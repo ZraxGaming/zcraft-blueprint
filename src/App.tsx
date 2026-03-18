@@ -39,6 +39,7 @@ import AuthCallbackPage from "./pages/AuthCallbackPage";
 import DiscordRedirectPage from "./pages/DiscordRedirectPage";
 import DiscordCallbackPage from "./pages/DiscordCallbackPage";
 import NotFound from "./pages/NotFound";
+import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
 import { useState, useEffect } from "react";
 
 // ClientOnly component to prevent SSR issues with localStorage-dependent contexts
@@ -67,6 +68,25 @@ function SSRSafeApp() {
 }
 
 const queryClient = new QueryClient();
+
+// Admin route protection component
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading, isAdmin } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user || !isAdmin) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
