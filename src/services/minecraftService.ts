@@ -1,102 +1,27 @@
 /**
  * Minecraft Player Image Service
- * Fetches Minecraft player heads/skins from multiple reliable APIs
+ * Builds direct image URLs instead of browser-side cross-origin API fetches.
+ * This avoids CORS failures on pages like Staff.
  */
 
-export interface MinecraftProfile {
-  uuid: string;
-  name: string;
-  skinUrl?: string;
-  headUrl: string;
-}
-
 /**
- * Get Minecraft player profile and skin URL
- * Uses Crafatar.com as the primary image source
+ * Get a Minecraft player image URL.
  */
 export async function getMinecraftPlayerImage(
   username: string,
   type: 'head' | 'skin' = 'head',
   size: number = 64
 ): Promise<string> {
-  try {
-    // Validate username
-    if (!username || username.length < 3) {
-      return getDefaultAvatar();
-    }
-
-    // Use Mojang API to get UUID (more reliable than NameMC)
-    const uuid = await getMinecraftUUID(username);
-    if (!uuid) {
-      // Fallback to crafatar with username
-      return buildCrafatarUrl(username, type, size);
-    }
-
-    return buildCrafatarUrl(uuid, type, size);
-  } catch (err) {
-    console.warn(`Failed to get Minecraft image for ${username}:`, err);
+  if (!username || username.length < 3) {
     return getDefaultAvatar();
   }
-}
 
-/**
- * Get Minecraft player UUID from username
- * Tries multiple APIs for better reliability
- */
-async function getMinecraftUUID(username: string): Promise<string | null> {
-  try {
-    // Try Mojang API first (official, most reliable)
-    const mojangResponse = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`, {
-      method: 'GET',
-    });
-
-    if (mojangResponse.ok) {
-      const data = await mojangResponse.json();
-      return data.id;
-    }
-
-    // Fallback to NameMC API
-    const nameMcResponse = await fetch(`https://api.namemc.com/profile/${username}`);
-    if (nameMcResponse.ok) {
-      const data = await nameMcResponse.json();
-      return data.id;
-    }
-
-    // Fallback to Crafatar's texture endpoint
-    const crafatarResponse = await fetch(`https://crafatar.com/api/players/profiles/minecraft/${username}`);
-    if (crafatarResponse.ok) {
-      const data = await crafatarResponse.json();
-      return data[0]?.id;
-    }
-
-    return null;
-  } catch (err) {
-    console.warn(`Failed to get UUID for ${username}:`, err);
-    return null;
+  const normalizedUsername = username.trim();
+  if (type === 'skin') {
+    return `https://crafthead.net/skin/${encodeURIComponent(normalizedUsername)}`;
   }
-}
 
-/**
- * Build Crafatar URL for player image
- * Crafatar is a reliable CDN service for Minecraft player skins and heads
- */
-function buildCrafatarUrl(
-  uuidOrUsername: string,
-  type: 'head' | 'skin' = 'head',
-  size: number = 64
-): string {
-  const baseUrl = 'https://crafatar.com/renders';
-  
-  // Crafatar supports: /avatars/, /heads/, /bodys/, /skins/ endpoints
-  const endpoint = type === 'head' ? 'heads' : 'skins';
-  
-  // Parameters for better image delivery
-  const params = new URLSearchParams({
-    size: size.toString(),
-    overlay: 'true', // Include skin overlay
-  });
-
-  return `${baseUrl}/${endpoint}/${uuidOrUsername}?${params.toString()}`;
+  return `https://crafthead.net/avatar/${encodeURIComponent(normalizedUsername)}/${size}`;
 }
 
 /**
@@ -118,18 +43,7 @@ export async function getMinecraftPlayerImages(
   avatar: string;
   full: string;
 }> {
-  try {
-    const uuid = await getMinecraftUUID(username);
-    const id = uuid || username;
-
-    return {
-      head: buildCrafatarUrl(id, 'head', 64),
-      skin: buildCrafatarUrl(id, 'skin', 64),
-      avatar: buildCrafatarUrl(id, 'head', 32), // Smaller for avatars
-      full: buildCrafatarUrl(id, 'skin', 128), // Larger for full body
-    };
-  } catch (err) {
-    console.warn(`Failed to get Minecraft images for ${username}:`, err);
+  if (!username || username.length < 3) {
     const fallback = getDefaultAvatar();
     return {
       head: fallback,
@@ -138,6 +52,14 @@ export async function getMinecraftPlayerImages(
       full: fallback,
     };
   }
+
+  const normalizedUsername = username.trim();
+  return {
+    head: `https://crafthead.net/avatar/${encodeURIComponent(normalizedUsername)}/64`,
+    skin: `https://crafthead.net/skin/${encodeURIComponent(normalizedUsername)}`,
+    avatar: `https://crafthead.net/avatar/${encodeURIComponent(normalizedUsername)}/32`,
+    full: `https://crafthead.net/body/${encodeURIComponent(normalizedUsername)}/128`,
+  };
 }
 
 /**

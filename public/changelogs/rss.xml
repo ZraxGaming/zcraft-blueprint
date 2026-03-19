@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>ZCraft Changelog Feed</title>
+    <link>https://z-craft.xyz/events</link>
+    <description>Latest changelogs from ZCraft Network</description>
+    <language>en-us</language>
+    <item>
+      <title>Smart Server Wake System (v1.0.2)</title>
+      <link>https://z-craft.xyz/events#changelog-1-0-2</link>
+      <description>📄 Description
+
+To improve hosting stability and reduce unnecessary downtime, Z-Craft now uses an automatic wake-up system. If the server is offline, players can now start it instantly by joining a secondary address.
+
+This ensures smoother uptime management while we optimize hosting infrastructure.
+
+
+🚀 What’s New
+
+🌐 Added: Server Wake Address
+	•	Added new startup address:
+up.zcraft.mcsh.io
+	•	If the main server is offline, joining this address will automatically start it.
+
+⸻
+
+⚙️ Improved: Hosting Stability
+	•	Reduced idle resource usage.
+	•	Improved backend server management.
+	•	Optimized boot performance when waking from sleep.
+
+⸻
+
+🛠️ Fixes
+	•	Fixed rare timeout issue when server was in sleep mode.
+	•	Improved join feedback while server is starting.
+
+⸻
+
+📌 How It Works
+	1.	Try joining the main server as usual.
+	2.	If it’s offline, join: **zcraft.mcsh.io**
+3.	Wait ~30–60 seconds.
+	4.	Rejoin the main server IP.
+
+⸻
+
+🔮 What’s Next
+
+We’re working on:
+	•	Automatic restart detection
+	•	Faster wake times
+	•	Hosting upgrades for 24/7 uptime
+</description>
+      <pubDate>Wed, 18 Feb 2026 00:00:00 GMT</pubDate>
+      <guid>https://z-craft.xyz/events#changelog-1-0-2</guid>
+    </item>
+    <item>
+      <title>Website Fixes and Improvements  (v1.0.1)</title>
+      <link>https://z-craft.xyz/events#changelog-1-0-1</link>
+      <description>We’ve launched a dedicated Status Page so you can check ZCraft’s operational status anytime without asking staff. You’ll know exactly when the server is online, how many players are connected, and whether any maintenance is planned or ongoing. This keeps everyone informed and eliminates confusion during downtime or updates.
+Access it at: status.z-craft.xyz
+
+
+🔍 Public Bans Page
+Transparency matters. Our new Bans Page lets anyone view all punishments issued on the server—past and present. You can search for any player and see exactly what they were punished for, when it happened, how long it lasts, and which staff member issued it. This ensures our moderation stays fair, consistent, and accountable to the community.
+Access it at: bans.z-craft.xyz
+
+🎯 Why This Matters
+These pages aren’t just extra features—they’re core infrastructure. Status visibility reduces support requests and confusion. Public punishment records keep moderation honest and give players the transparency they deserve. Both integrate directly with our existing systems and reflect ZCraft’s commitment to being more than just another Minecraft server.
+
+-THE ZCRAFT TEAM
+</description>
+      <pubDate>Thu, 29 Jan 2026 00:00:00 GMT</pubDate>
+      <guid>https://z-craft.xyz/events#changelog-1-0-1</guid>
+    </item>
+    <item>
+      <title>Opening Soon - ZCraft Network (v1.0.0)</title>
+      <link>https://z-craft.xyz/events#changelog-1-0-0</link>
+      <description>🚀 Opening Soon
+
+We’re actively building a centralized platform designed to connect our 🌐 website, 💬 Discord, and ⚙️ community systems into one seamless experience.
+
+Everything is being carefully configured, tested, and secured to ensure performance, stability, and automation from day one—no rushed features, no half-finished systems.
+
+This launch is about doing it right, not doing it fast.
+Once all systems meet our standards, access will open.
+
+📢 Stay tuned — updates will be announced soon.
+</description>
+      <pubDate>Tue, 27 Jan 2026 00:00:00 GMT</pubDate>
+      <guid>https://z-craft.xyz/events#changelog-1-0-0</guid>
+    </item>
+  </channel>
+</rss>

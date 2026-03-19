@@ -128,6 +128,15 @@ export function OptimizedImage({
 // Performance monitoring hook
 export function usePerformanceMonitor(componentName: string) {
   useEffect(() => {
+    const shouldLog =
+      import.meta.env.DEV &&
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("debug-performance") === "true";
+
+    if (!shouldLog) {
+      return;
+    }
+
     const startTime = performance.now();
 
     return () => {

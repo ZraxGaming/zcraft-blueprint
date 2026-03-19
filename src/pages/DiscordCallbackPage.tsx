@@ -41,32 +41,8 @@ export default function DiscordCallbackPage() {
           return;
         }
 
-        setMessage('Exchanging code for session...');
-
-        // Send code to backend for exchange
-        const response = await fetch('/api/auth/discord/exchange', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ code, state }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to exchange Discord code');
-        }
-
-        const { user, session, isNewUser } = await response.json();
-
-        // Note: In a real implementation, you'd set the session in your auth context
-        // For now, we'll just show success and redirect
-        toast({
-          title: 'Signed in with Discord!',
-          description: `Welcome${user.username ? `, ${user.username}` : ''}!`,
-        });
-
-        navigate('/profile');
+        setMessage('Redirecting to auth callback...');
+        navigate(`/auth/callback${window.location.search}`);
       } catch (err: any) {
         console.error('Discord callback error:', err);
         toast({
@@ -94,7 +70,7 @@ export default function DiscordCallbackPage() {
         </div>
         <p className="text-muted-foreground animate-pulse">{message}</p>
         <p className="text-sm text-muted-foreground">
-          Backend implementation required for Discord OAuth
+          Discord now uses the shared OAuth callback flow.
         </p>
       </div>
     </div>

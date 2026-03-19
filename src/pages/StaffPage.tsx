@@ -1,11 +1,15 @@
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Crown, Shield, Star, Heart, Loader, LucideIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { getMinecraftPlayerImage } from "@/services/minecraftService";
+import { Link } from "react-router-dom";
+import { getStaffApplicationSettings } from "@/services/staffApplicationService";
+import type { StaffApplicationRoleConfig } from "@/services/staffApplicationService";
 
 interface StaffMember {
   id: string;
@@ -30,10 +34,21 @@ export default function StaffPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [skinCache, setSkinCache] = useState<Record<string, string>>({});
+  const [applicationRoles, setApplicationRoles] = useState<StaffApplicationRoleConfig[]>([]);
 
   useEffect(() => {
     loadStaff();
+    loadApplicationStatus();
   }, []);
+
+  const loadApplicationStatus = async () => {
+    try {
+      const settings = await getStaffApplicationSettings();
+      setApplicationRoles(settings.roles.filter((role) => role.enabled));
+    } catch (error) {
+      console.warn("Failed to load application settings:", error);
+    }
+  };
 
   const getMinecraftHeadImage = async (username: string): Promise<string> => {
     // Check cache first
@@ -199,9 +214,24 @@ export default function StaffPage() {
               <p className="text-muted-foreground mb-6">
                 We're always looking for dedicated players to help our community grow.
               </p>
-              <Badge variant="outline" className="text-base px-4 py-2">
-                Applications opening soon!
-              </Badge>
+              {applicationRoles.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {applicationRoles.map((role) => (
+                      <Badge key={role.id} variant="secondary" className="px-3 py-1">
+                        {role.label}
+                      </Badge>
+                    ))}
+                  </div>
+                  <Button asChild className="btn-primary-gradient">
+                    <Link to="/apply">Apply Now</Link>
+                  </Button>
+                </div>
+              ) : (
+                <Badge variant="outline" className="text-base px-4 py-2">
+                  Applications currently closed
+                </Badge>
+              )}
             </CardContent>
           </Card>
         </div>

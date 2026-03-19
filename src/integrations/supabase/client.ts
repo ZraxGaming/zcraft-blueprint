@@ -4,6 +4,7 @@ import type { Database } from './types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const AUTH_STORAGE_KEY = import.meta.env.VITE_SUPABASE_AUTH_STORAGE_KEY || 'zcraft-auth';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -46,4 +47,12 @@ export const supabase = typeof window === 'undefined'
         rpc: () => Promise.resolve({ data: null, error: null }),
       }),
     }
-  : createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  : createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: AUTH_STORAGE_KEY,
+        storage: window.localStorage,
+      },
+    });

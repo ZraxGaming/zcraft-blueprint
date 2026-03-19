@@ -5,8 +5,49 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/components/ui/use-toast";
 
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleReset = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Enter your email address first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Reset email sent",
+        description: "Check your inbox for a password reset link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Reset failed",
+        description: error?.message || "Failed to send password reset email.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Layout seo={{
       title: "Reset Password — ZCraft Network Account Recovery",
@@ -34,9 +75,11 @@ export default function ForgotPasswordPage() {
             <CardContent className="pt-6 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" placeholder="Enter your email" />
+                <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
-              <Button className="w-full btn-primary-gradient">Send Reset Link</Button>
+              <Button className="w-full btn-primary-gradient" onClick={handleReset} disabled={submitting}>
+                {submitting ? "Sending..." : "Send Reset Link"}
+              </Button>
               <Link
                 to="/login"
                 className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"

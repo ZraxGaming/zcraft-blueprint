@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
+import { CookieBanner } from "./CookieBanner";
 import Seo, { SeoProps } from "@/components/seo/Seo";
 import Breadcrumbs, { Crumb } from "@/components/ui/Breadcrumbs";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -15,6 +16,17 @@ interface LayoutProps {
 
 export function Layout({ children, seo, breadcrumbs, skipToContent = "main-content" }: LayoutProps) {
   const { settings } = useSettings();
+  const announcementEnabled =
+    settings?.announcementEnabled ||
+    settings?.announcement_enabled === 'true';
+  const announcementMessage =
+    settings?.announcementMessage ||
+    settings?.announcement_message ||
+    null;
+  const announcementImage =
+    settings?.announcementImage ||
+    settings?.announcement_image ||
+    null;
 
   usePerformanceMonitor('Layout');
 
@@ -50,17 +62,28 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
       <Navbar />
 
       {/* Announcement banner with better accessibility */}
-      {settings?.announcementEnabled && settings?.announcementMessage && (
+      {announcementEnabled && announcementMessage && (
         <div
-          className="bg-primary/10 text-primary px-4 py-2 text-center border-b border-primary/20"
+          className="border-b border-primary/15 bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.92))] text-white"
           role="banner"
           aria-live="polite"
         >
-          <div className="container mx-auto">
-            <span className="inline-flex items-center gap-2">
-              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" aria-hidden="true" />
-              {settings.announcementMessage}
-            </span>
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left shadow-[0_18px_60px_rgba(15,23,42,0.25)] backdrop-blur-sm">
+              {announcementImage && (
+                <img
+                  src={announcementImage}
+                  alt=""
+                  className="hidden sm:block h-12 w-12 rounded-xl object-cover border border-white/10"
+                  aria-hidden="true"
+                />
+              )}
+              <span className="inline-flex h-3 w-3 shrink-0 rounded-full bg-emerald-400 animate-pulse self-start mt-1.5" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/60 mb-1">Live Announcement</p>
+                <p className="text-sm sm:text-[15px] text-white/95 break-words">{announcementMessage}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -76,6 +99,7 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
         {children}
       </main>
 
+      <CookieBanner />
       <Footer />
     </div>
   );

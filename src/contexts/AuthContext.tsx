@@ -3,6 +3,8 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { sendWebhook, WebhookEvent } from '@/services/webhookService';
 import { uploadProfilePicture } from '@/services/storageService';
+import { sendLoginAlert } from '@/services/securityAlertService';
+import { oneSignalLogin, oneSignalLogout, oneSignalTrackEvent } from '@/lib/onesignal';
 import {
   sanitizeInput,
   isValidEmail,
@@ -13,7 +15,7 @@ import {
   logSecurityEvent
 } from '@/lib/security';
 
-export type AppRole = 'admin' | 'moderator' | 'user';
+export type AppRole = 'owner' | 'admin' | 'moderator' | 'helper' | 'user';
 
 interface UserProfile {
   id: string;
@@ -33,6 +35,9 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, username: string) => Promise<void>;
   logout: () => Promise<void>;
+  sendMagicLink: (identifier: string) => Promise<void>;
+  changePassword: (password: string, nonce?: string) => Promise<void>;
+  sendPasswordReauthCode: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   updateProfilePicture: (file: File) => Promise<string>;
   signInWithDiscord: () => Promise<void>;
@@ -49,6 +54,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const resolveEmailOrUsername = async (identifier: string) => {
+    const sanitizedIdentifier = sanitizeInput(identifier, 254);
+    if (sanitizedIdentifier.includes('@')) {
+      if (!isValidEmail(sanitizedIdentifier)) {
+        throw new Error('Please enter a valid email address.');
+      }
+      return sanitizedIdentifier;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('email')
+      .eq('username', sanitizedIdentifier)
+      .single();
+
+    if (error || !data?.email) {
+      throw new Error('User not found.');
+    }
+
+    return data.email as string;
+  };
 
   // Fetch user profile and role from database
   const fetchUserProfile = async (userId: string) => {
@@ -95,12 +122,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: roleData } = await supabase
         .rpc('get_user_role', { _user_id: userId });
 
-      const role: AppRole = (roleData as AppRole) || 'user';
+      const fallbackRole = (profileData.role as AppRole | null) || 'user';
+      const role: AppRole = (roleData as AppRole) || fallbackRole;
 
       setUserProfile({
         ...profileData,
         role,
       } as UserProfile);
+
+      oneSignalLogin(userId, profileData.email, {
+        role,
+        username: profileData.username || "",
+      });
     } catch (err) {
       console.error('Error in fetchUserProfile:', err);
     }
@@ -143,6 +176,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return;
+
+      const { data: { session: visibleSession } } = await supabase.auth.getSession();
+      setSession(visibleSession);
+      setUser(visibleSession?.user ?? null);
+
+      if (visibleSession?.user) {
+        fetchUserProfile(visibleSession.user.id);
+      } else {
+        setUserProfile(null);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const login = async (email: string, password: string) => {
     // Rate limiting
     const rateLimitKey = `login:${email.toLowerCase()}`;
@@ -174,6 +228,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: data.user.email,
         lastSignInAt: data.user.last_sign_in_at,
       });
+
+      if (data.session?.access_token) {
+        sendLoginAlert(
+          data.session.access_token,
+          'password',
+          data.user.user_metadata?.username || data.user.email?.split('@')[0] || null
+        ).catch((alertError) => {
+          console.warn('Login alert email failed:', alertError);
+        });
+      }
     }
   };
 
@@ -228,6 +292,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       username: sanitizedUsername,
       createdAt: authData.user.created_at,
     });
+
+    oneSignalTrackEvent('user_registered', {
+      username: sanitizedUsername,
+      email: sanitizedEmail,
+    });
   };
 
   const logout = async () => {
@@ -245,9 +314,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     }
 
+    oneSignalLogout();
+
     setUser(null);
     setUserProfile(null);
     setSession(null);
+  };
+
+  const sendMagicLink = async (identifier: string) => {
+    const email = await resolveEmailOrUsername(identifier);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        shouldCreateUser: false,
+      },
+    });
+
+    if (error) throw error;
+  };
+
+  const sendPasswordReauthCode = async () => {
+    const { error } = await supabase.auth.reauthenticate();
+    if (error) throw error;
+  };
+
+  const changePassword = async (password: string, nonce?: string) => {
+    if (!isValidPassword(password)) {
+      throw new Error('Password must be at least 8 characters with at least one uppercase letter, one lowercase letter, and one number.');
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password,
+      ...(nonce ? { nonce } : {}),
+    });
+
+    if (error) throw error;
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
@@ -256,7 +358,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Sanitize input data
     const sanitizedUpdates: any = {};
     if (updates.username) {
-      sanitizedUpdates.username = updates.username.trim().replace(/[<>\"'&]/g, '');
+      const sanitizedUsername = updates.username.trim().replace(/[<>\"'&]/g, '');
+
+      if (!isValidUsername(sanitizedUsername)) {
+        throw new Error('Username must be 3-30 characters and contain only letters, numbers, underscores, and hyphens.');
+      }
+
+      const { data: existingUsers, error: usernameError } = await supabase
+        .from('users')
+        .select('id')
+        .ilike('username', sanitizedUsername)
+        .neq('id', user.id)
+        .limit(1);
+
+      if (usernameError) throw usernameError;
+      if (existingUsers && existingUsers.length > 0) {
+        throw new Error('That username is already taken.');
+      }
+
+      sanitizedUpdates.username = sanitizedUsername;
     }
     if (updates.bio) {
       sanitizedUpdates.bio = updates.bio.trim().substring(0, 500).replace(/[<>\"'&]/g, '');
@@ -320,16 +440,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithDiscord = async () => {
-    const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
-    if (!clientId) {
-      throw new Error('Discord client ID not configured');
-    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: import.meta.env.VITE_DISCORD_OAUTH_SCOPES || 'identify email guilds.join',
+      },
+    });
 
-    const redirectUri = `${window.location.origin}/auth/discord/callback`;
-    const scope = 'identify email';
-    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
-
-    window.location.href = discordAuthUrl;
+    if (error) throw error;
   };
 
   const signInWithGithub = async () => {
@@ -352,7 +471,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
-  const isAdmin = userProfile?.role === 'admin';
+  const isAdmin = userProfile?.role === 'owner' || userProfile?.role === 'admin';
   const isModerator = userProfile?.role === 'moderator' || isAdmin;
 
   const value: AuthContextType = {
@@ -363,6 +482,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     register,
     logout,
+    sendMagicLink,
+    changePassword,
+    sendPasswordReauthCode,
     updateProfile,
     updateProfilePicture,
     signInWithDiscord,

@@ -44,6 +44,7 @@ interface ActivityItem {
 export default function AdminPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [announcementEnabled, setAnnouncementEnabled] = useState(true);
+  const [announcementMessage, setAnnouncementMessage] = useState("");
   const { refresh } = useSettings();
   const [stats, setStats] = useState<Stat[]>([
     { label: "Total Users", value: "0", change: "+0%", icon: Users },
@@ -69,8 +70,10 @@ export default function AdminPage() {
         const rows = await settingsService.getSettings();
         const m = rows.find((r: any) => r.key === 'maintenance_mode')?.value === 'true';
         const a = rows.find((r: any) => r.key === 'announcement_enabled')?.value === 'true';
+        const message = rows.find((r: any) => r.key === 'announcement_message')?.value || '';
         setMaintenanceMode(!!m);
         setAnnouncementEnabled(!!a);
+        setAnnouncementMessage(message);
       } catch (e) {
         // ignore
       }
@@ -97,13 +100,18 @@ export default function AdminPage() {
     setStatusLoading(true);
     try {
       const server = await fetchMinecraftServerStatus('play.zcraftmc.xyz');
-      const website = await pingUrl('https://z-craft.xyz');
-      const forums = await pingUrl('https://z-craft.xyz/forums');
+      const canPingPublicSite = !import.meta.env.DEV;
+      const website = canPingPublicSite
+        ? await pingUrl('https://z-craft.xyz')
+        : { ok: true, latency: null, note: 'Skipped in local dev' };
+      const forums = canPingPublicSite
+        ? await pingUrl('https://z-craft.xyz/forums')
+        : { ok: true, latency: null, note: 'Skipped in local dev' };
 
       setServiceStatus([
         { name: 'Minecraft Server', status: server.online ? 'online' : 'offline', players: server.players ? `${server.players.online}/${server.players.max}` : '—' },
-        { name: 'Website', status: website.ok ? 'online' : 'offline', uptime: website.ok ? 'Available' : 'Unavailable', latency: website.latency },
-        { name: 'Forums', status: forums.ok ? 'online' : 'offline', uptime: forums.ok ? 'Available' : 'Unavailable', latency: forums.latency },
+        { name: 'Website', status: website.ok ? 'online' : 'offline', uptime: website.ok ? 'Available' : 'Unavailable', latency: website.latency, note: website.note },
+        { name: 'Forums', status: forums.ok ? 'online' : 'offline', uptime: forums.ok ? 'Available' : 'Unavailable', latency: forums.latency, note: forums.note },
       ]);
     } catch (err) {
       setServiceStatus([
@@ -317,6 +325,47 @@ export default function AdminPage() {
                       }
                     }}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-base font-medium">Announcement Message</Label>
+                  <input
+                    value={announcementMessage}
+                    onChange={(e) => setAnnouncementMessage(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    placeholder="Live banner message shown across the site"
+                  />
+                </div>
+
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Banner Preview</p>
+                  {announcementEnabled && announcementMessage.trim() ? (
+                    <div className="bg-primary/10 text-primary px-4 py-3 rounded-md border border-primary/20">
+                      {announcementMessage}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">The banner stays hidden until it is enabled and has a message.</p>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        await settingsService.setSetting('announcement_message', announcementMessage);
+                        await refresh();
+                        toast({ title: 'Success', description: 'Announcement message updated' });
+                      } catch (err: any) {
+                        toast({ title: 'Error', description: err?.message || 'Failed to update message', variant: 'destructive' });
+                      }
+                    }}
+                  >
+                    Save Announcement Text
+                  </Button>
+                  <Button asChild variant="ghost">
+                    <Link to="/admin/tools">Open Admin Tools</Link>
+                  </Button>
                 </div>
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border">

@@ -25,8 +25,10 @@ import ServerListings from "./pages/ServerListings";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
+import FaqPage from "./pages/FaqPage";
 import AdminPage from "./pages/AdminPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminNewsPage from "./pages/admin/AdminNewsPage";
@@ -34,8 +36,12 @@ import AdminForumsPage from "./pages/admin/AdminForumsPage";
 import AdminWikiPage from "./pages/admin/AdminWikiPage";
 import AdminChangelogsPage from "./pages/admin/AdminChangelogsPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import AdminToolsPage from "./pages/admin/AdminToolsPage";
+import AdminApplicationsPage from "./pages/admin/AdminApplicationsPage";
+import ApplyPage from "./pages/ApplyPage";
 import MaintenancePage from "./pages/MaintenancePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
+import VerifyIdentityPage from "./pages/VerifyIdentityPage";
 import DiscordRedirectPage from "./pages/DiscordRedirectPage";
 import DiscordCallbackPage from "./pages/DiscordCallbackPage";
 import NotFound from "./pages/NotFound";
@@ -96,7 +102,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <MaintenanceGate>
                 <PageTransition>
                   <Routes>
@@ -110,6 +116,7 @@ const App = () => (
                     <Route path="/news/:slug" element={<NewsArticlePage />} />
                     <Route path="/rules" element={<RulesPage />} />
                     <Route path="/support" element={<SupportPage />} />
+                    <Route path="/faq" element={<FaqPage />} />
                     <Route path="/status" element={<StatusPage />} />
                     <Route path="/store" element={<StorePage />} />
                     <Route path="/staff" element={<StaffPage />} />
@@ -119,7 +126,10 @@ const App = () => (
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/verify-identity" element={<VerifyIdentityPage />} />
+                    <Route path="/apply" element={<ApplyPage />} />
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/discord" element={<DiscordRedirectPage />} />
                     <Route path="/auth/discord/callback" element={<DiscordCallbackPage />} />
@@ -130,6 +140,8 @@ const App = () => (
                     <Route path="/admin/wiki" element={<AdminRoute><AdminWikiPage /></AdminRoute>} />
                     <Route path="/admin/changelogs" element={<AdminRoute><AdminChangelogsPage /></AdminRoute>} />
                     <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
+                    <Route path="/admin/applications" element={<AdminRoute><AdminApplicationsPage /></AdminRoute>} />
+                    <Route path="/admin/tools" element={<AdminRoute><AdminToolsPage /></AdminRoute>} />
                     <Route path="/maintenance" element={<MaintenancePage />} />
                     <Route path="/auth/callback" element={<AuthCallbackPage />} />
                     <Route path="*" element={<NotFound />} />

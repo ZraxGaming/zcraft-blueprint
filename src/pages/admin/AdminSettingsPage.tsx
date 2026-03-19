@@ -236,7 +236,7 @@ export default function AdminSettingsPage() {
                   <Input 
                     value={announcementMessage} 
                     onChange={(e) => setAnnouncementMessage(e.target.value)}
-                    placeholder="🎉 Special announcement here!"
+                    placeholder="Special announcement here"
                   />
                 </div>
               )}
@@ -389,3 +389,4 @@ export default function AdminSettingsPage() {
     </AdminLayout>
   );
 }
+

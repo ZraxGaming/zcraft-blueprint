@@ -22,7 +22,7 @@ export async function getSetting(key: string): Promise<string | null> {
     .from('admin_settings')
     .select('value')
     .eq('key', key)
-    .single();
+    .maybeSingle();
 
   if (error && error.code !== 'PGRST116') throw error;
   return data?.value || null;
@@ -34,7 +34,7 @@ export async function setSetting(key: string, value: string) {
     .from('admin_settings')
     .select('id')
     .eq('key', key)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     const { data, error } = await supabase

@@ -54,16 +54,28 @@ export function Navbar() {
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-0.5">
               {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={cn(
-                    "nav-link",
-                    location.pathname === link.path && "active"
-                  )}
-                >
-                  {link.name}
-                </Link>
+                link.external ? (
+                  <a
+                    key={link.path}
+                    href={link.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="nav-link"
+                  >
+                    {link.name}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={cn(
+                      "nav-link",
+                      location.pathname === link.path && "active"
+                    )}
+                  >
+                    {link.name}
+                  </Link>
+                )
               ))}
             </div>
 
@@ -173,19 +185,32 @@ export function Navbar() {
           <div className="lg:hidden border-t bg-card animate-fade-in" id="mobile-menu">
             <div className="container mx-auto px-4 py-4 space-y-2">
               {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-3 rounded-lg transition-colors",
-                    location.pathname === link.path
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted"
-                  )}
-                >
-                  {link.name}
-                </Link>
+                link.external ? (
+                  <a
+                    key={link.path}
+                    href={link.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg transition-colors hover:bg-muted"
+                  >
+                    {link.name}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-3 rounded-lg transition-colors",
+                      location.pathname === link.path
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted"
+                    )}
+                  >
+                    {link.name}
+                  </Link>
+                )
               ))}
               <div className="pt-4 border-t flex flex-col gap-2">
                 {user && userProfile ? (

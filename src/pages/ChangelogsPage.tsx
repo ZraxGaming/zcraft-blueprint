@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
+import { StructuredContent } from "@/components/content/StructuredContent";
 
 interface Changelog {
   id: string;
@@ -14,6 +15,7 @@ interface Changelog {
   description: string;
   changes: string[];
   type: "feature" | "fix" | "improvement" | "patch";
+  image_url?: string | null;
   released_at: string;
   created_at: string;
 }
@@ -59,8 +61,11 @@ export default function ChangelogsPage() {
         keywords: "zcraft changelogs, minecraft server updates, lifesteal server updates, release notes, server patches, minecraft updates, zcraft network changelogs",
         url: "/events",
         type: "website",
-        tags: ["changelogs", "updates", "release notes", "server updates"]
-      }}>
+        tags: ["changelogs", "updates", "release notes", "server updates"],
+        rssFeeds: [
+          { title: "ZCraft Changelog Feed", url: "https://z-craft.xyz/changelogs/rss.xml" }
+        ]
+        }}>
         <div className="flex items-center justify-center py-20">
           <Loader className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -76,8 +81,11 @@ export default function ChangelogsPage() {
         keywords: "zcraft changelogs, minecraft server updates, lifesteal server updates, release notes, server patches",
         url: "/events",
         type: "website",
-        tags: ["changelogs", "updates", "release notes"]
-      }}>
+        tags: ["changelogs", "updates", "release notes"],
+        rssFeeds: [
+          { title: "ZCraft Changelog Feed", url: "https://z-craft.xyz/changelogs/rss.xml" }
+        ]
+        }}>
         <div className="py-20 text-center text-red-500">{error}</div>
       </Layout>
     );
@@ -91,7 +99,10 @@ export default function ChangelogsPage() {
         keywords: 'zcraft changelogs, minecraft server updates, lifesteal server updates, release notes, server patches, minecraft updates, zcraft network changelogs, server changelog',
         url: '/events',
         type: 'website',
-        tags: ['changelogs', 'updates', 'release notes', 'server updates']
+        tags: ['changelogs', 'updates', 'release notes', 'server updates'],
+        rssFeeds: [
+          { title: "ZCraft Changelog Feed", url: "https://z-craft.xyz/changelogs/rss.xml" }
+        ]
       }}
     >
       {/* Hero */}
@@ -126,7 +137,16 @@ export default function ChangelogsPage() {
                 {changelogs.map((changelog) => {
                   const typeInfo = typeConfig[changelog.type as keyof typeof typeConfig];
                   return (
-                    <Card key={changelog.id} className="card-hover border-0 bg-card overflow-hidden">
+                    <Card
+                      key={changelog.id}
+                      id={`changelog-${String(changelog.version).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`}
+                      className="card-hover border-0 bg-card overflow-hidden"
+                    >
+                      {changelog.image_url && (
+                        <div className="border-b border-border">
+                          <img src={changelog.image_url} alt={changelog.title} className="w-full h-56 object-cover" />
+                        </div>
+                      )}
                       <CardHeader className="border-b pb-4">
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                           <div className="flex-1">
@@ -148,15 +168,15 @@ export default function ChangelogsPage() {
                         </div>
                       </CardHeader>
                       <CardContent className="pt-6">
-                        <p className="text-muted-foreground mb-4">{changelog.description}</p>
+                        <StructuredContent content={changelog.description} className="mb-5" />
                         {changelog.changes && changelog.changes.length > 0 && (
                           <div>
-                            <h4 className="font-semibold text-sm mb-3">Changes:</h4>
-                            <ul className="space-y-2">
+                            <h4 className="font-semibold text-sm mb-3 uppercase tracking-wide text-muted-foreground">Changes</h4>
+                            <ul className="space-y-3">
                               {changelog.changes.map((change, idx) => (
-                                <li key={idx} className="flex items-start gap-3 text-sm">
+                                <li key={idx} className="flex items-start gap-3 text-sm rounded-xl bg-muted/30 px-4 py-3">
                                   <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
-                                  <span>{change}</span>
+                                  <StructuredContent content={change} className="flex-1 space-y-2" />
                                 </li>
                               ))}
                             </ul>

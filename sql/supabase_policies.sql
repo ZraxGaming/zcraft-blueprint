@@ -132,15 +132,154 @@ CREATE POLICY "Status: admin write" ON public.status_services FOR ALL USING (
 );
 
 /* -------------------------------
+   storage buckets + policies
+   ------------------------------- */
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('user_img', 'user_img', true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('imgs', 'imgs', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Storage: public avatar read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'user_img');
+
+CREATE POLICY "Storage: user avatar insert" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'user_img'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Storage: user avatar update" ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (
+    bucket_id = 'user_img'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  )
+  WITH CHECK (
+    bucket_id = 'user_img'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Storage: user avatar delete" ON storage.objects
+  FOR DELETE TO authenticated
+  USING (
+    bucket_id = 'user_img'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Storage: public content image read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'imgs');
+
+CREATE POLICY "Storage: admin content images" ON storage.objects
+  FOR ALL TO authenticated
+  USING (
+    bucket_id = 'imgs'
+    AND EXISTS (
+      SELECT 1
+      FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('admin', 'owner', 'moderator')
+    )
+  )
+  WITH CHECK (
+    bucket_id = 'imgs'
+    AND EXISTS (
+      SELECT 1
+      FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('admin', 'owner', 'moderator')
+    )
+  );
+
+/* -------------------------------
    Useful helper: index examples
    ------------------------------- */
 CREATE INDEX IF NOT EXISTS idx_forum_posts_forum_id ON public.forum_posts(forum_id);
 CREATE INDEX IF NOT EXISTS idx_forum_posts_author_id ON public.forum_posts(author_id);
 
 /* -------------------------------
+   staff_applications table + settings
+   ------------------------------- */
+
+CREATE TABLE IF NOT EXISTS public.staff_applications (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  target_role text NOT NULL,
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+  answers jsonb NOT NULL DEFAULT '{}'::jsonb,
+  notes text,
+  reviewed_by uuid REFERENCES public.users(id) ON DELETE SET NULL,
+  reviewed_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT staff_applications_user_id_target_role_key UNIQUE (user_id, target_role)
+);
+
+ALTER TABLE IF EXISTS public.staff_applications ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff applications: users can view own" ON public.staff_applications;
+CREATE POLICY "Staff applications: users can view own"
+ON public.staff_applications FOR SELECT
+USING (
+  auth.uid() = user_id
+  OR EXISTS (
+    SELECT 1 FROM public.users u
+    WHERE u.id = auth.uid()
+      AND u.role IN ('admin', 'owner', 'moderator')
+  )
+);
+
+DROP POLICY IF EXISTS "Staff applications: users can insert own" ON public.staff_applications;
+CREATE POLICY "Staff applications: users can insert own"
+ON public.staff_applications FOR INSERT TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Staff applications: users can update own pending" ON public.staff_applications;
+CREATE POLICY "Staff applications: users can update own pending"
+ON public.staff_applications FOR UPDATE TO authenticated
+USING (auth.uid() = user_id AND status = 'pending')
+WITH CHECK (auth.uid() = user_id AND status = 'pending');
+
+DROP POLICY IF EXISTS "Staff applications: admins can manage" ON public.staff_applications;
+CREATE POLICY "Staff applications: admins can manage"
+ON public.staff_applications FOR ALL TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM public.users u
+    WHERE u.id = auth.uid()
+      AND u.role IN ('admin', 'owner', 'moderator')
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.users u
+    WHERE u.id = auth.uid()
+      AND u.role IN ('admin', 'owner', 'moderator')
+  )
+);
+
+INSERT INTO public.admin_settings (key, value)
+VALUES
+  ('staff_applications_enabled', 'false'),
+  (
+    'staff_application_form',
+    '[{"id":"timezone","label":"Timezone","type":"text","required":true,"placeholder":"UTC+4"},{"id":"experience","label":"Moderation or community experience","type":"textarea","required":true,"placeholder":"Describe your previous experience."},{"id":"why_join","label":"Why do you want to join the staff team?","type":"textarea","required":true,"placeholder":"Tell us why you would be a good fit."}]'
+  ),
+  (
+    'staff_application_roles',
+    '[{"id":"helper","label":"Helper","description":"Entry-level support for chat, tickets, and everyday player issues.","enabled":false,"form":[{"id":"timezone","label":"Timezone","type":"text","required":true,"placeholder":"UTC+4"},{"id":"experience","label":"Moderation or community experience","type":"textarea","required":true,"placeholder":"Describe your previous experience."},{"id":"why_join","label":"Why do you want to join the staff team?","type":"textarea","required":true,"placeholder":"Tell us why you would be a good fit."}]},{"id":"moderator","label":"Moderator","description":"Moderate the server, handle reports, and keep the community healthy.","enabled":false,"form":[{"id":"timezone","label":"Timezone","type":"text","required":true,"placeholder":"UTC+4"},{"id":"experience","label":"Moderation or community experience","type":"textarea","required":true,"placeholder":"Describe your previous experience."},{"id":"why_join","label":"Why do you want to join the staff team?","type":"textarea","required":true,"placeholder":"Tell us why you would be a good fit."}]},{"id":"builder","label":"Builder","description":"Help create maps, server visuals, and polished event spaces.","enabled":false,"form":[{"id":"timezone","label":"Timezone","type":"text","required":true,"placeholder":"UTC+4"},{"id":"portfolio","label":"Build portfolio or screenshots","type":"textarea","required":true,"placeholder":"Share links or describe your best builds."},{"id":"style","label":"What build styles are you strongest at?","type":"textarea","required":true,"placeholder":"Medieval, fantasy, modern, terrain, etc."}]}]'
+  )
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+
+/* -------------------------------
    Notes
    -------------------------------
 - Run this script in Supabase -> SQL editor. Review policies to match your exact roles (e.g., 'moderator' allowances).
+- Profile picture uploads expect the object path format `user_id/filename.ext` inside the `user_img` bucket.
 - If your auth JWT does not expose `auth.uid()` to SQL functions as expected, you may need to adjust trigger function to use
   current_setting('request.jwt.claims.sub', true) or implement author setting via Edge Function.
 - After applying policies, test using the app: login, create thread, confirm insert succeeds and appears in queries.

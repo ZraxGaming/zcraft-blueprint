@@ -6,6 +6,13 @@ export interface UploadResult {
   error?: string;
 }
 
+export interface StoredImage {
+  name: string;
+  path: string;
+  url: string;
+  updated_at?: string;
+}
+
 /**
  * Upload news or changelog image to Supabase storage
  * Bucket: imgs
@@ -130,21 +137,20 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
 
     const timestamp = Date.now();
     const extension = file.name.split('.').pop() || 'jpg';
-    const fileName = `${userId}-${timestamp}.${extension}`;
-    const filePath = `avatars/${fileName}`;
+    const fileName = `${timestamp}.${extension}`;
+    const filePath = `${userId}/${fileName}`;
 
     // Delete old profile picture if exists
     try {
       const { data: files } = await supabase.storage
         .from('user_img')
-        .list('avatars');
+        .list(userId);
 
       if (files) {
-        const oldFiles = files.filter(f => f.name.startsWith(userId));
-        if (oldFiles.length > 0) {
+        if (files.length > 0) {
           await supabase.storage
             .from('user_img')
-            .remove(oldFiles.map(f => `avatars/${f.name}`));
+            .remove(files.map(f => `${userId}/${f.name}`));
         }
       }
     } catch (err) {
@@ -198,6 +204,48 @@ export async function deleteImage(bucket: 'imgs' | 'user_img', path: string): Pr
   } catch (err: any) {
     console.error('Failed to delete image:', err);
     return false;
+  }
+}
+
+export async function listBucketImages(
+  bucket: 'imgs' | 'user_img',
+  prefixes: string[] = ['']
+): Promise<StoredImage[]> {
+  try {
+    const results = await Promise.all(
+      prefixes.map(async (prefix) => {
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .list(prefix, {
+            limit: 100,
+            sortBy: { column: 'updated_at', order: 'desc' },
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        return (data || [])
+          .filter((item) => item.id && item.name)
+          .map((item) => {
+            const path = prefix ? `${prefix}/${item.name}` : item.name;
+            const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+            return {
+              name: item.name,
+              path,
+              url: urlData.publicUrl,
+              updated_at: item.updated_at,
+            } as StoredImage;
+          });
+      })
+    );
+
+    return results
+      .flat()
+      .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
+  } catch (err) {
+    console.error('Failed to list bucket images:', err);
+    return [];
   }
 }
 

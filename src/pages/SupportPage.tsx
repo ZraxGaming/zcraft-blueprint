@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HelpCircle, MessageSquare, FileText, Shield, ExternalLink, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { supportFaqs } from "@/data/faqs";
 
 const supportOptions = [
   {
@@ -28,29 +30,6 @@ const supportOptions = [
     action: "Join Server",
     color: "bg-indigo-500/10 text-indigo-600",
     href: "https://discord.gg/zcraft",
-  },
-];
-
-const faqs = [
-  {
-    question: "How do I join the server?",
-    answer: "Add play.zcraftmc.xyz (Java) to your server list. We support Java (1.8-1.21).",
-  },
-  {
-    question: "I lost my items, can I get them back?",
-    answer: "Unfortunately, we cannot restore lost items unless it was due to a server bug. Make sure to secure your items!",
-  },
-  {
-    question: "How do I report a player?",
-    answer: "Use /report in-game or create a support ticket with evidence (screenshots/videos).",
-  },
-  {
-    question: "How do I apply for staff?",
-    answer: "Staff applications open periodically. Check our announcements and forums for updates.",
-  },
-  {
-    question: "Is the server free to play?",
-    answer: "Yes! ZCraft is completely free. Optional cosmetic ranks are available in our store.",
   },
 ];
 
@@ -109,14 +88,14 @@ export default function SupportPage() {
       </section>
 
       {/* FAQs */}
-      <section className="py-12 bg-muted/30">
+      <section id="faq" className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <h2 className="font-display text-2xl font-bold mb-8 text-center">
               Frequently Asked Questions
             </h2>
             <div className="space-y-4">
-              {faqs.map((faq, index) => (
+              {supportFaqs.slice(0, 5).map((faq, index) => (
                 <Card key={index} className="border-0 bg-card">
                   <CardContent className="p-6">
                     <h3 className="font-semibold mb-2 flex items-start gap-3">
@@ -132,9 +111,11 @@ export default function SupportPage() {
             </div>
 
             <div className="text-center mt-8">
-              <Button variant="outline" className="gap-2">
-                View All FAQs <ChevronRight className="h-4 w-4" />
-              </Button>
+              <Link to="/faq" className="inline-block">
+                <Button variant="outline" className="gap-2">
+                  View Full FAQ Page <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

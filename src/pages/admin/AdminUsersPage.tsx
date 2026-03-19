@@ -8,12 +8,14 @@ import {
   Mail,
   Filter,
   Loader,
-  Check
+  Check,
+  Pencil
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +40,9 @@ import {
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { isValidUsername } from "@/lib/security";
+
+const ROLE_OPTIONS = ["owner", "admin", "moderator", "helper", "user"] as const;
 
 interface User {
   id: string;
@@ -54,7 +59,10 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editUsername, setEditUsername] = useState("");
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
@@ -92,11 +100,18 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleChangeRole = async (userId: string, newRole: 'admin' | 'moderator' | 'user') => {
+  const handleChangeRole = async (userId: string, newRole: typeof ROLE_OPTIONS[number]) => {
     try {
       setUpdating(true);
-      
-      // Check if role exists
+
+      const { error: userError } = await supabase
+        .from("users")
+        .update({ role: newRole })
+        .eq("id", userId);
+
+      if (userError) throw userError;
+
+      const authRole = newRole === "owner" ? "admin" : newRole === "helper" ? "user" : newRole;
       const { data: existingRole } = await supabase
         .from("user_roles")
         .select("id")
@@ -104,27 +119,19 @@ export default function AdminUsersPage() {
         .maybeSingle();
 
       if (existingRole) {
-        // Update existing role
         const { error } = await supabase
           .from("user_roles")
-          .update({ role: newRole })
+          .update({ role: authRole })
           .eq("user_id", userId);
-        
+
         if (error) throw error;
       } else {
-        // Insert new role
         const { error } = await supabase
           .from("user_roles")
-          .insert({ user_id: userId, role: newRole });
-        
+          .insert({ user_id: userId, role: authRole });
+
         if (error) throw error;
       }
-
-      // Also update the users table role column for backwards compatibility
-      await supabase
-        .from("users")
-        .update({ role: newRole })
-        .eq("id", userId);
 
       toast({ title: "Success", description: `Role updated to ${newRole}` });
       setIsRoleDialogOpen(false);
@@ -157,6 +164,62 @@ export default function AdminUsersPage() {
     }
   };
 
+  const openEditDialog = (user: User) => {
+    setEditingUser(user);
+    setEditUsername(user.username);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateUsername = async () => {
+    if (!editingUser) return;
+
+    const nextUsername = editUsername.trim();
+    if (!isValidUsername(nextUsername)) {
+      toast({
+        title: "Invalid username",
+        description: "Username must be 3-30 characters and contain only letters, numbers, underscores, and hyphens.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setUpdating(true);
+
+      const { data: existingUsers, error: lookupError } = await supabase
+        .from("users")
+        .select("id")
+        .ilike("username", nextUsername)
+        .neq("id", editingUser.id)
+        .limit(1);
+
+      if (lookupError) throw lookupError;
+      if (existingUsers && existingUsers.length > 0) {
+        throw new Error("That username is already taken.");
+      }
+
+      const { error } = await supabase
+        .from("users")
+        .update({
+          username: nextUsername,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", editingUser.id);
+
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Username updated successfully" });
+      setIsEditDialogOpen(false);
+      setEditingUser(null);
+      loadUsers();
+    } catch (err: any) {
+      console.error("Error updating username:", err);
+      toast({ title: "Error", description: err?.message || "Failed to update username", variant: "destructive" });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const filteredUsers = allUsers.filter(user => {
     const matchesSearch = user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           user.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -166,8 +229,10 @@ export default function AdminUsersPage() {
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role.toLowerCase()) {
+      case "owner": return "destructive";
       case "admin": return "destructive";
       case "moderator": return "default";
+      case "helper": return "secondary";
       default: return "outline";
     }
   };
@@ -222,8 +287,10 @@ export default function AdminUsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="owner">Owner</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="moderator">Moderator</SelectItem>
+                  <SelectItem value="helper">Helper</SelectItem>
                   <SelectItem value="user">User</SelectItem>
                 </SelectContent>
               </Select>
@@ -293,6 +360,10 @@ export default function AdminUsersPage() {
                                 <Shield className="h-4 w-4 mr-2" />
                                 Change Role
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openEditDialog(user)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit Username
+                              </DropdownMenuItem>
                               <DropdownMenuItem>
                                 <Mail className="h-4 w-4 mr-2" />
                                 Send Email
@@ -328,7 +399,7 @@ export default function AdminUsersPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-4">
-            {(['admin', 'moderator', 'user'] as const).map((role) => (
+            {ROLE_OPTIONS.map((role) => (
               <Button
                 key={role}
                 variant={selectedUser?.role === role ? "default" : "outline"}
@@ -343,6 +414,30 @@ export default function AdminUsersPage() {
                 {selectedUser?.role === role && <Check className="h-4 w-4" />}
               </Button>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update the username for {editingUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label>Username</Label>
+              <Input
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value)}
+                placeholder="Enter a new username"
+              />
+            </div>
+            <Button className="w-full btn-primary-gradient" onClick={handleUpdateUsername} disabled={updating}>
+              {updating ? "Saving..." : "Save Username"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -52,7 +52,10 @@ export default function NewsPage() {
         keywords: "zcraft news, minecraft server news, lifesteal server updates, minecraft announcements, server events, zcraft network news, minecraft server updates, lifesteal news",
         url: "/news",
         type: "website",
-        tags: ["news", "updates", "announcements", "events", "minecraft"]
+        tags: ["news", "updates", "announcements", "events", "minecraft"],
+        rssFeeds: [
+          { title: "ZCraft News Feed", url: "https://z-craft.xyz/news/rss.xml" }
+        ]
       }}
     >
       {/* Hero */}

@@ -8,14 +8,15 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
-import { Loader } from "lucide-react";
+import { Loader, Mail } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, signInWithDiscord, signInWithGithub, signInWithGoogle } = useAuth();
+  const { login, sendMagicLink, signInWithDiscord, signInWithGithub, signInWithGoogle } = useAuth();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
 
   const resolveEmail = async (ident: string) => {
@@ -31,13 +32,38 @@ export default function LoginPage() {
     try {
       const email = await resolveEmail(identifier.trim());
       await login(email, password);
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       toast({ title: 'Signed in', description: 'Welcome back!' });
-      navigate('/profile');
+      navigate(aalData?.nextLevel === 'aal2' && aalData?.currentLevel !== 'aal2' ? '/verify-identity' : '/profile');
     } catch (err: any) {
       console.error(err);
       toast({ title: 'Sign in failed', description: err?.message || 'Check your credentials.' });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleMagicLink = async () => {
+    if (!identifier.trim()) {
+      toast({ title: 'Email or username required', description: 'Enter your email or username first.', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      setMagicLinkLoading(true);
+      await sendMagicLink(identifier.trim());
+      toast({
+        title: 'Magic link sent',
+        description: 'Check your inbox for a sign-in link.',
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Magic link failed',
+        description: err?.message || 'Unable to send the magic link.',
+        variant: 'destructive',
+      });
+    } finally {
+      setMagicLinkLoading(false);
     }
   };
 
@@ -95,6 +121,16 @@ export default function LoginPage() {
                 </div>
                 <Button type="submit" disabled={submitting} className="w-full btn-primary-gradient">{submitting ? 'Signing in...' : 'Sign In'}</Button>
               </form>
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full gap-2"
+                onClick={handleMagicLink}
+                disabled={magicLinkLoading || submitting}
+              >
+                {magicLinkLoading ? <Loader className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                {magicLinkLoading ? 'Sending magic link...' : 'Email Me A Magic Link'}
+              </Button>
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t" />

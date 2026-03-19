@@ -5,14 +5,32 @@ export interface SettingsMap {
   maintenanceMode: boolean;
   announcementEnabled: boolean;
   announcementMessage: string | null;
+  announcementImage: string | null;
   [key: string]: any;
 }
 
 const SettingsContext = createContext<{ settings: SettingsMap | null; loading: boolean; refresh: () => Promise<void> } | undefined>(undefined);
+const fallbackSettingsContext = {
+  settings: { maintenanceMode: false, maintenance_mode: 'false', announcementEnabled: false, announcement_enabled: 'false', announcementMessage: null, announcement_message: null } as SettingsMap,
+  loading: false,
+  refresh: async () => {},
+};
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<SettingsMap | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const normalizeSettings = (map: Record<string, string>) => ({
+    ...map,
+    maintenanceMode: map['maintenance_mode'] === 'true',
+    maintenance_mode: map['maintenance_mode'] || 'false',
+    announcementEnabled: map['announcement_enabled'] === 'true',
+    announcement_enabled: map['announcement_enabled'] || 'false',
+    announcementMessage: map['announcement_message'] || null,
+    announcement_message: map['announcement_message'] || null,
+    announcementImage: map['announcement_image'] || null,
+    announcement_image: map['announcement_image'] || null,
+  });
 
   const load = async () => {
     setLoading(true);
@@ -21,15 +39,27 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const map: Record<string, string> = {};
       rows.forEach((r: any) => (map[r.key] = r.value));
 
-      setSettings({
-        maintenanceMode: map['maintenance_mode'] === 'true',
-        announcementEnabled: map['announcement_enabled'] === 'true',
-        announcementMessage: map['announcement_message'] || null,
-        ...map,
-      });
+      setSettings(normalizeSettings(map));
     } catch (err) {
       console.error('Failed to load settings:', err);
-      setSettings({ maintenanceMode: false, announcementEnabled: false, announcementMessage: null });
+      try {
+        const [maintenanceMode, announcementEnabled, announcementMessage, announcementImage] = await Promise.all([
+          settingsService.getSetting('maintenance_mode'),
+          settingsService.getSetting('announcement_enabled'),
+          settingsService.getSetting('announcement_message'),
+          settingsService.getSetting('announcement_image'),
+        ]);
+
+        setSettings(normalizeSettings({
+          maintenance_mode: maintenanceMode || 'false',
+          announcement_enabled: announcementEnabled || 'false',
+          announcement_message: announcementMessage || '',
+          announcement_image: announcementImage || '',
+        }));
+      } catch (fallbackErr) {
+        console.error('Failed to load fallback settings:', fallbackErr);
+        setSettings(normalizeSettings({}));
+      }
     } finally {
       setLoading(false);
     }
@@ -48,7 +78,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
 export function useSettings() {
   const ctx = useContext(SettingsContext);
-  if (!ctx) throw new Error('useSettings must be used within SettingsProvider');
+  if (!ctx) {
+    console.warn('useSettings was called outside SettingsProvider. Returning fallback settings.');
+    return fallbackSettingsContext;
+  }
   return ctx;
 }
 

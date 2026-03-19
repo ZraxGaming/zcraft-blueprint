@@ -8,6 +8,8 @@ import {
   Newspaper,
   BookOpen,
   Calendar,
+  ClipboardList,
+  Wrench,
   Moon,
   Sun,
   Bell,
@@ -25,6 +27,8 @@ const sidebarLinks = [
   { label: "News", href: "/admin/news", icon: Newspaper },
   { label: "Wiki", href: "/admin/wiki", icon: BookOpen },
   { label: "Changelogs", href: "/admin/changelogs", icon: Calendar },
+  { label: "Applications", href: "/admin/applications", icon: ClipboardList },
+  { label: "Tools", href: "/admin/tools", icon: Wrench },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
