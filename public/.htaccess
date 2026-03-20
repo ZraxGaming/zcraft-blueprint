@@ -3,6 +3,11 @@
 # Enable mod_rewrite
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # Forward backend routes to the Node app when Apache serves the frontend.
+  # Requires mod_proxy and mod_proxy_http, with the Node server listening on localhost:3000.
+  RewriteRule ^api/(.*)$ http://127.0.0.1:3000/api/$1 [P,L]
+  RewriteRule ^email/(.*)$ http://127.0.0.1:3000/email/$1 [P,L]
   
   # Force HTTPS
   RewriteCond %{HTTPS} off
@@ -15,6 +20,10 @@
   # Add trailing slash to directories
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^(.+[^/])$ /$1/ [L,R=301]
+</IfModule>
+
+<IfModule mod_proxy.c>
+  ProxyPreserveHost On
 </IfModule>
 
 # Set proper MIME types

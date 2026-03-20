@@ -12,6 +12,14 @@ export const DEFAULT_EMAIL_PREFERENCES: EmailPreferenceMap = {
   recruitment: true,
 };
 
+function isMissingEmailPreferencesTable(error: any) {
+  return (
+    error?.code === "PGRST205" ||
+    error?.status === 404 ||
+    String(error?.message || "").includes("user_email_preferences")
+  );
+}
+
 export async function getMyEmailPreferences(userId: string): Promise<EmailPreferenceMap> {
   const { data, error } = await (supabase as any)
     .from("user_email_preferences")
@@ -19,6 +27,9 @@ export async function getMyEmailPreferences(userId: string): Promise<EmailPrefer
     .eq("user_id", userId);
 
   if (error) {
+    if (isMissingEmailPreferencesTable(error)) {
+      return { ...DEFAULT_EMAIL_PREFERENCES };
+    }
     throw error;
   }
 
@@ -47,6 +58,9 @@ export async function setMyEmailPreference(userId: string, category: EmailPrefer
     );
 
   if (error) {
+    if (isMissingEmailPreferencesTable(error)) {
+      return;
+    }
     throw error;
   }
 }

@@ -1,0 +1,27 @@
+# ZCraft Network - Apache entrypoint config
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Forward backend routes to the Node app when Apache serves the frontend.
+  # Requires mod_proxy and mod_proxy_http, with the Node server listening on localhost:3000.
+  RewriteRule ^api/(.*)$ http://127.0.0.1:3000/api/$1 [P,L]
+  RewriteRule ^email/(.*)$ http://127.0.0.1:3000/email/$1 [P,L]
+
+  # Force HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Remove trailing slashes for files
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.+)/$ /$1 [L,R=301]
+
+  # SPA fallback
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_proxy.c>
+  ProxyPreserveHost On
+</IfModule>
