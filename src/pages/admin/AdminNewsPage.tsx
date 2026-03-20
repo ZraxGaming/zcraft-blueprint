@@ -36,6 +36,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { StructuredContent } from "@/components/content/StructuredContent";
 import { MediaPicker } from "@/components/admin/MediaPicker";
+import { sendAdminEmail } from "@/services/emailService";
 
 function NewsFormFields({
   title,
@@ -114,7 +115,7 @@ function NewsFormFields({
 }
 
 export default function AdminNewsPage() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [posts, setPosts] = useState<NewsArticle[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -176,6 +177,21 @@ export default function AdminNewsPage() {
         image_url: imageUrl || null,
         author_id: user.id,
       });
+
+      if (session?.access_token) {
+        sendAdminEmail({
+          subject: `News: ${title}`,
+          html: `
+            <h1>${title}</h1>
+            <p>${excerpt}</p>
+            <p><a href="https://z-craft.xyz/news/${generateSlug(title)}">Read the full update</a></p>
+          `,
+          accessToken: session.access_token,
+          audience: "all_users",
+        }).catch((emailError) => {
+          console.warn("Failed to send news email:", emailError);
+        });
+      }
 
       toast({ title: "Success", description: "News post created" });
       setIsCreateOpen(false);

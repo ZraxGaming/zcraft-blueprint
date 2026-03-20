@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Settings, MessageSquare, FileText, Bell, User, Loader, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { toast } from "@/components/ui/use-toast";
+import { getMyEmailPreferences, setMyEmailPreference, type EmailPreferenceMap } from "@/services/emailPreferenceService";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -28,6 +30,11 @@ export default function ProfilePage() {
   const [passwordNonce, setPasswordNonce] = useState("");
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [sendingNonce, setSendingNonce] = useState(false);
+  const [emailPreferences, setEmailPreferences] = useState<EmailPreferenceMap>({
+    marketing: true,
+    recruitment: true,
+  });
+  const [savingEmailPreference, setSavingEmailPreference] = useState<null | "marketing" | "recruitment">(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -62,6 +69,21 @@ export default function ProfilePage() {
     setUsername(userProfile?.username || "");
     setBio(userProfile?.bio || "");
   }, [userProfile?.bio, userProfile?.username]);
+
+  useEffect(() => {
+    const loadEmailPreferences = async () => {
+      if (!user?.id) return;
+
+      try {
+        const next = await getMyEmailPreferences(user.id);
+        setEmailPreferences(next);
+      } catch (error) {
+        console.error("Failed to load email preferences:", error);
+      }
+    };
+
+    loadEmailPreferences();
+  }, [user?.id]);
 
   if (authLoading || loading) {
     return (
@@ -203,6 +225,28 @@ export default function ProfilePage() {
       });
     } finally {
       setUpdatingPassword(false);
+    }
+  };
+
+  const handleToggleEmailPreference = async (category: "marketing" | "recruitment", enabled: boolean) => {
+    if (!user?.id) return;
+
+    try {
+      setSavingEmailPreference(category);
+      await setMyEmailPreference(user.id, category, enabled);
+      setEmailPreferences((prev) => ({ ...prev, [category]: enabled }));
+      toast({
+        title: "Email preference updated",
+        description: `${category === "marketing" ? "Marketing" : "Recruitment"} emails ${enabled ? "enabled" : "disabled"}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Preference update failed",
+        description: error?.message || "Could not update your email preference.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingEmailPreference(null);
     }
   };
 
@@ -420,6 +464,39 @@ export default function ProfilePage() {
                       <p className="text-sm text-muted-foreground">
                         Authenticator app and passkey setup were removed from this page because your current Supabase project is not reliably supporting them. Email-based security actions remain available.
                       </p>
+
+                      <div className="space-y-4 rounded-xl border border-border/60 bg-background/70 p-4">
+                        <div>
+                          <h4 className="font-medium">Optional Email Preferences</h4>
+                          <p className="text-sm text-muted-foreground">
+                            You can opt out of marketing and recruitment emails. Security, password, manual admin alerts, and core site updates still send.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="font-medium">Marketing Emails</p>
+                            <p className="text-sm text-muted-foreground">Promotions, sales, and similar optional campaigns.</p>
+                          </div>
+                          <Switch
+                            checked={emailPreferences.marketing}
+                            disabled={savingEmailPreference !== null}
+                            onCheckedChange={(checked) => handleToggleEmailPreference("marketing", checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="font-medium">Recruitment Emails</p>
+                            <p className="text-sm text-muted-foreground">Application opening and recruitment availability notices.</p>
+                          </div>
+                          <Switch
+                            checked={emailPreferences.recruitment}
+                            disabled={savingEmailPreference !== null}
+                            onCheckedChange={(checked) => handleToggleEmailPreference("recruitment", checked)}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

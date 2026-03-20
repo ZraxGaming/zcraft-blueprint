@@ -40,6 +40,8 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { StructuredContent } from "@/components/content/StructuredContent";
 import { MediaPicker } from "@/components/admin/MediaPicker";
+import { useAuth } from "@/contexts/AuthContext";
+import { sendAdminEmail } from "@/services/emailService";
 
 interface Changelog {
   id: string;
@@ -190,6 +192,7 @@ function ChangelogFormFields({
 }
 
 export default function AdminChangelogsPage() {
+  const { session } = useAuth();
   const [changelogs, setChangelogs] = useState<Changelog[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -260,6 +263,23 @@ export default function AdminChangelogsPage() {
         image_url: imageUrl || null,
         released_at: releasedAt,
       });
+
+      if (session?.access_token) {
+        const slug = `changelog-${String(version).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`;
+        sendAdminEmail({
+          subject: `Changelog v${version}: ${title}`,
+          html: `
+            <h1>${title}</h1>
+            <p><strong>Version:</strong> v${version}</p>
+            <p>${description}</p>
+            <p><a href="https://z-craft.xyz/events#${slug}">Read the changelog</a></p>
+          `,
+          accessToken: session.access_token,
+          audience: "all_users",
+        }).catch((emailError) => {
+          console.warn("Failed to send changelog email:", emailError);
+        });
+      }
 
       toast({ title: "Success", description: "Changelog created" });
       resetForm();

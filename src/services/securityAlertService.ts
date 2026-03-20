@@ -1,5 +1,7 @@
+import { buildApiUrl } from "@/lib/api";
+
 export async function sendLoginAlert(accessToken: string, loginMethod: string, username?: string | null) {
-  const response = await fetch("/api/security/login-alert", {
+  const response = await fetch(buildApiUrl("/api/security/login-alert"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -13,7 +15,7 @@ export async function sendLoginAlert(accessToken: string, loginMethod: string, u
 
   const result = await response.json().catch(() => ({}));
   if (!response.ok || result.error) {
-    throw new Error(result.details || result.error || "Failed to send login alert");
+    throw new Error(result.error || result.details || "Failed to send login alert");
   }
 
   return result;

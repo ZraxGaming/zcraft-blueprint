@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { sendWebhook, WebhookEvent } from '@/services/webhookService';
 import { uploadProfilePicture } from '@/services/storageService';
 import { sendLoginAlert } from '@/services/securityAlertService';
-import { oneSignalLogin, oneSignalLogout, oneSignalTrackEvent } from '@/lib/onesignal';
 import {
   sanitizeInput,
   isValidEmail,
@@ -48,6 +47,45 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const fallbackAuthContext: AuthContextType = {
+  user: null,
+  userProfile: null,
+  session: null,
+  loading: false,
+  login: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  register: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  logout: async () => {},
+  sendMagicLink: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  changePassword: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  sendPasswordReauthCode: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  updateProfile: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  updateProfilePicture: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  signInWithDiscord: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  signInWithGithub: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  signInWithGoogle: async () => {
+    throw new Error('Auth provider is not ready yet.');
+  },
+  isAdmin: false,
+  isModerator: false,
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -129,11 +167,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...profileData,
         role,
       } as UserProfile);
-
-      oneSignalLogin(userId, profileData.email, {
-        role,
-        username: profileData.username || "",
-      });
     } catch (err) {
       console.error('Error in fetchUserProfile:', err);
     }
@@ -293,10 +326,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createdAt: authData.user.created_at,
     });
 
-    oneSignalTrackEvent('user_registered', {
-      username: sanitizedUsername,
-      email: sanitizedEmail,
-    });
   };
 
   const logout = async () => {
@@ -313,8 +342,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: userEmail,
       });
     }
-
-    oneSignalLogout();
 
     setUser(null);
     setUserProfile(null);
@@ -500,7 +527,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    console.warn('useAuth was called outside AuthProvider. Returning fallback auth context.');
+    return fallbackAuthContext;
   }
   return context;
 }

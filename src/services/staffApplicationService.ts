@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { settingsService } from "./settingsService";
-import { oneSignalTrackEvent } from "@/lib/onesignal";
 
 export interface StaffApplicationQuestion {
   id: string;
@@ -213,10 +212,6 @@ export async function submitStaffApplication(userId: string, targetRole: string,
       .single();
 
     if (error) throw error;
-    oneSignalTrackEvent("staff_application_updated", {
-      target_role: targetRole,
-      application_id: data.id,
-    });
     return data as StaffApplication;
   }
 
@@ -231,10 +226,6 @@ export async function submitStaffApplication(userId: string, targetRole: string,
     .single();
 
   if (error) throw error;
-  oneSignalTrackEvent("staff_application_submitted", {
-    target_role: targetRole,
-    application_id: data.id,
-  });
   return data as StaffApplication;
 }
 
@@ -268,27 +259,6 @@ export async function reviewStaffApplication(id: string, status: "accepted" | "r
     .single();
 
   if (error) throw error;
-
-  try {
-    await fetch("/api/onesignal/custom-event", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        externalId: data.user_id,
-        name: status === "accepted" ? "staff_application_accepted" : "staff_application_rejected",
-        properties: {
-          application_id: data.id,
-          target_role: data.target_role,
-          reviewed_by: reviewerId,
-          notes,
-        },
-      }),
-    });
-  } catch (eventError) {
-    console.warn("Failed to send OneSignal application review event:", eventError);
-  }
 
   return data as StaffApplication;
 }

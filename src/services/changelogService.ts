@@ -1,7 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
 import { sendWebhook, WebhookEvent } from './webhookService';
-import { oneSignalTrackEvent } from '@/lib/onesignal';
-import { sendOneSignalEmail } from './onesignalMessageService';
 
 export type ChangelogType = 'feature' | 'fix' | 'improvement' | 'patch';
 
@@ -79,26 +77,6 @@ export async function createChangelog(
     releasedAt: data.released_at,
     changes: data.changes,
   });
-
-  oneSignalTrackEvent('changelog_published', {
-    changelog_id: data.id,
-    version: data.version,
-    title: data.title,
-  });
-
-  try {
-    await sendOneSignalEmail({
-      subject: `Changelog v${data.version}: ${data.title}`,
-      html: `
-        <h1>${data.title}</h1>
-        <p><strong>Version:</strong> v${data.version}</p>
-        <p>${data.description}</p>
-        <p><a href="https://z-craft.xyz/events#changelog-${String(data.version).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}">Read the changelog</a></p>
-      `,
-    });
-  } catch (error) {
-    console.warn('Failed to send changelog email:', error);
-  }
 
   return data as Changelog;
 }

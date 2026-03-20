@@ -21,7 +21,7 @@ import {
 } from "@/services/staffApplicationService";
 import { ClipboardList, Plus, Trash2 } from "lucide-react";
 import { MediaPicker } from "@/components/admin/MediaPicker";
-import { sendOneSignalEmail } from "@/services/onesignalMessageService";
+import { sendAdminEmail } from "@/services/emailService";
 
 function emptyQuestion(index: number): StaffApplicationQuestion {
   return {
@@ -46,7 +46,7 @@ function emptyRole(index: number): StaffApplicationRoleConfig {
 }
 
 export default function AdminApplicationsPage() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [roles, setRoles] = useState<StaffApplicationRoleConfig[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState("");
   const [applications, setApplications] = useState<StaffApplication[]>([]);
@@ -124,35 +124,37 @@ export default function AdminApplicationsPage() {
       const newlyOpenedRoles = nextEnabledRoles.filter((role) => !previousEnabledRoleIds.includes(role.id));
       const newlyClosedRoles = previousEnabledRoleIds.filter((roleId) => !nextEnabledRoleIds.includes(roleId));
 
-      if (newlyOpenedRoles.length > 0) {
-        try {
-          await sendOneSignalEmail({
-            subject: "Staff applications are now open",
-            html: `
-              <h1>Staff applications are open</h1>
-              <p>The following roles are now accepting applications:</p>
-              <ul>${newlyOpenedRoles.map((role) => `<li>${role.label}</li>`).join("")}</ul>
-              <p><a href="https://z-craft.xyz/apply">Apply now</a></p>
-            `,
-          });
-        } catch (error) {
-          console.warn("Failed to send applications-open email:", error);
-        }
+      if (session?.access_token && newlyOpenedRoles.length > 0) {
+        sendAdminEmail({
+          subject: "Staff applications are now open",
+          html: `
+            <h1>Staff applications are open</h1>
+            <p>The following roles are now accepting applications:</p>
+            <ul>${newlyOpenedRoles.map((role) => `<li>${role.label}</li>`).join("")}</ul>
+            <p><a href="https://z-craft.xyz/apply">Apply now</a></p>
+          `,
+          accessToken: session.access_token,
+          audience: "all_users",
+          category: "recruitment",
+        }).catch((emailError) => {
+          console.warn("Failed to send applications-open email:", emailError);
+        });
       }
 
-      if (newlyClosedRoles.length > 0) {
-        try {
-          await sendOneSignalEmail({
-            subject: "Staff applications have changed",
-            html: `
-              <h1>Staff application availability updated</h1>
-              <p>Some application roles have been closed or updated.</p>
-              <p><a href="https://z-craft.xyz/staff">Check the staff page</a></p>
-            `,
-          });
-        } catch (error) {
-          console.warn("Failed to send applications-closed email:", error);
-        }
+      if (session?.access_token && newlyClosedRoles.length > 0) {
+        sendAdminEmail({
+          subject: "Staff applications have changed",
+          html: `
+            <h1>Staff application availability updated</h1>
+            <p>Some application roles have been closed or updated.</p>
+            <p><a href="https://z-craft.xyz/staff">Check the staff page</a></p>
+          `,
+          accessToken: session.access_token,
+          audience: "all_users",
+          category: "recruitment",
+        }).catch((emailError) => {
+          console.warn("Failed to send applications-closed email:", emailError);
+        });
       }
 
       setPreviousEnabledRoleIds(nextEnabledRoleIds);
@@ -168,6 +170,21 @@ export default function AdminApplicationsPage() {
     if (!selected || !user?.id) return;
     try {
       await reviewStaffApplication(selected.id, status, reviewNotes, user.id);
+      if (session?.access_token && selected.user?.email) {
+        sendAdminEmail({
+          subject: status === "accepted" ? "Your staff application was accepted" : "Your staff application was reviewed",
+          html: `
+            <h1>${status === "accepted" ? "Application accepted" : "Application reviewed"}</h1>
+            <p>Your application for <strong>${selectedApplicationRole?.label || selected.target_role}</strong> was marked as <strong>${status}</strong>.</p>
+            ${reviewNotes ? `<p><strong>Reviewer notes:</strong><br />${reviewNotes.replace(/\n/g, "<br />")}</p>` : ""}
+          `,
+          accessToken: session.access_token,
+          audience: "manual",
+          emails: [selected.user.email],
+        }).catch((emailError) => {
+          console.warn("Failed to send application review email:", emailError);
+        });
+      }
       toast({ title: "Application reviewed", description: `Marked as ${status}.` });
       setSelected(null);
       setReviewNotes("");

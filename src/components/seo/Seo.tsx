@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { isOneSignalAllowedOrigin } from "@/lib/runtime";
 
 export interface SeoBreadcrumb {
   name: string;
@@ -448,39 +447,6 @@ export function Seo({
 
     // Preload critical fonts
     setPreload('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap', 'style');
-
-    // OneSignal web push
-    if (!isOneSignalAllowedOrigin()) {
-      return;
-    }
-
-    const sdkId = "onesignal-sdk";
-    if (!document.getElementById(sdkId)) {
-      const script = document.createElement("script");
-      script.id = sdkId;
-      script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
-      script.defer = true;
-      document.head.appendChild(script);
-    }
-
-    const oneSignalWindow = window as typeof window & {
-      OneSignalDeferred?: Array<(oneSignal: any) => void>;
-      __zcraftOneSignalInit?: boolean;
-    };
-
-    oneSignalWindow.OneSignalDeferred = oneSignalWindow.OneSignalDeferred || [];
-    if (!oneSignalWindow.__zcraftOneSignalInit) {
-      oneSignalWindow.__zcraftOneSignalInit = true;
-      oneSignalWindow.OneSignalDeferred.push(async function (OneSignal: any) {
-        await OneSignal.init({
-          appId: "3ab05448-008b-4a95-a3ce-9a8445deea57",
-          safari_web_id: "web.onesignal.auto.50aab334-fdef-4f2b-a12a-95c1e616813d",
-          notifyButton: {
-            enable: true,
-          },
-        });
-      });
-    }
 
   }, [
     title,

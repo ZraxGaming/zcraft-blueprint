@@ -1,7 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
 import { sendWebhook, WebhookEvent } from './webhookService';
-import { oneSignalTrackEvent } from '@/lib/onesignal';
-import { sendOneSignalEmail } from './onesignalMessageService';
 
 export interface Author {
   id: string;
@@ -81,25 +79,6 @@ export async function createNews(article: Omit<NewsArticle, 'id' | 'created_at' 
     authorId: data.author_id,
     excerpt: data.excerpt,
   });
-
-  oneSignalTrackEvent('news_published', {
-    article_id: data.id,
-    title: data.title,
-    slug: data.slug,
-  });
-
-  try {
-    await sendOneSignalEmail({
-      subject: `News: ${data.title}`,
-      html: `
-        <h1>${data.title}</h1>
-        <p>${data.excerpt}</p>
-        <p><a href="https://z-craft.xyz/news/${data.slug}">Read the full update</a></p>
-      `,
-    });
-  } catch (error) {
-    console.warn('Failed to send news email:', error);
-  }
 
   return data as NewsArticle;
 }

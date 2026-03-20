@@ -14,7 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { settingsService } from "@/services/settingsService";
+import { sendAdminEmail } from "@/services/emailService";
 import { toast } from "@/components/ui/use-toast";
 import { BellRing, Copy, ExternalLink, Mail, Rss, Save, Wrench } from "lucide-react";
 import { MediaPicker } from "@/components/admin/MediaPicker";
@@ -27,12 +29,14 @@ const tools = [
 ];
 
 export default function AdminToolsPage() {
+  const { session } = useAuth();
   const { settings, refresh } = useSettings();
   const [bannerEnabled, setBannerEnabled] = useState(false);
   const [bannerMessage, setBannerMessage] = useState("");
   const [bannerImage, setBannerImage] = useState("");
   const [discordLink, setDiscordLink] = useState("");
-  const [emailAudience, setEmailAudience] = useState<"subscribed" | "manual">("subscribed");
+  const [emailAudience, setEmailAudience] = useState<"all_users" | "manual">("all_users");
+  const [emailCategory, setEmailCategory] = useState<"mandatory" | "marketing">("mandatory");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [manualEmails, setManualEmails] = useState("");
@@ -84,12 +88,17 @@ export default function AdminToolsPage() {
     try {
       await navigator.clipboard.writeText(value);
       toast({ title: "Copied", description: `${label} copied to clipboard.` });
-    } catch (error) {
+    } catch {
       toast({ title: "Copy failed", description: `Could not copy ${label}.`, variant: "destructive" });
     }
   };
 
   const sendManualEmail = async () => {
+    if (!session?.access_token) {
+      toast({ title: "Not authenticated", description: "Sign in again and retry.", variant: "destructive" });
+      return;
+    }
+
     if (!emailSubject.trim() || !emailBody.trim()) {
       toast({ title: "Missing fields", description: "Email subject and body are required.", variant: "destructive" });
       return;
@@ -107,25 +116,16 @@ export default function AdminToolsPage() {
 
     try {
       setSendingEmail(true);
-      const response = await fetch("/api/onesignal/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subject: emailSubject.trim(),
-          html: emailBody.trim().replace(/\n/g, "<br />"),
-          emails: emailAudience === "manual" ? parsedEmails : [],
-          includedSegments: emailAudience === "subscribed" ? ["Subscribed Users"] : [],
-        }),
+      await sendAdminEmail({
+        subject: emailSubject.trim(),
+        html: emailBody.trim().replace(/\n/g, "<br />"),
+        accessToken: session.access_token,
+        audience: emailAudience,
+        emails: emailAudience === "manual" ? parsedEmails : [],
+        category: emailCategory === "marketing" ? "marketing" : undefined,
       });
 
-      const result = await response.json();
-      if (!response.ok || result.error) {
-        throw new Error(result.details || result.error || "Failed to send email");
-      }
-
-      toast({ title: "Email queued", description: "OneSignal accepted the email request." });
+      toast({ title: "Email sent", description: "SendPulse accepted the email request." });
       setEmailSubject("");
       setEmailBody("");
       setManualEmails("");
@@ -293,19 +293,31 @@ export default function AdminToolsPage() {
               <Mail className="h-5 w-5 text-primary" />
               Manual Email Send
             </CardTitle>
-            <CardDescription>Send a promotion, alert, or announcement through OneSignal email.</CardDescription>
+            <CardDescription>Send a promotion, alert, or announcement through SendPulse.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
               <div className="space-y-2">
                 <Label>Audience</Label>
-                <Select value={emailAudience} onValueChange={(value) => setEmailAudience(value as "subscribed" | "manual")}>
+                <Select value={emailAudience} onValueChange={(value) => setEmailAudience(value as "all_users" | "manual")}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="subscribed">Subscribed Users</SelectItem>
+                    <SelectItem value="all_users">All Users</SelectItem>
                     <SelectItem value="manual">Manual Emails</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Email Type</Label>
+                <Select value={emailCategory} onValueChange={(value) => setEmailCategory(value as "mandatory" | "marketing")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mandatory">Mandatory Alert</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -343,8 +355,7 @@ export default function AdminToolsPage() {
 
             <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-4 bg-muted/30">
               <div className="text-sm text-muted-foreground">
-                Current automatic OneSignal email-ready events:
-                `staff_application_submitted`, `staff_application_updated`, `staff_application_accepted`, `staff_application_rejected`
+                This uses the backend SendPulse integration. Marketing emails honor opt-out settings and add an unsubscribe link. `All Users` requires a configured Supabase service role key on the server.
               </div>
               <Button className="btn-primary-gradient" onClick={sendManualEmail} disabled={sendingEmail}>
                 {sendingEmail ? "Sending..." : "Send Email"}

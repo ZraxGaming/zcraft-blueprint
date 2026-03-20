@@ -5,6 +5,8 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const AUTH_STORAGE_KEY = import.meta.env.VITE_SUPABASE_AUTH_STORAGE_KEY || 'zcraft-auth';
+export const OAUTH_PROVIDER_TOKEN_KEY = 'zcraft-oauth-provider-token';
+export const OAUTH_PROVIDER_REFRESH_TOKEN_KEY = 'zcraft-oauth-provider-refresh-token';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -56,3 +58,21 @@ export const supabase = typeof window === 'undefined'
         storage: window.localStorage,
       },
     });
+
+if (typeof window !== 'undefined' && 'auth' in supabase) {
+  // Capture provider tokens during the OAuth callback event before they disappear from the session payload.
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (session?.provider_token) {
+      window.sessionStorage.setItem(OAUTH_PROVIDER_TOKEN_KEY, session.provider_token);
+    }
+
+    if (session?.provider_refresh_token) {
+      window.sessionStorage.setItem(OAUTH_PROVIDER_REFRESH_TOKEN_KEY, session.provider_refresh_token);
+    }
+
+    if (event === 'SIGNED_OUT') {
+      window.sessionStorage.removeItem(OAUTH_PROVIDER_TOKEN_KEY);
+      window.sessionStorage.removeItem(OAUTH_PROVIDER_REFRESH_TOKEN_KEY);
+    }
+  });
+}
