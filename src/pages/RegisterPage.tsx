@@ -59,7 +59,7 @@ export default function RegisterPage() {
         keywords: "register zcraft, join minecraft server, create account, lifesteal server registration, minecraft sign up, zcraft network account",
         url: "/register",
         type: "website",
-        noindex: true,
+        noindex: false,
         tags: ["register", "sign up", "account creation", "join server"]
       }}
     >

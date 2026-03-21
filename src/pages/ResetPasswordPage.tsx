@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
         description: "Finish resetting your ZCraft Network account password.",
         url: "/reset-password",
         type: "website",
-        noindex: true,
+        noindex: false,
         tags: ["password reset", "security"],
       }}
     >

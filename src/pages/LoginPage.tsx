@@ -89,7 +89,7 @@ export default function LoginPage() {
       keywords: "login zcraft, minecraft login, account login, zcraft network login, server account, lifesteal login",
       url: "/login",
       type: "website",
-      noindex: true,
+      noindex: false,
       tags: ["login", "account", "authentication"]
     }}>
       <section className="py-16 lg:py-24 min-h-[70vh] flex items-center">

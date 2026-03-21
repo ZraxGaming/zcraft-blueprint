@@ -5,6 +5,7 @@ import {
   getUserProfileById,
   json,
   lookupGeo,
+  renderZcraftEmail,
   sendSendPulseEmail,
 } from '../_lib/core.js';
 
@@ -34,22 +35,27 @@ export async function POST(request) {
       auth.user.user_metadata?.preferred_username ||
       auth.user.email.split('@')[0];
 
-    const html = `
-      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
-        <h2>New Login To Your ZCraft Account</h2>
-        <p>Hello ${escapeHtml(titleName)},</p>
-        <p>We detected a new login to your account. If this was you, no action is needed.</p>
-        <table style="border-collapse:collapse;margin:16px 0">
-          <tr><td style="padding:6px 12px 6px 0"><strong>Time (UTC)</strong></td><td>${escapeHtml(formattedUtc)}</td></tr>
-          <tr><td style="padding:6px 12px 6px 0"><strong>Login method</strong></td><td>${escapeHtml(loginMethod)}</td></tr>
-          <tr><td style="padding:6px 12px 6px 0"><strong>IP address</strong></td><td>${escapeHtml(geo.ip)}</td></tr>
-          <tr><td style="padding:6px 12px 6px 0"><strong>Location</strong></td><td>${escapeHtml(`${geo.city}, ${geo.region}, ${geo.country}`)}</td></tr>
-          <tr><td style="padding:6px 12px 6px 0"><strong>Timezone</strong></td><td>${escapeHtml(geo.timezone)}</td></tr>
-          <tr><td style="padding:6px 12px 6px 0"><strong>Network</strong></td><td>${escapeHtml(geo.org)}</td></tr>
-        </table>
-        <p>If this was not you, reset your password immediately and review your account activity.</p>
-      </div>
-    `;
+    const locationBits = [geo.city, geo.region, geo.country].filter((value) => value && value !== 'Unknown');
+    const html = renderZcraftEmail({
+      title: 'New login detected',
+      intro: `Hello ${titleName}, we detected a login to your ZCraft account. If this was you, no action is needed.`,
+      badge: 'Security Alert',
+      accentColor: '#22d3ee',
+      ctaLabel: 'Open Account Settings',
+      ctaUrl: `${process.env.SITE_URL || 'https://www.z-craft.xyz'}/profile`,
+      bodyHtml: `
+        <p style="margin:0 0 12px;">We captured the login details below to help you confirm whether this session was yours.</p>
+        <p style="margin:0 0 12px;">If this login was not you, reset your password immediately and review any connected accounts or admin access.</p>
+      `,
+      infoRows: [
+        { label: 'Time (UTC)', value: formattedUtc },
+        { label: 'Login method', value: loginMethod },
+        { label: 'IP address', value: geo.ip || 'Unavailable' },
+        { label: 'Approximate location', value: locationBits.join(', ') || 'Unavailable' },
+        { label: 'Timezone', value: geo.timezone || 'Unavailable' },
+        { label: 'Network / ISP', value: geo.org || 'Unavailable' },
+      ],
+    });
 
     const result = await sendSendPulseEmail({
       subject: 'New login to your ZCraft account',

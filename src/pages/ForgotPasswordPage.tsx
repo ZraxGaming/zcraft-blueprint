@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
       keywords: "reset password, forgot password, account recovery, password reset, zcraft login help, minecraft account recovery",
       url: "/forgot-password",
       type: "website",
-      noindex: true,
+      noindex: false,
       tags: ["password reset", "account recovery", "login help"]
     }}>
       <section className="py-16 lg:py-24 min-h-[70vh] flex items-center">

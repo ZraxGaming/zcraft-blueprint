@@ -2,12 +2,12 @@
 <rss version="2.0">
   <channel>
     <title>ZCraft Changelog Feed</title>
-    <link>https://z-craft.xyz/events</link>
+    <link>https://www.z-craft.xyz/events</link>
     <description>Latest changelogs from ZCraft Network</description>
     <language>en-us</language>
     <item>
       <title>Smart Server Wake System (v1.0.2)</title>
-      <link>https://z-craft.xyz/events#changelog-1-0-2</link>
+      <link>https://www.z-craft.xyz/events#changelog-1-0-2</link>
       <description>📄 Description
 
 To improve hosting stability and reduce unnecessary downtime, Z-Craft now uses an automatic wake-up system. If the server is offline, players can now start it instantly by joining a secondary address.
@@ -53,11 +53,11 @@ We’re working on:
 	•	Hosting upgrades for 24/7 uptime
 </description>
       <pubDate>Wed, 18 Feb 2026 00:00:00 GMT</pubDate>
-      <guid>https://z-craft.xyz/events#changelog-1-0-2</guid>
+      <guid>https://www.z-craft.xyz/events#changelog-1-0-2</guid>
     </item>
     <item>
       <title>Website Fixes and Improvements  (v1.0.1)</title>
-      <link>https://z-craft.xyz/events#changelog-1-0-1</link>
+      <link>https://www.z-craft.xyz/events#changelog-1-0-1</link>
       <description>We’ve launched a dedicated Status Page so you can check ZCraft’s operational status anytime without asking staff. You’ll know exactly when the server is online, how many players are connected, and whether any maintenance is planned or ongoing. This keeps everyone informed and eliminates confusion during downtime or updates.
 Access it at: status.z-craft.xyz
 
@@ -72,11 +72,11 @@ These pages aren’t just extra features—they’re core infrastructure. Status
 -THE ZCRAFT TEAM
 </description>
       <pubDate>Thu, 29 Jan 2026 00:00:00 GMT</pubDate>
-      <guid>https://z-craft.xyz/events#changelog-1-0-1</guid>
+      <guid>https://www.z-craft.xyz/events#changelog-1-0-1</guid>
     </item>
     <item>
       <title>Opening Soon - ZCraft Network (v1.0.0)</title>
-      <link>https://z-craft.xyz/events#changelog-1-0-0</link>
+      <link>https://www.z-craft.xyz/events#changelog-1-0-0</link>
       <description>🚀 Opening Soon
 
 We’re actively building a centralized platform designed to connect our 🌐 website, 💬 Discord, and ⚙️ community systems into one seamless experience.
@@ -89,7 +89,7 @@ Once all systems meet our standards, access will open.
 📢 Stay tuned — updates will be announced soon.
 </description>
       <pubDate>Tue, 27 Jan 2026 00:00:00 GMT</pubDate>
-      <guid>https://z-craft.xyz/events#changelog-1-0-0</guid>
+      <guid>https://www.z-craft.xyz/events#changelog-1-0-0</guid>
     </item>
   </channel>
 </rss>
