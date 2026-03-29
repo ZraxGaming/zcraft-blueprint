@@ -35,6 +35,7 @@ import AdminNewsPage from "./pages/admin/AdminNewsPage";
 import AdminForumsPage from "./pages/admin/AdminForumsPage";
 import AdminWikiPage from "./pages/admin/AdminWikiPage";
 import AdminChangelogsPage from "./pages/admin/AdminChangelogsPage";
+import AdminEmailPage from "./pages/admin/AdminEmailPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminToolsPage from "./pages/admin/AdminToolsPage";
 import AdminApplicationsPage from "./pages/admin/AdminApplicationsPage";
@@ -139,6 +140,7 @@ const App = () => (
                     <Route path="/admin/forums" element={<AdminRoute><AdminForumsPage /></AdminRoute>} />
                     <Route path="/admin/wiki" element={<AdminRoute><AdminWikiPage /></AdminRoute>} />
                     <Route path="/admin/changelogs" element={<AdminRoute><AdminChangelogsPage /></AdminRoute>} />
+                    <Route path="/admin/email" element={<AdminRoute><AdminEmailPage /></AdminRoute>} />
                     <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
                     <Route path="/admin/applications" element={<AdminRoute><AdminApplicationsPage /></AdminRoute>} />
                     <Route path="/admin/tools" element={<AdminRoute><AdminToolsPage /></AdminRoute>} />

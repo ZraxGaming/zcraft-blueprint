@@ -42,6 +42,7 @@ import { StructuredContent } from "@/components/content/StructuredContent";
 import { MediaPicker } from "@/components/admin/MediaPicker";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendAdminEmail } from "@/services/emailService";
+import { changelogService } from "@/services/changelogService";
 
 interface Changelog {
   id: string;
@@ -254,7 +255,7 @@ export default function AdminChangelogsPage() {
         .map((c) => c.trim())
         .filter((c) => c);
 
-      await supabase.from("changelogs").insert({
+      await changelogService.createChangelog({
         version,
         title,
         description,
@@ -309,18 +310,15 @@ export default function AdminChangelogsPage() {
         .map((c) => c.trim())
         .filter((c) => c);
 
-      await supabase
-        .from("changelogs")
-        .update({
-          version,
-          title,
-          description,
-          changes,
-          type,
-          image_url: imageUrl || null,
-          released_at: releasedAt,
-        })
-        .eq("id", editingChangelog.id);
+      await changelogService.updateChangelog(editingChangelog.id, {
+        version,
+        title,
+        description,
+        changes,
+        type,
+        image_url: imageUrl || null,
+        released_at: releasedAt,
+      });
 
       toast({ title: "Success", description: "Changelog updated" });
       resetForm();
@@ -341,7 +339,7 @@ export default function AdminChangelogsPage() {
     if (!confirm("Are you sure you want to delete this changelog?")) return;
 
     try {
-      await supabase.from("changelogs").delete().eq("id", id);
+      await changelogService.deleteChangelog(id);
       toast({ title: "Success", description: "Changelog deleted" });
       loadChangelogs();
     } catch (err: any) {

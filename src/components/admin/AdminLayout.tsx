@@ -15,7 +15,8 @@ import {
   Bell,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +29,7 @@ const sidebarLinks = [
   { label: "Wiki", href: "/admin/wiki", icon: BookOpen },
   { label: "Changelogs", href: "/admin/changelogs", icon: Calendar },
   { label: "Applications", href: "/admin/applications", icon: ClipboardList },
+  { label: "Email", href: "/admin/email", icon: Mail },
   { label: "Tools", href: "/admin/tools", icon: Wrench },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];

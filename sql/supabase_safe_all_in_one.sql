@@ -245,3 +245,20 @@ CREATE TRIGGER touch_user_email_preferences_updated_at
 BEFORE UPDATE ON public.user_email_preferences
 FOR EACH ROW
 EXECUTE FUNCTION public.touch_user_email_preferences_updated_at();
+
+/* --------------------------------
+   Changelogs table and policies
+   -------------------------------- */
+
+ALTER TABLE IF EXISTS public.changelogs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Changelogs: public select" ON public.changelogs;
+CREATE POLICY "Changelogs: public select"
+ON public.changelogs FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "Changelogs: admin write" ON public.changelogs;
+CREATE POLICY "Changelogs: admin write"
+ON public.changelogs FOR ALL
+USING (EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin'))
+WITH CHECK (EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin'));
