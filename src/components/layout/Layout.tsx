@@ -28,6 +28,19 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
     settings?.announcement_image ||
     null;
 
+  const seoDefaults = {
+    title: settings?.seo_title || "ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Server",
+    description: settings?.seo_description || "Join ZCraft Network, the ultimate Minecraft network with Lifesteal and Skyblock SMP, survival gameplay, custom economy, factions, and active community events.",
+    keywords: settings?.seo_keywords || "zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock, lifesteal skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server",
+    image: settings?.seo_image || "/zcraft.png",
+    type: settings?.seo_type || "website",
+  };
+
+  const mergedSeo = {
+    ...seoDefaults,
+    ...(seo || {}),
+  };
+
   usePerformanceMonitor('Layout');
 
   // Skip to main content functionality
@@ -49,7 +62,7 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Seo {...(seo || {})} />
+      <Seo {...mergedSeo} />
 
       {/* Skip to main content link for accessibility */}
       <a

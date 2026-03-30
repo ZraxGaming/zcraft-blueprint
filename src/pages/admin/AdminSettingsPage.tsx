@@ -39,6 +39,13 @@ export default function AdminSettingsPage() {
   const [announcementEnabled, setAnnouncementEnabled] = useState(false);
   const [announcementMessage, setAnnouncementMessage] = useState("");
 
+  // SEO
+  const [seoTitle, setSeoTitle] = useState("ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Server");
+  const [seoDescription, setSeoDescription] = useState("Join ZCraft Network, the premier Minecraft network offering Lifesteal and Skyblock SMP, survival features, factions, economy, and competitive PvP.");
+  const [seoKeywords, setSeoKeywords] = useState("zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock, lifesteal skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, smp");
+  const [seoImage, setSeoImage] = useState("/zcraft.png");
+  const [seoType, setSeoType] = useState("website");
+
   // Security
   const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const [emailVerification, setEmailVerification] = useState(true);
@@ -59,6 +66,11 @@ export default function AdminSettingsPage() {
       setServerDescription(settingsMap.get('server_description') || '');
       setDiscordUrl(settingsMap.get('discord_link') || '');
       setStoreUrl(settingsMap.get('store_url') || '');
+      setSeoTitle(settingsMap.get('seo_title') || 'ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Server');
+      setSeoDescription(settingsMap.get('seo_description') || 'Join ZCraft Network, the premier Minecraft network offering Lifesteal and Skyblock SMP, survival features, factions, economy, and competitive PvP.');
+      setSeoKeywords(settingsMap.get('seo_keywords') || 'zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock, lifesteal skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, smp');
+      setSeoImage(settingsMap.get('seo_image') || '/zcraft.png');
+      setSeoType(settingsMap.get('seo_type') || 'website');
       setMaintenanceMode(settingsMap.get('maintenance_mode') === 'true');
       setAnnouncementEnabled(settingsMap.get('announcement_enabled') === 'true');
       setAnnouncementMessage(settingsMap.get('announcement_message') || '');
@@ -83,6 +95,11 @@ export default function AdminSettingsPage() {
         settingsService.setSetting('server_description', serverDescription),
         settingsService.setSetting('discord_link', discordUrl),
         settingsService.setSetting('store_url', storeUrl),
+        settingsService.setSetting('seo_title', seoTitle),
+        settingsService.setSetting('seo_description', seoDescription),
+        settingsService.setSetting('seo_keywords', seoKeywords),
+        settingsService.setSetting('seo_image', seoImage),
+        settingsService.setSetting('seo_type', seoType),
       ]);
       toast({ title: "Success", description: "General settings saved" });
       // refresh global settings
@@ -194,6 +211,28 @@ export default function AdminSettingsPage() {
               <div className="space-y-2">
                 <Label>Server Description</Label>
                 <Textarea value={serverDescription} onChange={(e) => setServerDescription(e.target.value)} rows={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>SEO Title</Label>
+                <Input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} placeholder="ZCraft Network — ..." />
+              </div>
+              <div className="space-y-2">
+                <Label>SEO Description</Label>
+                <Textarea value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} rows={3} placeholder="Join ZCraft Network..." />
+              </div>
+              <div className="space-y-2">
+                <Label>SEO Keywords</Label>
+                <Input value={seoKeywords} onChange={(e) => setSeoKeywords(e.target.value)} placeholder="zcraft, minecraft, ..." />
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>SEO Image URL</Label>
+                  <Input value={seoImage} onChange={(e) => setSeoImage(e.target.value)} placeholder="/zcraft.png" />
+                </div>
+                <div className="space-y-2">
+                  <Label>SEO Type</Label>
+                  <Input value={seoType} onChange={(e) => setSeoType(e.target.value)} placeholder="website" />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Discord Invite URL</Label>

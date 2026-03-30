@@ -38,9 +38,9 @@ export interface SeoProps {
 }
 
 export function Seo({
-  title = "ZCraft Network — Premium Minecraft Lifesteal & Survival Servers",
-  description = "Join ZCraft Network, the ultimate Minecraft experience with lifesteal SMP, survival gameplay, factions, economy system, and active community. Best Minecraft server for competitive PvP and social gaming.",
-  keywords = "zcraft, zcraft network, minecraft server, minecraft lifesteal, lifesteal server, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server, minecraft community server",
+  title = "ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Server",
+  description = "Join ZCraft Network, the ultimate Minecraft network with Lifesteal and Skyblock SMP, survival gameplay, factions, economy, and active community events. Rapid growth, competitive PvP, and custom features for players who want the best Minecraft multiplayer experience.",
+  keywords = "zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock server, lifesteal skyblock, minecraft skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server, competitive mcsmp",
   image = "/zcraft.png",
   url,
   type = 'website',
