@@ -312,6 +312,20 @@ export function Seo({
       }
     };
 
+    const pathSegments = location.pathname.split("/").filter(Boolean);
+    const defaultBreadcrumbs: SeoBreadcrumb[] = pathSegments.length
+      ? [
+          { name: "Home", url: origin },
+          ...pathSegments.map((segment, index) => ({
+            name: segment
+              .replace(/[-_]/g, " ")
+              .replace(/\b\w/g, (chr) => chr.toUpperCase()),
+            url: `${origin}/${pathSegments.slice(0, index + 1).join("/")}`,
+          })),
+        ]
+      : [];
+    const breadcrumbItems = breadcrumbs && breadcrumbs.length > 0 ? breadcrumbs : defaultBreadcrumbs;
+
     ld.webPage = {
       "@type": "WebPage",
       name: title,
@@ -321,42 +335,20 @@ export function Seo({
         "@type": "WebSite",
         url: origin,
         name: "ZCraft Network"
-      },
-      breadcrumb: {
+      }
+    };
+
+    if (breadcrumbItems.length > 0) {
+      ld.webPage.breadcrumb = {
         "@type": "BreadcrumbList",
-        itemListElement: []
-      }
-    };
-
-    if (breadcrumbs && breadcrumbs.length > 0) {
-      ld.webPage.breadcrumb.itemListElement = breadcrumbs.map((crumb, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        name: crumb.name,
-        item: crumb.url.startsWith('http') ? crumb.url : `${origin}${crumb.url}`
-      }));
+        itemListElement: breadcrumbItems.map((crumb, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: crumb.name,
+          item: crumb.url.startsWith('http') ? crumb.url : `${origin}${crumb.url}`
+        }))
+      };
     }
-
-    // Add WebSite SearchAction for better search results
-    ld.website = {
-      "@type": "WebSite",
-      url: origin,
-      name: "ZCraft Network",
-      description: "Premium Minecraft Lifesteal & Survival Servers",
-      potentialAction: {
-        "@type": "SearchAction",
-        target: `${origin}/search?q={search_term_string}`,
-        "query-input": "required name=search_term_string"
-      },
-      publisher: {
-        "@type": "Organization",
-        name: "ZCraft Network",
-        logo: {
-          "@type": "ImageObject",
-          url: absoluteImage
-        }
-      }
-    };
 
     // Add VideoGame structured data for gaming content
     if (type === 'website' || !type) {
@@ -404,6 +396,7 @@ export function Seo({
     }
 
     // FAQ structured data (for rich result eligibility)
+    let schemaPayload: any = ld;
     if (faq && faq.length > 0) {
       const faqJsonLd = {
         "@context": "https://schema.org",
@@ -417,8 +410,7 @@ export function Seo({
           },
         })),
       };
-      // Merge in without overriding existing schema (if any)
-      ld.faq = faqJsonLd;
+      schemaPayload = [ld, faqJsonLd];
     }
 
     // Add a JSON-LD script for deep SEO with rich schema
@@ -430,7 +422,7 @@ export function Seo({
       script.id = scriptId;
       document.head.appendChild(script);
     }
-    script.text = JSON.stringify(ld);
+    script.text = JSON.stringify(schemaPayload);
 
     // Performance: Preload critical resources
     const setPreload = (href: string, as: string, type?: string) => {

@@ -36,10 +36,17 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
     type: settings?.seo_type || "website",
   };
 
-  const mergedSeo = {
+  const mergedSeo: SeoProps = {
     ...seoDefaults,
     ...(seo || {}),
   };
+
+  if (breadcrumbs && breadcrumbs.length > 0) {
+    mergedSeo.breadcrumbs = breadcrumbs.map((crumb) => ({
+      name: crumb.label,
+      url: crumb.href || mergedSeo.url || "/",
+    }));
+  }
 
   usePerformanceMonitor('Layout');
 
