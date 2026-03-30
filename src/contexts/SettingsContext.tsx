@@ -11,7 +11,19 @@ export interface SettingsMap {
 
 const SettingsContext = createContext<{ settings: SettingsMap | null; loading: boolean; refresh: () => Promise<void> } | undefined>(undefined);
 const fallbackSettingsContext = {
-  settings: { maintenanceMode: false, maintenance_mode: 'false', announcementEnabled: false, announcement_enabled: 'false', announcementMessage: null, announcement_message: null } as SettingsMap,
+  settings: {
+    maintenanceMode: false,
+    maintenance_mode: 'false',
+    announcementEnabled: false,
+    announcement_enabled: 'false',
+    announcementMessage: null,
+    announcement_message: null,
+    seo_title: 'ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Server',
+    seo_description: 'Join ZCraft Network, the ultimate Minecraft network with Lifesteal and Skyblock SMP, survival gameplay, custom economy, factions, and active community events.',
+    seo_keywords: 'zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock, lifesteal skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server',
+    seo_image: '/zcraft.png',
+    seo_type: 'website',
+  } as SettingsMap,
   loading: false,
   refresh: async () => {},
 };
@@ -30,6 +42,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     announcement_message: map['announcement_message'] || null,
     announcementImage: map['announcement_image'] || null,
     announcement_image: map['announcement_image'] || null,
+    seo_title: map['seo_title'] || 'ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Server',
+    seo_description: map['seo_description'] || 'Join ZCraft Network, the ultimate Minecraft network with Lifesteal and Skyblock SMP, survival gameplay, custom economy, factions, and active community events.',
+    seo_keywords: map['seo_keywords'] || 'zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock, lifesteal skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server',
+    seo_image: map['seo_image'] || '/zcraft.png',
+    seo_type: map['seo_type'] || 'website',
   });
 
   const load = async () => {

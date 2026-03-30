@@ -19,9 +19,9 @@ async function prerender() {
     {
       route: '/',
       seo: {
-        title: "ZCraft Network — Premium Minecraft Lifesteal & Survival Servers",
-        description: "Join ZCraft Network, the ultimate Minecraft experience with lifesteal SMP, survival gameplay, factions, economy system, and active community. Best Minecraft server for competitive PvP and social gaming.",
-        keywords: "zcraft, zcraft network, minecraft server, minecraft lifesteal, lifesteal server, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server, minecraft community server",
+        title: "ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Servers",
+        description: "Join ZCraft Network, the ultimate Minecraft network with Lifesteal and Skyblock SMP, survival gameplay, factions, economy system, and active community. Best Minecraft server for competitive PvP and multi-mode SMP.",
+        keywords: "zcraft, zcraft network, minecraft server, minecraft lifesteal, minecraft skyblock, lifesteal skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server, minecraft community server",
         type: 'website'
       }
     },
