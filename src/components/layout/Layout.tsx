@@ -6,34 +6,27 @@ import Seo, { SeoProps } from "@/components/seo/Seo";
 import Breadcrumbs, { Crumb } from "@/components/ui/Breadcrumbs";
 import { useSettings } from "@/contexts/SettingsContext";
 import { usePerformanceMonitor } from "@/components/ui/OptimizedImage";
+import { siteConfig } from "@/config/siteEnv";
 
 interface LayoutProps {
   children: ReactNode;
   seo?: SeoProps;
   breadcrumbs?: Crumb[];
-  skipToContent?: string; // ID of main content for skip links
+  skipToContent?: string;
 }
 
 export function Layout({ children, seo, breadcrumbs, skipToContent = "main-content" }: LayoutProps) {
   const { settings } = useSettings();
-  const announcementEnabled =
-    settings?.announcementEnabled ||
-    settings?.announcement_enabled === 'true';
-  const announcementMessage =
-    settings?.announcementMessage ||
-    settings?.announcement_message ||
-    null;
-  const announcementImage =
-    settings?.announcementImage ||
-    settings?.announcement_image ||
-    null;
+  const announcementEnabled = settings?.announcementEnabled || settings?.announcement_enabled === "true";
+  const announcementMessage = settings?.announcementMessage || settings?.announcement_message || null;
+  const announcementImage = settings?.announcementImage || settings?.announcement_image || null;
 
   const seoDefaults = {
-    title: settings?.seo_title || "ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Server",
-    description: settings?.seo_description || "Join ZCraft Network, the ultimate Minecraft network with Lifesteal and Skyblock SMP, survival gameplay, custom economy, factions, and active community events.",
-    keywords: settings?.seo_keywords || "zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock, lifesteal skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server",
-    image: settings?.seo_image || "/zcraft.png",
-    type: settings?.seo_type || "website",
+    title: settings?.seo_title || siteConfig.seo.title,
+    description: settings?.seo_description || siteConfig.seo.description,
+    keywords: settings?.seo_keywords || siteConfig.seo.keywords,
+    image: settings?.seo_image || siteConfig.seo.image,
+    type: settings?.seo_type || siteConfig.seo.type,
   };
 
   const mergedSeo: SeoProps = {
@@ -41,37 +34,35 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
     ...(seo || {}),
   };
 
-  if (breadcrumbs && breadcrumbs.length > 0) {
+  if (breadcrumbs?.length) {
     mergedSeo.breadcrumbs = breadcrumbs.map((crumb) => ({
       name: crumb.label,
       url: crumb.href || mergedSeo.url || "/",
     }));
   }
 
-  usePerformanceMonitor('Layout');
+  usePerformanceMonitor("Layout");
 
-  // Skip to main content functionality
   useEffect(() => {
     const handleSkipLink = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && e.target instanceof HTMLAnchorElement && e.target.getAttribute('href') === `#${skipToContent}`) {
+      if (e.key === "Enter" && e.target instanceof HTMLAnchorElement && e.target.getAttribute("href") === `#${skipToContent}`) {
         e.preventDefault();
         const mainContent = document.getElementById(skipToContent);
         if (mainContent) {
           mainContent.focus();
-          mainContent.scrollIntoView({ behavior: 'smooth' });
+          mainContent.scrollIntoView({ behavior: "smooth" });
         }
       }
     };
 
-    document.addEventListener('keydown', handleSkipLink);
-    return () => document.removeEventListener('keydown', handleSkipLink);
+    document.addEventListener("keydown", handleSkipLink);
+    return () => document.removeEventListener("keydown", handleSkipLink);
   }, [skipToContent]);
 
   return (
     <div className="flex min-h-screen flex-col">
       <Seo {...mergedSeo} />
 
-      {/* Skip to main content link for accessibility */}
       <a
         href={`#${skipToContent}`}
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -81,8 +72,7 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
 
       <Navbar />
 
-      {/* Announcement banner with better accessibility */}
-      {announcementEnabled && announcementMessage && (
+      {siteConfig.features.announcementBanner && announcementEnabled && announcementMessage && (
         <div
           className="border-b border-primary/15 bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.92))] text-white"
           role="banner"
@@ -119,7 +109,7 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
         {children}
       </main>
 
-      <CookieBanner />
+      {siteConfig.features.cookieBanner && <CookieBanner />}
       <Footer />
     </div>
   );

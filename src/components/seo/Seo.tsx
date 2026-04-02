@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { siteConfig, toAbsoluteUrl } from "@/config/siteEnv";
 
 export interface SeoBreadcrumb {
   name: string;
@@ -22,31 +23,75 @@ export interface SeoProps {
   keywords?: string;
   image?: string;
   url?: string;
-  type?: 'website' | 'article' | 'profile' | string;
-  publishedTime?: string; // ISO date when the article was published
-  updatedTime?: string; // ISO date when the article/page was last updated
+  type?: "website" | "article" | "profile" | string;
+  publishedTime?: string;
+  updatedTime?: string;
   author?: string;
   section?: string;
   tags?: string[];
   noindex?: boolean;
   canonical?: string;
-  structuredData?: any; // Additional structured data
+  structuredData?: any;
   breadcrumbs?: SeoBreadcrumb[];
-  alternateUrls?: Record<string, string>; // e.g. { en: '/en/about', fr: '/fr/about' }
+  alternateUrls?: Record<string, string>;
   rssFeeds?: RssFeedLink[];
   faq?: SeoFaqItem[];
 }
 
+function setMeta(name: string, content?: string) {
+  if (!content) return;
+  let el = document.querySelector(`meta[name="${name}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute("name", name);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
+
+function setProperty(prop: string, content?: string) {
+  if (!content) return;
+  let el = document.querySelector(`meta[property="${prop}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute("property", prop);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
+
+function setLink(rel: string, href: string, attrs: Record<string, string> = {}) {
+  let link = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
+  if (!link) {
+    link = document.createElement("link");
+    link.setAttribute("rel", rel);
+    document.head.appendChild(link);
+  }
+  link.setAttribute("href", href);
+  Object.entries(attrs).forEach(([key, value]) => link!.setAttribute(key, value));
+}
+
+function setAlternate(hrefLang: string, href: string) {
+  let link = document.querySelector(`link[rel="alternate"][hreflang="${hrefLang}"]`) as HTMLLinkElement | null;
+  if (!link) {
+    link = document.createElement("link");
+    link.setAttribute("rel", "alternate");
+    link.setAttribute("hreflang", hrefLang);
+    document.head.appendChild(link);
+  }
+  link.setAttribute("href", href);
+}
+
 export function Seo({
-  title = "ZCraft Network — Premium Minecraft Lifesteal & Skyblock SMP Server",
-  description = "Join ZCraft Network, the ultimate Minecraft network with Lifesteal and Skyblock SMP, survival gameplay, factions, economy, and active community events. Rapid growth, competitive PvP, and custom features for players who want the best Minecraft multiplayer experience.",
-  keywords = "zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock server, lifesteal skyblock, minecraft skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server, competitive mcsmp",
-  image = "/zcraft.png",
+  title = siteConfig.seo.title,
+  description = siteConfig.seo.description,
+  keywords = siteConfig.seo.keywords,
+  image = siteConfig.seo.image,
   url,
-  type = 'website',
+  type = "website",
   publishedTime,
   updatedTime,
-  author = "ZCraft Network",
+  author = siteConfig.seo.author,
   section,
   tags = [],
   noindex = false,
@@ -60,360 +105,233 @@ export function Seo({
   const location = useLocation();
 
   useEffect(() => {
-    if (title) document.title = title;
+    document.title = title;
 
-    const setMeta = (name: string, content?: string) => {
-      if (!content) return;
-      let el = document.querySelector(`meta[name=\"${name}\"]`);
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute("name", name);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("content", content);
-    };
+    const origin = siteConfig.url;
+    const currentPath = url || `${location.pathname}${location.search || ""}`;
+    const absoluteUrl = currentPath.startsWith("http") ? currentPath : toAbsoluteUrl(currentPath);
+    const absoluteImage = image.startsWith("http") ? image : toAbsoluteUrl(image);
 
-    const setProperty = (prop: string, content?: string) => {
-      if (!content) return;
-      let el = document.querySelector(`meta[property=\"${prop}\"]`);
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute("property", prop);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("content", content);
-    };
-
-    // Ensure absolute URLs for image and url
-    const origin = 'https://z-craft.xyz';
-    const defaultPath = location.pathname + (location.search || '');
-    const resolvedUrl = url || defaultPath;
-    const absoluteUrl = resolvedUrl?.startsWith('http') ? resolvedUrl : `${origin}${resolvedUrl}`;
-    const absoluteImage = image?.startsWith('http') ? image : `${origin}${image}`;
-
-    // Basic meta tags
     setMeta("description", description);
     setMeta("keywords", keywords);
     setMeta("author", author);
     setMeta("robots", noindex ? "noindex, nofollow" : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1");
     setMeta("googlebot", noindex ? "noindex, nofollow" : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1");
     setMeta("bingbot", noindex ? "noindex, nofollow" : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1");
-
-    // Language and locale
     document.documentElement.lang = "en";
     setMeta("language", "en-US");
     setProperty("og:locale", "en_US");
-
-    // Performance and accessibility
-    setMeta("theme-color", "#3b82f6");
-    setMeta("msapplication-TileColor", "#3b82f6");
-    setMeta("application-name", "ZCraft Network");
-    setMeta("format-detection", "telephone=no"); // Prevent phone number detection
+    setMeta("theme-color", siteConfig.themeColor);
+    setMeta("msapplication-TileColor", siteConfig.themeColor);
+    setMeta("application-name", siteConfig.name);
     setMeta("mobile-web-app-capable", "yes");
     setMeta("apple-mobile-web-app-capable", "yes");
     setMeta("apple-mobile-web-app-status-bar-style", "default");
-    setMeta("apple-mobile-web-app-title", "ZCraft Network");
+    setMeta("apple-mobile-web-app-title", siteConfig.name);
     setMeta("color-scheme", "light dark");
     setMeta("supported-color-schemes", "light dark");
     setMeta("referrer", "strict-origin-when-cross-origin");
-
-    // Accessibility
     setMeta("viewport", "width=device-width, initial-scale=1.0, viewport-fit=cover");
 
-    // Open Graph tags
     setProperty("og:title", title);
     setProperty("og:description", description);
     setProperty("og:image", absoluteImage);
-    setProperty("og:image:alt", `${title} - ZCraft Network`);
+    setProperty("og:image:alt", `${title} - ${siteConfig.name}`);
     setProperty("og:url", absoluteUrl);
-    setProperty("og:type", type || 'website');
-    setProperty("og:site_name", "ZCraft Network");
+    setProperty("og:type", type);
+    setProperty("og:site_name", siteConfig.name);
     setProperty("og:image:width", "1200");
     setProperty("og:image:height", "630");
     setProperty("og:image:type", "image/png");
 
-    // Article specific tags
-    if (type === 'article' && publishedTime) {
+    if (type === "article" && publishedTime) {
       setProperty("article:published_time", publishedTime);
       setProperty("article:author", author);
       setProperty("article:section", section || "Gaming");
-      if (tags.length > 0) {
-        tags.forEach(tag => setProperty("article:tag", tag));
-      }
-      if (updatedTime) {
-        setProperty("article:modified_time", updatedTime);
-      }
+      tags.forEach((tag) => setProperty("article:tag", tag));
+      if (updatedTime) setProperty("article:modified_time", updatedTime);
     }
 
-    // Open Graph modification tags
     if (updatedTime) {
       setProperty("og:updated_time", updatedTime);
     }
 
-    // Twitter Card tags
     setMeta("twitter:card", "summary_large_image");
-    setMeta("twitter:site", "@ZCraftNetwork");
-    setMeta("twitter:creator", "@ZCraftNetwork");
+    setMeta("twitter:site", siteConfig.twitterHandle);
+    setMeta("twitter:creator", siteConfig.twitterHandle);
     setMeta("twitter:title", title);
     setMeta("twitter:description", description);
     setMeta("twitter:image", absoluteImage);
-    setMeta("twitter:image:alt", `${title} - ZCraft Network`);
+    setMeta("twitter:image:alt", `${title} - ${siteConfig.name}`);
 
-    // Additional SEO tags for better ranking
-    setMeta("theme-color", "#3b82f6");
-    setMeta("msapplication-TileColor", "#3b82f6");
-    setMeta("application-name", "ZCraft Network");
-
-    // Canonical link
-    if (canonical || absoluteUrl) {
-      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'canonical');
-        document.head.appendChild(link);
-      }
-      link.setAttribute('href', canonical || absoluteUrl);
+    const canonicalUrl = canonical || absoluteUrl;
+    if (canonicalUrl) {
+      setLink("canonical", canonicalUrl);
     }
 
-    // Alternate / multilingual support
-    const setAlternate = (hrefLang: string, href: string) => {
-      let link = document.querySelector(`link[rel="alternate"][hreflang="${hrefLang}"]`) as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'alternate');
-        link.setAttribute('hreflang', hrefLang);
-        document.head.appendChild(link);
-      }
-      link.setAttribute('href', href);
-    };
-
-    setAlternate('en', absoluteUrl);
-
+    setAlternate("en", absoluteUrl);
+    setAlternate("x-default", absoluteUrl);
     if (alternateUrls) {
       Object.entries(alternateUrls).forEach(([lang, href]) => {
-        const absoluteAlt = href.startsWith('http') ? href : `${origin}${href}`;
-        setAlternate(lang, absoluteAlt);
+        setAlternate(lang, href.startsWith("http") ? href : toAbsoluteUrl(href));
       });
     }
 
-    // Google site verification (if configured)
     const googleVerification = (import.meta.env.VITE_GOOGLE_SITE_VERIFICATION || import.meta.env.GOOGLE_SITE_VERIFICATION) as string | undefined;
     if (googleVerification) {
-      setMeta('google-site-verification', googleVerification);
+      setMeta("google-site-verification", googleVerification);
     }
 
-    // Performance hints
-    const setPreconnect = (href: string) => {
+    const preconnect = (href: string) => {
       let link = document.querySelector(`link[rel="preconnect"][href="${href}"]`) as HTMLLinkElement | null;
       if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'preconnect');
-        link.setAttribute('href', href);
-        link.setAttribute('crossorigin', '');
+        link = document.createElement("link");
+        link.setAttribute("rel", "preconnect");
+        link.setAttribute("href", href);
+        link.setAttribute("crossorigin", "");
         document.head.appendChild(link);
       }
     };
 
-    const setDnsPrefetch = (href: string) => {
+    const dnsPrefetch = (href: string) => {
       let link = document.querySelector(`link[rel="dns-prefetch"][href="${href}"]`) as HTMLLinkElement | null;
       if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'dns-prefetch');
-        link.setAttribute('href', href);
+        link = document.createElement("link");
+        link.setAttribute("rel", "dns-prefetch");
+        link.setAttribute("href", href);
         document.head.appendChild(link);
       }
     };
 
-    setPreconnect('https://fonts.googleapis.com');
-    setPreconnect('https://fonts.gstatic.com');
-    setPreconnect('https://cdn.jsdelivr.net');
-    setDnsPrefetch('https://fonts.googleapis.com');
-    setDnsPrefetch('https://fonts.gstatic.com');
-    setDnsPrefetch('https://cdn.jsdelivr.net');
+    preconnect("https://fonts.googleapis.com");
+    preconnect("https://fonts.gstatic.com");
+    preconnect("https://cdn.jsdelivr.net");
+    dnsPrefetch("https://fonts.googleapis.com");
+    dnsPrefetch("https://fonts.gstatic.com");
+    dnsPrefetch("https://cdn.jsdelivr.net");
 
-    // Favicon and icons
-    const setLink = (rel: string, href: string, attrs: Record<string, string> = {}) => {
-      let link = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', rel);
-        document.head.appendChild(link);
-      }
-      link.setAttribute('href', href);
-      Object.entries(attrs).forEach(([key, value]) => {
-        link!.setAttribute(key, value);
-      });
-    };
-
-    setLink("icon", "/favicon.ico");
-    setLink("apple-touch-icon", "/apple-touch-icon.png", { sizes: "180x180" });
-    setLink("icon", "/favicon-32x32.png", { sizes: "32x32", type: "image/png" });
-    setLink("icon", "/favicon-16x16.png", { sizes: "16x16", type: "image/png" });
+    setLink("icon", siteConfig.icon);
+    setLink("apple-touch-icon", siteConfig.appleTouchIcon, { sizes: "180x180" });
     setLink("manifest", "/site.webmanifest");
 
-    // RSS / feed links
-    if (rssFeeds && rssFeeds.length > 0) {
+    if (rssFeeds?.length) {
       rssFeeds.forEach((feed) => {
         setLink("alternate", feed.url, { type: "application/rss+xml", title: feed.title });
       });
     }
 
-    // JSON-LD structured data (Organization + site-level data)
+    const breadcrumbItems =
+      breadcrumbs?.length
+        ? breadcrumbs
+        : location.pathname
+            .split("/")
+            .filter(Boolean)
+            .map((segment, index, segments) => ({
+              name: segment.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()),
+              url: toAbsoluteUrl(`/${segments.slice(0, index + 1).join("/")}`),
+            }));
+
     const ld: any = {
       "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "ZCraft Network",
+      "@type": type === "article" && publishedTime ? "Article" : "Organization",
+      name: siteConfig.name,
       url: absoluteUrl,
       logo: absoluteImage,
-      description: "Premium Minecraft server network featuring lifesteal SMP, survival gameplay, and active community",
-      foundingDate: "2024",
-      sameAs: [
-        "https://discord.gg/zcraft",
-        "https://twitter.com/ZCraftNetwork",
-        "https://www.youtube.com/@ZCraftNetwork",
-        "https://www.tiktok.com/@zcraftnetwork"
-      ],
+      description,
+      sameAs: [siteConfig.discordUrl],
       contactPoint: {
         "@type": "ContactPoint",
-        contactType: "customer service",
-        url: "https://z-craft.xyz/support",
+        contactType: "customer support",
+        url: toAbsoluteUrl(siteConfig.supportUrl),
         availableLanguage: ["English"],
-        contactOption: "TollFree"
       },
       publisher: {
         "@type": "Organization",
-        name: "ZCraft Network",
+        name: siteConfig.name,
         logo: {
           "@type": "ImageObject",
-          url: absoluteImage
-        }
-      }
-    };
-
-    // Always include WebSite + WebPage for deep SEO
-    ld.webSite = {
-      "@type": "WebSite",
-      url: origin,
-      name: "ZCraft Network",
-      alternateName: "ZCraft",
-      description: "Premium Minecraft Lifesteal & Survival Servers",
-      publisher: {
-        "@type": "Organization",
-        name: "ZCraft Network",
-        logo: {
-          "@type": "ImageObject",
-          url: absoluteImage
-        }
+          url: absoluteImage,
+        },
       },
-      potentialAction: {
-        "@type": "SearchAction",
-        target: `${origin}/search?q={search_term_string}`,
-        "query-input": "required name=search_term_string"
-      }
-    };
-
-    const pathSegments = location.pathname.split("/").filter(Boolean);
-    const defaultBreadcrumbs: SeoBreadcrumb[] = pathSegments.length
-      ? [
-          { name: "Home", url: origin },
-          ...pathSegments.map((segment, index) => ({
-            name: segment
-              .replace(/[-_]/g, " ")
-              .replace(/\b\w/g, (chr) => chr.toUpperCase()),
-            url: `${origin}/${pathSegments.slice(0, index + 1).join("/")}`,
-          })),
-        ]
-      : [];
-    const breadcrumbItems = breadcrumbs && breadcrumbs.length > 0 ? breadcrumbs : defaultBreadcrumbs;
-
-    ld.webPage = {
-      "@type": "WebPage",
-      name: title,
-      description,
-      url: absoluteUrl,
-      isPartOf: {
+      webSite: {
         "@type": "WebSite",
         url: origin,
-        name: "ZCraft Network"
-      }
+        name: siteConfig.name,
+        description: siteConfig.seo.description,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${origin}/search?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+      webPage: {
+        "@type": "WebPage",
+        name: title,
+        description,
+        url: absoluteUrl,
+        isPartOf: {
+          "@type": "WebSite",
+          url: origin,
+          name: siteConfig.name,
+        },
+      },
     };
 
-    if (breadcrumbItems.length > 0) {
+    if (breadcrumbItems.length) {
       ld.webPage.breadcrumb = {
         "@type": "BreadcrumbList",
         itemListElement: breadcrumbItems.map((crumb, index) => ({
           "@type": "ListItem",
           position: index + 1,
           name: crumb.name,
-          item: crumb.url.startsWith('http') ? crumb.url : `${origin}${crumb.url}`
-        }))
+          item: crumb.url.startsWith("http") ? crumb.url : toAbsoluteUrl(crumb.url),
+        })),
       };
     }
 
-    // Add VideoGame structured data for gaming content
-    if (type === 'website' || !type) {
+    if (type === "website" || !type) {
       ld.game = {
         "@type": "VideoGame",
-        name: "ZCraft Network - Minecraft Server",
-        description: "Minecraft server with lifesteal, survival, and community features",
+        name: `${siteConfig.name} - Minecraft Server`,
+        description: siteConfig.seo.description,
         genre: ["Action", "Adventure", "Simulation"],
         gamePlatform: "PC",
         operatingSystem: "Windows, macOS, Linux",
-        applicationCategory: "Game",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-          description: "Free to play Minecraft server"
-        }
       };
     }
 
-    // Article specific structured data
-    if (type === 'article' && publishedTime) {
-      ld['@type'] = 'Article';
+    if (type === "article" && publishedTime) {
       ld.headline = title;
       ld.datePublished = publishedTime;
-      ld.author = {
-        "@type": "Organization",
-        name: author
-      };
-      ld.publisher = {
-        "@type": "Organization",
-        name: "ZCraft Network",
-        logo: {
-          "@type": "ImageObject",
-          url: absoluteImage
-        }
-      };
+      ld.author = { "@type": "Organization", name: author };
       if (section) ld.articleSection = section;
-      if (tags.length > 0) ld.keywords = tags.join(", ");
+      if (tags.length) ld.keywords = tags.join(", ");
+      if (updatedTime) ld.dateModified = updatedTime;
     }
 
-    // Add custom structured data if provided
     if (structuredData) {
       Object.assign(ld, structuredData);
     }
 
-    // FAQ structured data (for rich result eligibility)
-    let schemaPayload: any = ld;
-    if (faq && faq.length > 0) {
-      const faqJsonLd = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: faq.map((item) => ({
-          "@type": "Question",
-          name: item.question,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: item.answer,
-          },
-        })),
-      };
-      schemaPayload = [ld, faqJsonLd];
-    }
+    const schemaPayload =
+      faq?.length
+        ? [
+            ld,
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: faq.map((item) => ({
+                "@type": "Question",
+                name: item.question,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: item.answer,
+                },
+              })),
+            },
+          ]
+        : ld;
 
-    // Add a JSON-LD script for deep SEO with rich schema
     const scriptId = "zcraft-jsonld";
     let script = document.getElementById(scriptId) as HTMLScriptElement | null;
     if (!script) {
@@ -424,22 +342,19 @@ export function Seo({
     }
     script.text = JSON.stringify(schemaPayload);
 
-    // Performance: Preload critical resources
-    const setPreload = (href: string, as: string, type?: string) => {
+    const preload = (href: string, as: string, type?: string) => {
       let link = document.querySelector(`link[rel="preload"][href="${href}"]`) as HTMLLinkElement | null;
       if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'preload');
-        link.setAttribute('href', href);
-        link.setAttribute('as', as);
-        if (type) link.setAttribute('type', type);
+        link = document.createElement("link");
+        link.setAttribute("rel", "preload");
+        link.setAttribute("href", href);
+        link.setAttribute("as", as);
+        if (type) link.setAttribute("type", type);
         document.head.appendChild(link);
       }
     };
 
-    // Preload critical fonts
-    setPreload('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap', 'style');
-
+    preload("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap", "style");
   }, [
     title,
     description,

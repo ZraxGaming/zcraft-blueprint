@@ -402,3 +402,10 @@ Success! 🎉
 *Frontend: 100% Complete ✅*  
 *Backend: Ready to Implement (Template Provided) ⏳*  
 *Overall: 70% Complete 🟢*
+
+---
+
+## Vercel Hosting Guide
+
+- Read [VERCEL_SETUP_AND_EDITING.md](VERCEL_SETUP_AND_EDITING.md) for the deployment and editing workflow.
+- It covers Vercel env vars, appeal mode, maintenance safety, and the main files to edit.

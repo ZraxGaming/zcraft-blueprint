@@ -1,6 +1,7 @@
 import { Sword, Users, Shield, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { siteConfig } from "@/config/siteEnv";
 
 const features = [
   {
@@ -66,7 +67,7 @@ export function FeaturesSection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
-            Why Play <span className="text-gradient">ZCraft</span>?
+            Why Play <span className="text-gradient">{siteConfig.shortName}</span>?
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             Discover what makes our server special and why players keep coming back.

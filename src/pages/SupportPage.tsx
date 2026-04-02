@@ -1,10 +1,12 @@
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HelpCircle, MessageSquare, FileText, Shield, ExternalLink, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supportFaqs } from "@/data/faqs";
+import { getPageSeo, siteConfig } from "@/config/siteEnv";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const supportOptions = [
   {
@@ -13,7 +15,7 @@ const supportOptions = [
     description: "Submit a support ticket for personalized help from our team.",
     action: "Open Ticket",
     color: "bg-primary/10 text-primary",
-    href: "https://discord.gg/zcraft",
+    href: siteConfig.discordUrl,
   },
   {
     icon: Shield,
@@ -21,7 +23,7 @@ const supportOptions = [
     description: "Think you were unfairly punished? Submit an appeal here.",
     action: "Start Appeal",
     color: "bg-amber-500/10 text-amber-600",
-    href: "https://appeal.z-craft.xyz",
+    href: "/appeal",
   },
   {
     icon: MessageSquare,
@@ -29,21 +31,24 @@ const supportOptions = [
     description: "Get real-time support from staff and community members.",
     action: "Join Server",
     color: "bg-indigo-500/10 text-indigo-600",
-    href: "https://discord.gg/zcraft",
+    href: siteConfig.discordUrl,
   },
 ];
 
 export default function SupportPage() {
+  const { settings } = useSettings();
+
   return (
     <Layout seo={{
-      title: "ZCraft Network Support — Help Center & Community Assistance",
-      description: "Get help and support for ZCraft Network Minecraft server. FAQ, troubleshooting guides, ban appeals, ticket system, and community support for lifesteal SMP gameplay.",
-      keywords: "zcraft support, minecraft server support, lifesteal support, server help, ban appeal, ticket system, minecraft troubleshooting, server faq, zcraft help",
+      ...getPageSeo("support", {
+        title: settings?.supportSeoTitle,
+        description: settings?.supportSeoDescription,
+        keywords: settings?.supportSeoKeywords,
+      }),
       url: "/support",
       type: "website",
-      tags: ["support", "help", "faq", "troubleshooting", "ban appeal"]
+      tags: ["support", "help", "faq", "troubleshooting", "ban appeal"],
     }}>
-      {/* Hero */}
       <section className="py-16 lg:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="container mx-auto px-4 relative">
@@ -62,7 +67,6 @@ export default function SupportPage() {
         </div>
       </section>
 
-      {/* Support Options */}
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -74,12 +78,20 @@ export default function SupportPage() {
                   </div>
                   <h3 className="font-display text-xl font-semibold mb-2">{option.title}</h3>
                   <p className="text-sm text-muted-foreground mb-6">{option.description}</p>
-                  <a href={option.href} target="_blank" rel="noopener noreferrer" className="block">
-                    <Button className="w-full gap-2">
-                      {option.action}
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </a>
+                  {option.href.startsWith("http") ? (
+                    <a href={option.href} target="_blank" rel="noopener noreferrer" className="block">
+                      <Button className="w-full gap-2">
+                        {option.action}
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </a>
+                  ) : (
+                    <Link to={option.href} className="block">
+                      <Button className="w-full gap-2">
+                        {option.action}
+                      </Button>
+                    </Link>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -87,7 +99,6 @@ export default function SupportPage() {
         </div>
       </section>
 
-      {/* FAQs */}
       <section id="faq" className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
@@ -121,7 +132,6 @@ export default function SupportPage() {
         </div>
       </section>
 
-      {/* Additional Resources */}
       <section className="py-12">
         <div className="container mx-auto px-4">
           <Card className="max-w-2xl mx-auto border-0 bg-card">
@@ -132,10 +142,10 @@ export default function SupportPage() {
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <Badge variant="outline" className="px-4 py-2">
-                  📧 support@zcraft.net
+                  support@zcraft.net
                 </Badge>
                 <Badge variant="outline" className="px-4 py-2">
-                  💬 Discord: ZCraft Support
+                  Discord: ZCraft Support
                 </Badge>
               </div>
             </CardContent>

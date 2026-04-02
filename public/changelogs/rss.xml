@@ -6,54 +6,39 @@
     <description>Latest changelogs from ZCraft Network</description>
     <language>en-us</language>
     <item>
-      <title>Smart Server Wake System (v1.0.2)</title>
-      <link>https://www.z-craft.xyz/events#changelog-1-0-2</link>
-      <description>📄 Description
+      <title>✨ ZCraft Official Release — Server Now Open! ✨ (v2.0)</title>
+      <link>https://www.z-craft.xyz/events#changelog-2-0</link>
+      <description>We’re officially live.
 
-To improve hosting stability and reduce unnecessary downtime, Z-Craft now uses an automatic wake-up system. If the server is offline, players can now start it instantly by joining a secondary address.
+After intensive development, testing, and optimization, ZCraft is now open to the public. The server is fully built, core systems are stable, and everything is ready for players to jump in.
 
-This ensures smoother uptime management while we optimize hosting infrastructure.
+Minor bugs may still exist — that’s expected at launch. Report anything you find so it gets fixed fast
 
-
-🚀 What’s New
-
-🌐 Added: Server Wake Address
-	•	Added new startup address:
-up.zcraft.mcsh.io
-	•	If the main server is offline, joining this address will automatically start it.
-
+🎮┃Gameplay — Fully implemented and tested
+🌍┃World — Generation complete, spawn finalized
+🔐┃Permissions — Balanced roles and fair access
+💰┃Economy — Active, stable, and integrated
+🧩┃Features — Optimized for performance and experience
 ⸻
-
-⚙️ Improved: Hosting Stability
-	•	Reduced idle resource usage.
-	•	Improved backend server management.
-	•	Optimized boot performance when waking from sleep.
-
+🛠️┃Support &amp; Bugs
+💬┃Discord support system is fully active
+🎫┃Create tickets for bugs, issues, or help
+🐛┃Any reported bugs will be reviewed and fixed quickly
 ⸻
-
-🛠️ Fixes
-	•	Fixed rare timeout issue when server was in sleep mode.
-	•	Improved join feedback while server is starting.
-
+⚠️┃Important
+❗┃Minor bugs may still appear
+📢┃Player feedback is critical at this stage
+🚧┃Continuous updates and improvements are planned
 ⸻
-
-📌 How It Works
-	1.	Try joining the main server as usual.
-	2.	If it’s offline, join: **zcraft.mcsh.io**
-3.	Wait ~30–60 seconds.
-	4.	Rejoin the main server IP.
-
+📣┃Join Now
+🔥┃Jump in and start playing
+🤝┃Help shape the server with your feedback
+💬┃Use Discord for support, reports, and suggestions
 ⸻
-
-🔮 What’s Next
-
-We’re working on:
-	•	Automatic restart detection
-	•	Faster wake times
-	•	Hosting upgrades for 24/7 uptime
-</description>
-      <pubDate>Wed, 18 Feb 2026 00:00:00 GMT</pubDate>
-      <guid>https://www.z-craft.xyz/events#changelog-1-0-2</guid>
+💎┃ZCraft
+Play smart. Build fast. Dominate.</description>
+      <pubDate>Sun, 29 Mar 2026 00:00:00 GMT</pubDate>
+      <guid>https://www.z-craft.xyz/events#changelog-2-0</guid>
     </item>
     <item>
       <title>Website Fixes and Improvements  (v1.0.1)</title>

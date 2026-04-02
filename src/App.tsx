@@ -15,6 +15,7 @@ import NewsPage from "./pages/NewsPage";
 import NewsArticlePage from "./pages/NewsArticlePage";
 import RulesPage from "./pages/RulesPage";
 import SupportPage from "./pages/SupportPage";
+import AppealPage from "./pages/AppealPage";
 import StatusPage from "./pages/StatusPage";
 import StorePage from "./pages/StorePage";
 import StaffPage from "./pages/StaffPage";
@@ -48,6 +49,7 @@ import DiscordCallbackPage from "./pages/DiscordCallbackPage";
 import NotFound from "./pages/NotFound";
 import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
 import { useState, useEffect } from "react";
+import { siteConfig } from "@/config/siteEnv";
 
 // ClientOnly component to prevent SSR issues with localStorage-dependent contexts
 function ClientOnly({ children }: { children: React.ReactNode }) {
@@ -108,20 +110,21 @@ const App = () => (
                 <PageTransition>
                   <Routes>
                     <Route path="/" element={<Index />} />
-                    <Route path="/play" element={<PlayPage />} />
-                    <Route path="/server-listings" element={<ServerListings />} />
-                    <Route path="/forums" element={<ForumsPage />} />
-                    <Route path="/forums/:slug" element={<ForumCategoryPage />} />
-                    <Route path="/forums/:slug/:threadId" element={<ForumThreadPage />} />
-                    <Route path="/news" element={<NewsPage />} />
-                    <Route path="/news/:slug" element={<NewsArticlePage />} />
-                    <Route path="/rules" element={<RulesPage />} />
-                    <Route path="/support" element={<SupportPage />} />
+                    <Route path="/play" element={siteConfig.features.play ? <PlayPage /> : <NotFound />} />
+                    <Route path="/server-listings" element={siteConfig.features.serverListings ? <ServerListings /> : <NotFound />} />
+                    <Route path="/forums" element={siteConfig.features.forums ? <ForumsPage /> : <NotFound />} />
+                    <Route path="/forums/:slug" element={siteConfig.features.forums ? <ForumCategoryPage /> : <NotFound />} />
+                    <Route path="/forums/:slug/:threadId" element={siteConfig.features.forums ? <ForumThreadPage /> : <NotFound />} />
+                    <Route path="/news" element={siteConfig.features.news ? <NewsPage /> : <NotFound />} />
+                    <Route path="/news/:slug" element={siteConfig.features.news ? <NewsArticlePage /> : <NotFound />} />
+                    <Route path="/rules" element={siteConfig.features.rules ? <RulesPage /> : <NotFound />} />
+                    <Route path="/support" element={siteConfig.features.support ? <SupportPage /> : <NotFound />} />
+                    <Route path="/appeal" element={siteConfig.features.appeal ? <AppealPage /> : <NotFound />} />
                     <Route path="/faq" element={<FaqPage />} />
-                    <Route path="/status" element={<StatusPage />} />
-                    <Route path="/store" element={<StorePage />} />
-                    <Route path="/staff" element={<StaffPage />} />
-                    <Route path="/events" element={<EventsPage />} />
+                    <Route path="/status" element={siteConfig.features.status ? <StatusPage /> : <NotFound />} />
+                    <Route path="/store" element={siteConfig.features.store ? <StorePage /> : <NotFound />} />
+                    <Route path="/staff" element={siteConfig.features.staff ? <StaffPage /> : <NotFound />} />
+                    <Route path="/events" element={siteConfig.features.changelogs ? <EventsPage /> : <NotFound />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/login" element={<LoginPage />} />

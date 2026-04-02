@@ -1,35 +1,6 @@
 import { Link } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
-
-const footerLinks = {
-  Server: [
-    { name: "Home", path: "/" },
-    { name: "Play", path: "/play" },
-    { name: "Status", path: "https://status.z-craft.xyz", external: true },
-    { name: "Rules", path: "/rules" },
-    { name: "Bans", path: "https://bans.z-craft.xyz", external: true },
-  ],
-  Community: [
-    { name: "Forums", path: "/forums" },
-    { name: "News", path: "/news" },
-    { name: "Changelogs", path: "/events" },
-    { name: "Staff", path: "/staff" },
-  ],
-  Resources: [
-    { name: "Wiki", path: "https://wiki.z-craft.xyz", external: true },
-    { name: "Support", path: "/support" },
-    { name: "Appeal", path: "https://appeal.z-craft.xyz", external: true },
-    { name: "Store", path: "https://store.z-craft.xyz", external: true },
-  ],
-  Legal: [
-    { name: "Privacy Policy", path: "/privacy" },
-    { name: "Terms of Service", path: "/terms" },
-  ],
-};
-
-const socialLinks = [
-  { name: "Discord", label: "Discord", url: "https://discord.z-craft.xyz" },
-];
+import { enabledFooterSections, siteConfig } from "@/config/siteEnv";
 
 export function Footer() {
   return (
@@ -39,31 +10,35 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <span className="font-display text-xl font-bold text-primary-foreground">Z</span>
+                <span className="font-display text-xl font-bold text-primary-foreground">
+                  {siteConfig.shortName.charAt(0)}
+                </span>
               </div>
-              <span className="font-display text-xl font-bold text-gradient">ZCraft</span>
+              <span className="font-display text-xl font-bold text-gradient">{siteConfig.shortName}</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
-              The ultimate Minecraft experience. Join thousands of players today!
+              {siteConfig.seo.description}
             </p>
-            <div className="flex gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-primary/10 transition-colors"
-                  title={social.name}
-                  aria-label={social.name}
-                >
-                  <span className="text-xs font-medium">{social.label}</span>
-                </a>
-              ))}
-            </div>
+            {siteConfig.features.discordButton && (
+              <div className="flex gap-3">
+                {[{ name: "Discord", label: "Discord", url: siteConfig.discordUrl }].map((social) => (
+                  <a
+                    key={social.name}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-primary/10 transition-colors"
+                    title={social.name}
+                    aria-label={social.name}
+                  >
+                    <span className="text-xs font-medium">{social.label}</span>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
-          {Object.entries(footerLinks).map(([category, links]) => (
+          {Object.entries(enabledFooterSections).map(([category, links]) => (
             <div key={category}>
               <h4 className="font-display text-sm font-semibold mb-4 text-foreground">
                 {category}
@@ -98,10 +73,10 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            Copyright 2026 ZCraft. Not affiliated with Mojang AB.
+            Copyright 2026 {siteConfig.name}. Not affiliated with Mojang AB.
           </p>
           <p className="text-sm text-muted-foreground font-mono">
-            play.zcraftmc.xyz | Version 1.21.4
+            {siteConfig.playIp} | Version 1.21.4
           </p>
         </div>
       </div>

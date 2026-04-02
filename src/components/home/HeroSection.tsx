@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import zcraftLogo from "@/assets/zcraft-logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { siteConfig } from "@/config/siteEnv";
 
 export function HeroSection() {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export function HeroSection() {
   }, []);
 
   const copyIP = () => {
-    navigator.clipboard.writeText("play.zcraftmc.xyz");
+    navigator.clipboard.writeText(siteConfig.playIp);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -99,120 +100,130 @@ export function HeroSection() {
           transition={{ duration: 0.8 }}
         >
           {/* Logo */}
-          <motion.div
-            className="mb-10 flex justify-center"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="relative">
-              <motion.img
-                src={zcraftLogo}
-                alt="ZCraft Network"
-                className="h-32 md:h-40 lg:h-48 w-auto object-contain"
-                whileHover={{ scale: 1.05 }}
-              />
-              <motion.div
-                className="absolute -top-4 -right-4"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="h-6 w-6 text-primary/60" />
-              </motion.div>
-            </div>
-          </motion.div>
+          {siteConfig.features.homeHero && (
+            <motion.div
+              className="mb-10 flex justify-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="relative">
+                <motion.img
+                  src={zcraftLogo}
+                  alt={siteConfig.name}
+                  className="h-32 md:h-40 lg:h-48 w-auto object-contain"
+                  whileHover={{ scale: 1.05 }}
+                />
+                <motion.div
+                  className="absolute -top-4 -right-4"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="h-6 w-6 text-primary/60" />
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Tagline */}
-          <motion.p
-            className="text-xl md:text-2xl lg:text-3xl text-muted-foreground mb-12 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            The ultimate Minecraft survival experience. Build, explore, and conquer with thousands of players.
-          </motion.p>
+          {siteConfig.features.homeHero && (
+            <motion.p
+              className="text-xl md:text-2xl lg:text-3xl text-muted-foreground mb-12 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              A cleaner, more focused Minecraft network experience built around survival, community, and scalable features.
+            </motion.p>
+          )}
 
           {/* Buttons */}
-          <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                size="lg"
-                onClick={() => navigate("/play")}
-                className="btn-primary-gradient h-16 px-10 text-lg gap-3 shadow-xl shadow-primary/25"
-              >
-                <Play className="h-6 w-6" />
-                Play Now
-              </Button>
-            </motion.div>
+          {siteConfig.features.homeHero && (
+            <motion.div
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  size="lg"
+                  onClick={() => navigate("/play")}
+                  className="btn-primary-gradient h-16 px-10 text-lg gap-3 shadow-xl shadow-primary/25"
+                >
+                  <Play className="h-6 w-6" />
+                  Play Now
+                </Button>
+              </motion.div>
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={copyIP}
-                className="h-16 px-10 text-lg gap-3 font-mono border-2 hover:bg-primary/10"
-              >
-                {copied ? (
-                  <Check className="h-6 w-6 text-emerald-500" />
-                ) : (
-                  <Copy className="h-6 w-6" />
-                )}
-                play.zcraftmc.xyz
-              </Button>
+              {siteConfig.features.copyIpButton && (
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={copyIP}
+                    className="h-16 px-10 text-lg gap-3 font-mono border-2 hover:bg-primary/10"
+                  >
+                    {copied ? (
+                      <Check className="h-6 w-6 text-emerald-500" />
+                    ) : (
+                      <Copy className="h-6 w-6" />
+                    )}
+                    {siteConfig.playIp}
+                  </Button>
+                </motion.div>
+              )}
             </motion.div>
-          </motion.div>
+          )}
 
           {/* Stats */}
-          <motion.div
-            className="grid grid-cols-3 gap-8 max-w-xl mx-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-          >
-            {loadingStats
-              ? Array(3)
-                  .fill(null)
-                  .map((_, i) => (
+          {siteConfig.features.heroStats && (
+            <motion.div
+              className="grid grid-cols-3 gap-8 max-w-xl mx-auto"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+            >
+              {loadingStats
+                ? Array(3)
+                    .fill(null)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="text-center p-4 rounded-xl bg-card/50 border border-border/50"
+                      >
+                        <div className="h-8 w-24 mx-auto mb-3 animate-pulse bg-muted rounded" />
+                        <div className="h-4 w-20 mx-auto animate-pulse bg-muted rounded" />
+                      </div>
+                    ))
+                : [
+                    {
+                      value: stats?.players ?? FALLBACK_STATS.players,
+                      label: "Players",
+                    },
+                    {
+                      value: stats?.blocks ?? FALLBACK_STATS.blocks,
+                      label: "Blocks Placed",
+                    },
+                    {
+                      value: stats?.uptime ?? FALLBACK_STATS.uptime,
+                      label: "Uptime",
+                    },
+                  ].map((stat) => (
                     <div
-                      key={i}
+                      key={stat.label}
                       className="text-center p-4 rounded-xl bg-card/50 border border-border/50"
                     >
-                      <div className="h-8 w-24 mx-auto mb-3 animate-pulse bg-muted rounded" />
-                      <div className="h-4 w-20 mx-auto animate-pulse bg-muted rounded" />
+                      <p className="text-3xl font-bold text-primary">
+                        {stat.value}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {stat.label}
+                      </p>
                     </div>
-                  ))
-              : [
-                  {
-                    value: stats?.players ?? FALLBACK_STATS.players,
-                    label: "Players",
-                  },
-                  {
-                    value: stats?.blocks ?? FALLBACK_STATS.blocks,
-                    label: "Blocks Placed",
-                  },
-                  {
-                    value: stats?.uptime ?? FALLBACK_STATS.uptime,
-                    label: "Uptime",
-                  },
-                ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="text-center p-4 rounded-xl bg-card/50 border border-border/50"
-                  >
-                    <p className="text-3xl font-bold text-primary">
-                      {stat.value}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
-          </motion.div>
+                  ))}
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </section>

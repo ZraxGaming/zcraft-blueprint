@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Check, Monitor, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import ServerLiveCard from "@/components/server/ServerLiveCard";
+import { siteConfig } from "@/config/siteEnv";
 const steps = [
   {
     number: 1,
@@ -24,7 +25,7 @@ const steps = [
 
 export default function PlayPage() {
   const [copiedJava, setCopiedJava] = useState(false);
-  const JAVA_IP = "play.zcraftmc.xyz";
+  const JAVA_IP = siteConfig.playIp;
   const JAVA_PORT = "25565";
 
   const copyAddress = (type: "java") => {
@@ -64,7 +65,7 @@ export default function PlayPage() {
       <section className="py-6">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto mb-6">
-            <ServerLiveCard host="play.zcraftmc.xyz:25565" />
+            <ServerLiveCard host={`${siteConfig.playIp}:25565`} />
           </div>
         </div>
       </section>

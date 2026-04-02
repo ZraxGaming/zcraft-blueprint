@@ -7,6 +7,11 @@ dotenv.config();
 const SITE_URL = process.env.SITE_URL || 'https://z-craft.xyz';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const isEnabled = (key, fallback = true) => {
+  const value = process.env[key];
+  if (value === undefined || value === '') return fallback;
+  return String(value).toLowerCase() === 'true';
+};
 
 async function main() {
   console.log('Generating sitemap...');
@@ -15,18 +20,19 @@ async function main() {
 
   const staticPages = [
     { loc: '/', lastmod: buildDate, changefreq: 'daily', priority: '1.0' },
-    { loc: '/play', lastmod: buildDate, changefreq: 'weekly', priority: '0.9' },
-    { loc: '/forums', lastmod: buildDate, changefreq: 'weekly', priority: '0.8' },
-    { loc: '/wiki', lastmod: buildDate, changefreq: 'weekly', priority: '0.7' },
-    { loc: '/store', lastmod: buildDate, changefreq: 'weekly', priority: '0.7' },
-    { loc: '/server-listings', lastmod: buildDate, changefreq: 'weekly', priority: '0.6' },
-    { loc: '/news', lastmod: buildDate, changefreq: 'daily', priority: '0.8' },
-    { loc: '/changelogs', lastmod: buildDate, changefreq: 'weekly', priority: '0.6' },
-    { loc: '/events', lastmod: buildDate, changefreq: 'weekly', priority: '0.6' },
-    { loc: '/support', lastmod: buildDate, changefreq: 'monthly', priority: '0.4' },
+    isEnabled('VITE_FEATURE_PLAY') && { loc: '/play', lastmod: buildDate, changefreq: 'weekly', priority: '0.9' },
+    isEnabled('VITE_FEATURE_FORUMS') && { loc: '/forums', lastmod: buildDate, changefreq: 'weekly', priority: '0.8' },
+    isEnabled('VITE_FEATURE_WIKI') && { loc: '/wiki', lastmod: buildDate, changefreq: 'weekly', priority: '0.7' },
+    isEnabled('VITE_FEATURE_STORE') && { loc: '/store', lastmod: buildDate, changefreq: 'weekly', priority: '0.7' },
+    isEnabled('VITE_FEATURE_SERVER_LISTINGS') && { loc: '/server-listings', lastmod: buildDate, changefreq: 'weekly', priority: '0.6' },
+    isEnabled('VITE_FEATURE_NEWS') && { loc: '/news', lastmod: buildDate, changefreq: 'daily', priority: '0.8' },
+    isEnabled('VITE_FEATURE_CHANGELOGS') && { loc: '/changelogs', lastmod: buildDate, changefreq: 'weekly', priority: '0.6' },
+    isEnabled('VITE_FEATURE_EVENTS') && { loc: '/events', lastmod: buildDate, changefreq: 'weekly', priority: '0.6' },
+    isEnabled('VITE_FEATURE_SUPPORT') && { loc: '/support', lastmod: buildDate, changefreq: 'monthly', priority: '0.4' },
+    isEnabled('VITE_FEATURE_APPEAL') && { loc: '/appeal', lastmod: buildDate, changefreq: 'monthly', priority: '0.4' },
     { loc: '/search', lastmod: buildDate, changefreq: 'weekly', priority: '0.4' },
-    { loc: '/status', lastmod: buildDate, changefreq: 'hourly', priority: '0.9' }
-  ];
+    isEnabled('VITE_FEATURE_STATUS') && { loc: '/status', lastmod: buildDate, changefreq: 'hourly', priority: '0.9' }
+  ].filter(Boolean);
 
   const dynamicUrls = [];
 

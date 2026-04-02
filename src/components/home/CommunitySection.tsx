@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { newsService } from "@/services/newsService";
 import { forumService } from "@/services/forumService";
 import { settingsService } from "@/services/settingsService";
+import { siteConfig } from "@/config/siteEnv";
 
 type Announcement = { id: string; title: string; date: string; type?: string; excerpt?: string };
 type ThreadPreview = { id: string; title: string; author: string; replies_count: number; category: string };
@@ -16,7 +17,7 @@ export function CommunitySection() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [forumPosts, setForumPosts] = useState<ThreadPreview[]>([]);
   const [loading, setLoading] = useState(true);
-  const [discordLink, setDiscordLink] = useState("https://discord.z-craft.xyz");
+  const [discordLink, setDiscordLink] = useState(siteConfig.discordUrl);
 
   useEffect(() => {
     const load = async () => {

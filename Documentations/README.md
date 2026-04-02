@@ -64,6 +64,8 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
 
+If you are hosting the site on Vercel, read [VERCEL_SETUP_AND_EDITING.md](VERCEL_SETUP_AND_EDITING.md) for the exact deployment, env var, maintenance, and appeal setup.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!

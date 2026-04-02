@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/config/siteEnv";
 
 const CONSENT_KEY = "cookie-consent-dismissed";
 
@@ -8,6 +9,10 @@ export function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (!siteConfig.features.cookieBanner) {
+      setVisible(false);
+      return;
+    }
     const dismissed = localStorage.getItem(CONSENT_KEY);
     setVisible(dismissed !== "true");
   }, []);

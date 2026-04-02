@@ -26,6 +26,10 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    sourcemap: false,
+    minify: "esbuild",
+    cssMinify: "esbuild",
+    reportCompressedSize: false,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),

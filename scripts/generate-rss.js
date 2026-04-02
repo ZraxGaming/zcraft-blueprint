@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
-const SITE_URL = process.env.SITE_URL || 'https://z-craft.xyz';
+const SITE_URL = process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://z-craft.xyz';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||

@@ -103,6 +103,12 @@ function htmlToText(html = '') {
     .trim();
 }
 
+function clampText(value = '', limit = 1024) {
+  const text = String(value || '').trim();
+  if (!text) return 'Not provided';
+  return text.length > limit ? `${text.slice(0, limit - 3)}...` : text;
+}
+
 function createSignature(payload) {
   const secret = process.env.EMAIL_UNSUBSCRIBE_SECRET || process.env.SENDPULSE_CLIENT_SECRET || 'zcraft-unsubscribe';
   return crypto.createHmac('sha256', secret).update(payload).digest('hex');
@@ -509,6 +515,77 @@ app.post('/api/email/send', async (req, res) => {
     return res.json({ sent: true, result, recipientCount: recipientEmails.length });
   } catch (error) {
     console.error('SendPulse admin email error:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+});
+
+app.post('/api/appeals', async (req, res) => {
+  try {
+    const webhookUrl = process.env.APPEAL_DISCORD_WEBHOOK_URL || process.env.DISCORD_APPEAL_WEBHOOK_URL;
+    if (!webhookUrl) {
+      return res.status(500).json({ error: 'Appeal webhook is not configured' });
+    }
+
+    const {
+      minecraftUsername,
+      discordUsername,
+      email,
+      punishmentType,
+      punishmentReason,
+      punishmentDate,
+      appealReason,
+      evidenceLinks,
+      additionalInfo,
+    } = req.body || {};
+
+    if (!minecraftUsername || !discordUsername || !punishmentReason || !appealReason) {
+      return res.status(400).json({ error: 'Missing required appeal fields' });
+    }
+
+    const siteUrl = process.env.SITE_URL || 'https://z-craft.xyz';
+    const payload = {
+      username: 'ZCraft Appeals',
+      avatar_url: `${siteUrl}/zcraft.png`,
+      content: `New appeal submitted by ${clampText(minecraftUsername, 128)}`,
+      embeds: [
+        {
+          title: `Appeal submitted: ${clampText(minecraftUsername, 128)}`,
+          color: 0xeab308,
+          fields: [
+            { name: 'Minecraft Username', value: clampText(minecraftUsername, 256), inline: true },
+            { name: 'Discord Username', value: clampText(discordUsername, 256), inline: true },
+            { name: 'Email', value: clampText(email, 256), inline: true },
+            { name: 'Punishment Type', value: clampText(punishmentType, 128), inline: true },
+            { name: 'Punishment Reason', value: clampText(punishmentReason, 1024), inline: false },
+            { name: 'Punishment Date', value: clampText(punishmentDate, 128), inline: true },
+            { name: 'Appeal Reason', value: clampText(appealReason, 1024), inline: false },
+            { name: 'Evidence Links', value: clampText(evidenceLinks, 1024), inline: false },
+            { name: 'Additional Info', value: clampText(additionalInfo, 1024), inline: false },
+          ],
+          footer: {
+            text: 'Submitted from the ZCraft website',
+          },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return res.status(502).json({ error: errorText || 'Failed to send appeal webhook' });
+    }
+
+    return res.json({ sent: true });
+  } catch (error) {
+    console.error('Appeal submission error:', error);
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 });
