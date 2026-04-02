@@ -151,17 +151,6 @@ export function validateFileUpload(file: File, options: {
   return { valid: result.v, error: result.e };
 }
 
-  // Check file extension
-  if (allowedExtensions.length > 0) {
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    if (!extension || !allowedExtensions.includes(extension)) {
-      return { valid: false, error: `File extension not allowed. Allowed: ${allowedExtensions.join(', ')}` };
-    }
-  }
-
-  return { valid: true };
-}
-
 /**
  * Security headers for API responses
  */
