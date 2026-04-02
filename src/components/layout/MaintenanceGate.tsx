@@ -13,16 +13,6 @@ export function MaintenanceGate({ children }: MaintenanceGateProps) {
   const { settings, loading: settingsLoading } = useSettings();
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Show loading state while auth or settings are loading
-  if (authLoading || settingsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   const isMaintenanceMode = siteConfig.features.maintenanceBanner && settings?.maintenance_mode === 'true';
   const maintenanceAllowedPaths = [
     "/maintenance",
@@ -37,10 +27,20 @@ export function MaintenanceGate({ children }: MaintenanceGateProps) {
   const isMaintenanceExempt = maintenanceAllowedPaths.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
 
   useEffect(() => {
+    if (authLoading || settingsLoading) return;
     if (isMaintenanceMode && !isAdmin && !isMaintenanceExempt) {
       navigate("/maintenance", { replace: true });
     }
-  }, [isMaintenanceMode, isAdmin, isMaintenanceExempt, navigate]);
+  }, [authLoading, settingsLoading, isMaintenanceMode, isAdmin, isMaintenanceExempt, navigate]);
+
+  // Show loading state while auth or settings are loading
+  if (authLoading || settingsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (isMaintenanceMode && !isAdmin && !isMaintenanceExempt) {
     return <Navigate to="/maintenance" replace />;
