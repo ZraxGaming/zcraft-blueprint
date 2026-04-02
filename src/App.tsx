@@ -48,6 +48,7 @@ import DiscordRedirectPage from "./pages/DiscordRedirectPage";
 import DiscordCallbackPage from "./pages/DiscordCallbackPage";
 import NotFound from "./pages/NotFound";
 import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
+import { AnalyticsSync } from "@/components/analytics/AnalyticsSync";
 import { useState, useEffect } from "react";
 import { siteConfig } from "@/config/siteEnv";
 
@@ -103,6 +104,7 @@ const App = () => (
       <AuthProvider>
         <SettingsProvider>
           <TooltipProvider>
+            <AnalyticsSync />
             <Toaster />
             <Sonner />
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

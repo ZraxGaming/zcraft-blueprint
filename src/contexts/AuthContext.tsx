@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { sendWebhook, WebhookEvent } from '@/services/webhookService';
 import { uploadProfilePicture } from '@/services/storageService';
 import { sendLoginAlert } from '@/services/securityAlertService';
+import { trackAnalyticsEvent } from '@/services/analyticsService';
 import {
   sanitizeInput,
   isValidEmail,
@@ -300,6 +301,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Send webhook for user login
       if (data.user) {
+        trackAnalyticsEvent("user_login", {
+          method: "password",
+          provider: "email",
+          user_id: data.user.id,
+          email: data.user.email || undefined,
+        });
         await sendWebhook(WebhookEvent.USER_LOGIN, {
           userId: data.user.id,
           email: data.user.email,
@@ -365,6 +372,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!authData.user) throw new Error('Failed to create user');
 
+    trackAnalyticsEvent("user_registered", {
+      user_id: authData.user.id,
+      email: authData.user.email || undefined,
+      username: sanitizedUsername,
+    });
+
     // Send webhook for user registration
     await sendWebhook(WebhookEvent.USER_REGISTERED, {
       userId: authData.user.id,
@@ -384,6 +397,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Send webhook for user logout
     if (userId) {
+      trackAnalyticsEvent("user_logout", {
+        user_id: userId,
+        email: userEmail || undefined,
+      });
       await sendWebhook(WebhookEvent.USER_LOGOUT, {
         userId,
         email: userEmail,

@@ -21,6 +21,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { settingsService } from "@/services/settingsService";
 import { sendAdminEmail } from "@/services/emailService";
+import { trackAnalyticsEvent, trackAnalyticsException } from "@/services/analyticsService";
 import { toast } from "@/components/ui/use-toast";
 import { BellRing, Copy, ExternalLink, Mail, Rss, Save, Wrench } from "lucide-react";
 import { MediaPicker } from "@/components/admin/MediaPicker";
@@ -140,6 +141,26 @@ export default function AdminToolsPage() {
     }
   };
 
+  const sendPostHogEvent = () => {
+    trackAnalyticsEvent("admin_tools_test_event", {
+      page: "/admin/tools",
+      source: "manual_button",
+    });
+    toast({ title: "PostHog event sent", description: "A test event was captured." });
+  };
+
+  const sendSentryTest = () => {
+    try {
+      throw new Error("Sentry test exception from Admin Tools");
+    } catch (error) {
+      trackAnalyticsException(error, {
+        page: "/admin/tools",
+        source: "manual_button",
+      });
+      toast({ title: "Sentry test sent", description: "A test exception was captured." });
+    }
+  };
+
   return (
     <AdminLayout title="Tools">
       <div className="space-y-6">
@@ -233,6 +254,14 @@ export default function AdminToolsPage() {
                 <Button variant="outline" onClick={() => copyText(window.location.origin, "site URL")}>
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Site URL
+                </Button>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button variant="outline" onClick={sendPostHogEvent}>
+                  Send PostHog Test
+                </Button>
+                <Button variant="outline" onClick={sendSentryTest}>
+                  Send Sentry Test
                 </Button>
               </div>
             </CardContent>

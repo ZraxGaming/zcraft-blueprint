@@ -9,6 +9,7 @@ import { buildApiUrl } from '@/lib/api';
 import { toast } from '@/components/ui/use-toast';
 import { Loader } from 'lucide-react';
 import { sendLoginAlert } from '@/services/securityAlertService';
+import { trackAnalyticsEvent } from '@/services/analyticsService';
 
 /**
  * OAuth Callback Handler
@@ -170,6 +171,12 @@ export default function AuthCallbackPage() {
           toast({ 
             title: 'Signed in successfully!', 
             description: `Welcome${profile?.username ? `, ${profile.username}` : ''}!` 
+          });
+          trackAnalyticsEvent("user_login", {
+            method: formatLoginMethod(provider || authType || 'email'),
+            provider: provider || authType || 'email',
+            user_id: session.user.id,
+            email: session.user.email || undefined,
           });
           if (session.access_token) {
             const browserContext = getBrowserContext();
