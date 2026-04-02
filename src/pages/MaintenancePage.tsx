@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
-import { Link } from "react-router-dom";
 import { siteConfig } from "@/config/siteEnv";
 
 export default function MaintenancePage() {
@@ -40,9 +39,9 @@ export default function MaintenancePage() {
                 Check Status Page
               </a>
             </Button>
-            <Button className="w-full" variant="secondary" asChild>
-              <Link to="/login">Admin Login</Link>
-            </Button>
+            <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+              Authorized staff can use the regular sign-in flow to regain access once maintenance is finished.
+            </div>
           </div>
           <p className="text-xs text-muted-foreground mt-8">
             Expected downtime: ~2 hours

@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { siteConfig } from "@/config/siteEnv";
 
 interface MaintenanceGateProps {
@@ -9,9 +9,10 @@ interface MaintenanceGateProps {
 }
 
 export function MaintenanceGate({ children }: MaintenanceGateProps) {
-  const { user, loading: authLoading, isAdmin } = useAuth();
+  const { loading: authLoading, isAdmin } = useAuth();
   const { settings, loading: settingsLoading } = useSettings();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Show loading state while auth or settings are loading
   if (authLoading || settingsLoading) {
@@ -34,6 +35,12 @@ export function MaintenanceGate({ children }: MaintenanceGateProps) {
     "/admin",
   ];
   const isMaintenanceExempt = maintenanceAllowedPaths.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
+
+  useEffect(() => {
+    if (isMaintenanceMode && !isAdmin && !isMaintenanceExempt) {
+      navigate("/maintenance", { replace: true });
+    }
+  }, [isMaintenanceMode, isAdmin, isMaintenanceExempt, navigate]);
 
   if (isMaintenanceMode && !isAdmin && !isMaintenanceExempt) {
     return <Navigate to="/maintenance" replace />;

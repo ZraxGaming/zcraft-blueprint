@@ -7,6 +7,7 @@ import Breadcrumbs, { Crumb } from "@/components/ui/Breadcrumbs";
 import { useSettings } from "@/contexts/SettingsContext";
 import { usePerformanceMonitor } from "@/components/ui/OptimizedImage";
 import { siteConfig } from "@/config/siteEnv";
+import { Link, useLocation } from "react-router-dom";
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,9 +18,18 @@ interface LayoutProps {
 
 export function Layout({ children, seo, breadcrumbs, skipToContent = "main-content" }: LayoutProps) {
   const { settings } = useSettings();
+  const location = useLocation();
   const announcementEnabled = settings?.announcementEnabled || settings?.announcement_enabled === "true";
   const announcementMessage = settings?.announcementMessage || settings?.announcement_message || null;
   const announcementImage = settings?.announcementImage || settings?.announcement_image || null;
+  const isAuthShell =
+    location.pathname === "/login" ||
+    location.pathname === "/register" ||
+    location.pathname === "/forgot-password" ||
+    location.pathname === "/reset-password" ||
+    location.pathname === "/auth/callback" ||
+    location.pathname === "/auth/discord/callback" ||
+    location.pathname === "/verify-identity";
 
   const seoDefaults = {
     title: settings?.seo_title || siteConfig.seo.title,
@@ -70,9 +80,22 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
         Skip to main content
       </a>
 
-      <Navbar />
+      {isAuthShell ? (
+        <header className="border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+          <div className="container mx-auto flex h-16 items-center px-4">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+                <span className="font-display text-lg font-bold text-primary-foreground">Z</span>
+              </div>
+              <span className="font-display text-lg font-bold text-gradient">{siteConfig.shortName}</span>
+            </Link>
+          </div>
+        </header>
+      ) : (
+        <Navbar />
+      )}
 
-      {siteConfig.features.announcementBanner && announcementEnabled && announcementMessage && (
+      {!isAuthShell && siteConfig.features.announcementBanner && announcementEnabled && announcementMessage && (
         <div
           className="border-b border-primary/15 bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.92))] text-white"
           role="banner"
@@ -109,8 +132,8 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
         {children}
       </main>
 
-      {siteConfig.features.cookieBanner && <CookieBanner />}
-      <Footer />
+      {!isAuthShell && siteConfig.features.cookieBanner && <CookieBanner />}
+      {!isAuthShell && <Footer />}
     </div>
   );
 }

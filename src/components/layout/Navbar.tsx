@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Moon, Sun, Copy, Check, LogOut, Settings } from "lucide-react";
+import { Menu, X, Moon, Sun, Copy, Check, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,7 +11,15 @@ export function Navbar() {
   const [isDark, setIsDark] = useState(false);
   const [copied, setCopied] = useState(false);
   const location = useLocation();
-  const { user, userProfile, logout, isAdmin } = useAuth();
+  const { user, userProfile, logout } = useAuth();
+  const isAuthPath =
+    location.pathname === "/login" ||
+    location.pathname === "/register" ||
+    location.pathname === "/forgot-password" ||
+    location.pathname === "/reset-password" ||
+    location.pathname === "/auth/callback" ||
+    location.pathname === "/auth/discord/callback" ||
+    location.pathname === "/verify-identity";
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -25,12 +33,28 @@ export function Navbar() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  if (isAuthPath) {
+    return (
+      <nav className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+                <span className="font-display text-lg font-bold text-primary-foreground">Z</span>
+              </div>
+              <span className="font-display text-lg font-bold text-gradient">{siteConfig.shortName}</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <>
       <nav className="sticky top-0 z-50 glass-effect border-b">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
                 <span className="font-display text-lg font-bold text-primary-foreground">Z</span>
@@ -38,27 +62,17 @@ export function Navbar() {
               <span className="font-display text-lg font-bold text-gradient">{siteConfig.shortName}</span>
             </Link>
 
-            {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-0.5">
               {enabledNavLinks.map((link) => (
                 link.external ? (
-                  <a
-                    key={link.path}
-                    href={link.path}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="nav-link"
-                  >
+                  <a key={link.path} href={link.path} target="_blank" rel="noopener noreferrer" className="nav-link">
                     {link.name}
                   </a>
                 ) : (
                   <Link
                     key={link.path}
                     to={link.path}
-                    className={cn(
-                      "nav-link",
-                      location.pathname === link.path && "active"
-                    )}
+                    className={cn("nav-link", location.pathname === link.path && "active")}
                   >
                     {link.name}
                   </Link>
@@ -66,7 +80,6 @@ export function Navbar() {
               ))}
             </div>
 
-            {/* Right Actions */}
             <div className="hidden lg:flex items-center gap-2">
               {siteConfig.features.copyIpButton && (
                 <Button
@@ -104,44 +117,20 @@ export function Navbar() {
                   {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
               )}
-              
+
               {user && userProfile ? (
                 <div className="flex items-center gap-2">
-                  {isAdmin && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 gap-1"
-                      asChild
-                      aria-label="Go to admin panel"
-                    >
-                      <Link to="/admin">
-                        <Settings className="h-4 w-4" />
-                        Admin
-                      </Link>
-                    </Button>
-                  )}
                   <Link
                     to="/profile"
                     className="flex items-center gap-2 px-3 py-1 rounded-lg hover:bg-muted transition-colors text-sm"
                     aria-label={`Go to ${userProfile.username}'s profile`}
                   >
                     {userProfile.avatar_url && (
-                      <img
-                        src={userProfile.avatar_url}
-                        alt={userProfile.username}
-                        className="h-6 w-6 rounded-full"
-                      />
+                      <img src={userProfile.avatar_url} alt={userProfile.username} className="h-6 w-6 rounded-full" />
                     )}
                     <span>{userProfile.username}</span>
                   </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8"
-                    onClick={logout}
-                    aria-label="Logout"
-                  >
+                  <Button variant="ghost" size="sm" className="h-8" onClick={logout} aria-label="Logout">
                     <LogOut className="h-4 w-4 mr-2" />
                     Logout
                   </Button>
@@ -158,7 +147,6 @@ export function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
@@ -173,7 +161,6 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isOpen && (
           <div className="lg:hidden border-t bg-card animate-fade-in" id="mobile-menu">
             <div className="container mx-auto px-4 py-4 space-y-2">
@@ -196,9 +183,7 @@ export function Navbar() {
                     onClick={() => setIsOpen(false)}
                     className={cn(
                       "flex items-center gap-2 px-4 py-3 rounded-lg transition-colors",
-                      location.pathname === link.path
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted"
+                      location.pathname === link.path ? "bg-primary/10 text-primary" : "hover:bg-muted"
                     )}
                   >
                     {link.name}
@@ -208,19 +193,6 @@ export function Navbar() {
               <div className="pt-4 border-t flex flex-col gap-2">
                 {user && userProfile ? (
                   <>
-                    {isAdmin && (
-                      <Button
-                        variant="outline"
-                        className="w-full gap-2"
-                        asChild
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <Link to="/admin">
-                          <Settings className="h-4 w-4" />
-                          Admin Panel
-                        </Link>
-                      </Button>
-                    )}
                     <Link
                       to="/profile"
                       onClick={() => setIsOpen(false)}
