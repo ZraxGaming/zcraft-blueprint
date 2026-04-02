@@ -1,3 +1,7 @@
+// %%__NONCE_ADMIN_FORUMS_03_%%
+// %%__RESOURCE_%%
+// %%__TIMESTAMP_%%
+
 import { useState, useEffect } from "react";
 import { 
   MessageSquare, 

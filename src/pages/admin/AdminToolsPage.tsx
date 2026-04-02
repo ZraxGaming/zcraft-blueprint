@@ -1,3 +1,7 @@
+// %%__NONCE_ADMIN_TOOLS_10_%%
+// %%__TIMESTAMP_%%
+// %%__VERSION_NUMBER_%%
+
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

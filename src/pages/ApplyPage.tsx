@@ -1,3 +1,7 @@
+// %%__NONCE_APPLY_PAGE_18_%%
+// %%__TIMESTAMP_%%
+// %%__VERSION_NUMBER_%%
+
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";

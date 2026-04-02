@@ -1,3 +1,13 @@
+// %%__NONCE_LOGIN_PAGE_11_%%
+// %%__RESOURCE_%%
+// %%__TIMESTAMP_%%
+/**
+ * ============================================================
+ * Login Page - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * ============================================================
+ */
+
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

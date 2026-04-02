@@ -1,3 +1,14 @@
+/**
+ * ============================================================
+ * Features Section Component - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * Unauthorized distribution or modification is prohibited.
+ * ============================================================
+ * This code is protected under international copyright law.
+ * Removal of this notice or unauthorized copying will be detected.
+ * __BUILTIN_ANTI_PIRACY_CHECK_FEATURES_001__
+ */
+
 import { Sword, Users, Shield, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";

@@ -1,3 +1,7 @@
+// %%__NONCE_EVENTS_PAGE_17_%%
+// %%__BUILTBYBIT_%%
+// %%__RESOURCE_TITLE_%%
+
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

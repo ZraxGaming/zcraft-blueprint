@@ -1,3 +1,17 @@
+// %%__NONCE_FORUMS_PAGE_14_%%
+// %%__BUILTBYBIT_%%
+// %%__TIMESTAMP_%%
+/**
+ * ============================================================
+ * Forums Page - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * Unauthorized distribution or modification is prohibited.
+ * ============================================================
+ * This code is protected under international copyright law.
+ * Removal of this notice or unauthorized copying will be detected.
+ * __BUILTIN_ANTI_PIRACY_CHECK_FORUMS_PAGE_001__
+ */
+
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

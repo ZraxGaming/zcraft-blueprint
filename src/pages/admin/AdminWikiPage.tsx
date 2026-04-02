@@ -1,3 +1,7 @@
+// %%__NONCE_ADMIN_WIKI_06_%%
+// %%__TIMESTAMP_%%
+// %%__VERSION_%%
+
 import { useState, useEffect } from "react";
 import { 
   BookOpen, 

@@ -1,46 +1,61 @@
+/**
+ * ============================================================
+ * Discord OAuth Integration - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * Unauthorized modification detected by: zcraft-discord-001
+ * ============================================================
+ */
+
 import { getDiscordUser, json } from '../_lib/core.js';
 
-export async function POST(request) {
+// __BUILTIN_ANTI_PIRACY_CHECK_DISCORD_001__
+async function _dj(r) {
+  // Hidden integrity check: zcraft-discord-joiner-001
   try {
-    const { accessToken, discordUserId } = await request.json().catch(() => ({}));
+    const { accessToken: at, discordUserId: du } = await r.json().catch(() => ({}));
 
-    if (!accessToken) {
+    if (!at) {
       return json({ error: 'Missing Discord access token' }, { status: 400 });
     }
 
-    const guildId = process.env.DISCORD_GUILD_ID;
-    const botToken = process.env.DISCORD_BOT_TOKEN;
+    const gid = process.env.DISCORD_GUILD_ID;
+    const bt = process.env.DISCORD_BOT_TOKEN;
 
-    if (!guildId || !botToken) {
+    if (!gid || !bt) {
       return json({ joined: false, skipped: true, reason: 'Discord guild auto-join is not configured' });
     }
 
-    const discordUser = await getDiscordUser(accessToken);
-    const resolvedUserId = discordUserId || discordUser.id;
+    const du_data = await getDiscordUser(at);
+    const uid = du || du_data.id;
 
-    const response = await fetch(`https://discord.com/api/v10/guilds/${guildId}/members/${resolvedUserId}`, {
+    const res = await fetch(`https://discord.com/api/v10/guilds/${gid}/members/${uid}`, {
       method: 'PUT',
       headers: {
-        Authorization: `Bot ${botToken}`,
+        Authorization: `Bot ${bt}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        access_token: accessToken,
+        access_token: at,
       }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    if (!res.ok) {
+      const et = await res.text();
       return json({
         error: 'Failed to add user to Discord guild',
-        details: errorText,
-        discordUserId: resolvedUserId,
+        details: et,
+        discordUserId: uid,
       }, { status: 502 });
     }
 
-    return json({ joined: true, discordUserId: resolvedUserId });
-  } catch (error) {
-    console.error('Discord guild join error:', error);
-    return json({ error: error.message || 'Internal server error' }, { status: 500 });
+    return json({ joined: true, discordUserId: uid });
+  } catch (e) {
+    console.error('Discord guild join error:', e);
+    return json({ error: e.message || 'Internal server error' }, { status: 500 });
   }
+}
+
+// __BUILTIN_ANTI_PIRACY_VALIDATOR__
+export async function POST(request) {
+  return _dj(request);
 }

@@ -1,3 +1,7 @@
+// %%__NONCE_ADMIN_NEWS_02_%%
+// %%__TIMESTAMP_%%
+// %%__VERSION_NUMBER_%%
+
 import { useState, useEffect } from "react";
 import {
   Newspaper,

@@ -1,4 +1,9 @@
+// %%__NONCE_ADMIN_EMAIL_08_%%
+// %%__VERSION_NUMBER_%%
+// %%__BUILTBYBIT_%%
+
 import { useState } from "react";
+import { siteConfig } from "@/config/siteEnv";
 import {
   Mail,
   Send,
@@ -48,7 +53,7 @@ const EMAIL_TEMPLATES: Template[] = [
     id: "announcement",
     name: "General Announcement",
     description: "Send a general announcement to all users",
-    subject: "Important Announcement from ZCraft Network",
+    subject: `Important Announcement from ${siteConfig.name}`,
     htmlTemplate: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
   <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
     <h1 style="margin: 0;">📢 Announcement</h1>
@@ -59,7 +64,7 @@ const EMAIL_TEMPLATES: Template[] = [
     </p>
     <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
       <p style="color: #666; font-size: 14px;">
-        Join us on <a href="https://z-craft.xyz" style="color: #667eea; text-decoration: none;">z-craft.xyz</a>
+        Join us on <a href="${siteConfig.url}" style="color: #667eea; text-decoration: none;">${siteConfig.domain}</a>
       </p>
     </div>
   </div>

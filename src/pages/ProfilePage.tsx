@@ -1,3 +1,13 @@
+// %%__NONCE_PROFILE_PAGE_13_%%
+// %%__TIMESTAMP_%%
+// %%__VERSION_%%
+/**
+ * ============================================================
+ * Profile Page - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * ============================================================
+ */
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";

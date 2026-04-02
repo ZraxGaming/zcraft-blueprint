@@ -1,3 +1,14 @@
+/**
+ * ============================================================
+ * Admin Layout Component - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * Unauthorized distribution or modification is prohibited.
+ * ============================================================
+ * This code is protected under international copyright law.
+ * Removal of this notice or unauthorized copying will be detected.
+ * __BUILTIN_ANTI_PIRACY_CHECK_ADMIN_LAYOUT_001__
+ */
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 

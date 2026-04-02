@@ -1,3 +1,7 @@
+// %%__NONCE_ADMIN_SETTINGS_09_%%
+// %%__RESOURCE_%%
+// %%__VERSION_%%
+
 import { useEffect, useState } from "react";
 import { Bell, Globe, Loader, Palette, Save, Search, Server, Shield } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

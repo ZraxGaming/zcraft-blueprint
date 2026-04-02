@@ -1,3 +1,14 @@
+/**
+ * ============================================================
+ * Structured Content Component - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * Unauthorized distribution or modification is prohibited.
+ * ============================================================
+ * This code is protected under international copyright law.
+ * Removal of this notice or unauthorized copying will be detected.
+ * __BUILTIN_ANTI_PIRACY_CHECK_CONTENT_001__
+ */
+
 import React from "react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";

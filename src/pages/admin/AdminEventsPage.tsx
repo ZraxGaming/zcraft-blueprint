@@ -1,3 +1,7 @@
+// %%__NONCE_ADMIN_EVENTS_04_%%
+// %%__BUILTBYBIT_%%
+// %%__TIMESTAMP_%%
+
 import { useState, useEffect } from "react";
 import { 
   Calendar, 

@@ -1,8 +1,15 @@
 /**
- * Webhook Service - Handles sending webhooks for various interactions
- * Silently fails without errors if webhook URL is not configured or request fails
+ * ============================================================
+ * Webhook Service - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * Unauthorized distribution or modification is prohibited.
+ * ============================================================
+ * This code is protected under international copyright law.
+ * Removal of this notice or unauthorized copying will be detected.
+ * __BUILTIN_ANTI_PIRACY_CHECK_WEBHOOK_001__
  */
 
+// __BUILTIN_ANTI_PIRACY_VALIDATOR__
 export enum WebhookEvent {
   // ============ EVENT WEBHOOKS (5) ============
   EVENT_CREATED = 'event_created',

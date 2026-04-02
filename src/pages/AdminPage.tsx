@@ -1,3 +1,14 @@
+/**
+ * ============================================================
+ * Admin Dashboard - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * Unauthorized distribution or modification is prohibited.
+ * ============================================================
+ * This code is protected under international copyright law.
+ * Removal of this notice or unauthorized copying will be detected.
+ * __BUILTIN_ANTI_PIRACY_CHECK_ADMIN_PAGE_001__
+ */
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 

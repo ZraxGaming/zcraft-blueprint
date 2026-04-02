@@ -106,6 +106,21 @@ export const siteConfig = {
     themeToggle: toBool(env.VITE_FEATURE_THEME_TOGGLE, true),
     cookieBanner: toBool(env.VITE_FEATURE_COOKIE_BANNER, true),
   },
+  branding: {
+    legalNotice: toString(env.VITE_SITE_LEGAL_NOTICE, "© 2024-2026 ZCraft Network. All rights reserved."),
+    licenseEmail: toString(env.VITE_LICENSE_EMAIL, "license@z-craft.xyz"),
+    companyName: toString(env.VITE_COMPANY_NAME, "ZCraft Network"),
+    companyShortName: toString(env.VITE_COMPANY_SHORT_NAME, "ZCraft"),
+    newsFeedTitle: toString(env.VITE_NEWS_FEED_TITLE, "ZCraft News Feed"),
+    newsFeedDescription: toString(env.VITE_NEWS_FEED_DESCRIPTION, "Latest news from ZCraft Network"),
+    emailSubjectLoginAlert: toString(env.VITE_EMAIL_SUBJECT_LOGIN_ALERT, "New login to your ZCraft account"),
+    emailSubjectAnnouncement: toString(env.VITE_EMAIL_SUBJECT_ANNOUNCEMENT, "Important Announcement from ZCraft Network"),
+    emailWelcomeMessage: toString(env.VITE_EMAIL_WELCOME_MESSAGE, "Welcome to ZCraft Network"),
+  },
+  storage: {
+    storageKey: toString(env.VITE_SUPABASE_STORAGE_KEY, "zcraft-oauth-provider-token"),
+    refreshKey: toString(env.VITE_SUPABASE_REFRESH_KEY, "zcraft-oauth-provider-refresh-token"),
+  },
 };
 
 export type SiteFeatureKey = keyof typeof siteConfig.features;

@@ -1,3 +1,7 @@
+// %%__NONCE_NEWS_PAGE_15_%%
+// %%__VERSION_NUMBER_%%
+// %%__RESOURCE_%%
+
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

@@ -1,3 +1,7 @@
+// %%__NONCE_ADMIN_CHANGELOGS_05_%%
+// %%__VERSION_NUMBER_%%
+// %%__RESOURCE_%%
+
 import { useState, useEffect } from "react";
 import {
   GitCommit,

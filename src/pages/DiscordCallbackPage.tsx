@@ -1,3 +1,7 @@
+// %%__NONCE_DISCORD_CALLBACK_19_%%
+// %%__RESOURCE_TITLE_%%
+// %%__BUILTBYBIT_%%
+
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';

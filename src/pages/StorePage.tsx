@@ -6,7 +6,8 @@ import { ExternalLink, ShoppingCart } from "lucide-react";
 export default function StorePage() {
   useEffect(() => {
     // Redirect to the canonical store domain/path
-    window.location.replace("https://z-craft.xyz/store");
+    const storeUrl = import.meta.env.VITE_STORE_URL || 'https://store.z-craft.xyz';
+    window.location.replace(storeUrl);
   }, []);
 
   return (

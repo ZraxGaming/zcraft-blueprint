@@ -1,3 +1,7 @@
+// %%__NONCE_AUTH_CALLBACK_20_%%
+// %%__VERSION_%%
+// %%__RESOURCE_%%
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OAUTH_PROVIDER_TOKEN_KEY, supabase } from '@/integrations/supabase/client';

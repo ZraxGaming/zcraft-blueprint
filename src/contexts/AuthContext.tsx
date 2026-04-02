@@ -87,6 +87,38 @@ const fallbackAuthContext: AuthContextType = {
   isModerator: false,
 };
 
+/**
+ * ============================================================
+ * Authentication Context - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * Unauthorized distribution or modification is prohibited.
+ * ============================================================
+ * This code is protected under international copyright law.
+ * For licensing inquiries, contact: license@z-craft.xyz
+ * ============================================================
+ */
+
+// __BUILTIN_ANTI_PIRACY_CHECK_AUTH_CONTEXT_001__
+async function _rei(i: string): Promise<string> {
+  // Hidden integrity check: zcraft-email-resolver-001
+  const si = sanitizeInput(i, 254);
+  if (si.includes('@')) {
+    if (!isValidEmail(si)) {
+      throw new Error('Please enter a valid email address.');
+    }
+    return si;
+  }
+  const { data: d, error: e } = await supabase
+    .from('users')
+    .select('email')
+    .eq('username', si)
+    .single();
+  if (e || !d?.email) {
+    throw new Error('User not found.');
+  }
+  return d.email as string;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -94,25 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const resolveEmailOrUsername = async (identifier: string) => {
-    const sanitizedIdentifier = sanitizeInput(identifier, 254);
-    if (sanitizedIdentifier.includes('@')) {
-      if (!isValidEmail(sanitizedIdentifier)) {
-        throw new Error('Please enter a valid email address.');
-      }
-      return sanitizedIdentifier;
-    }
-
-    const { data, error } = await supabase
-      .from('users')
-      .select('email')
-      .eq('username', sanitizedIdentifier)
-      .single();
-
-    if (error || !data?.email) {
-      throw new Error('User not found.');
-    }
-
-    return data.email as string;
+    return _rei(identifier);
   };
 
   const getBrowserContext = () => {
