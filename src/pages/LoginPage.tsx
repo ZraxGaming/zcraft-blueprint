@@ -20,9 +20,25 @@ export default function LoginPage() {
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
 
   const resolveEmail = async (ident: string) => {
-    if (ident.includes("@")) return ident;
-    const { data, error } = await supabase.from('users').select('email').eq('username', ident).single();
-    if (error || !data?.email) throw new Error('User not found');
+    const normalized = ident.trim();
+    if (!normalized) {
+      throw new Error('Email or username required');
+    }
+
+    if (normalized.includes("@")) {
+      return normalized.toLowerCase();
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('email')
+      .ilike('username', normalized)
+      .maybeSingle();
+
+    if (error || !data?.email) {
+      throw new Error('User not found. Try signing in with your email address.');
+    }
+
     return data.email as string;
   };
 

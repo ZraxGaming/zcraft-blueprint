@@ -1,6 +1,19 @@
 import { buildApiUrl } from "@/lib/api";
 
-export async function sendLoginAlert(accessToken: string, loginMethod: string, username?: string | null) {
+type LoginAlertPayload = {
+  loginMethod: string;
+  username?: string | null;
+  timezone?: string | null;
+  locale?: string | null;
+  browser?: string | null;
+};
+
+export async function sendLoginAlert(
+  accessToken: string,
+  loginMethod: string,
+  username?: string | null,
+  extras: Partial<LoginAlertPayload> = {}
+) {
   const response = await fetch(buildApiUrl("/api/security/login-alert"), {
     method: "POST",
     headers: {
@@ -10,6 +23,9 @@ export async function sendLoginAlert(accessToken: string, loginMethod: string, u
     body: JSON.stringify({
       loginMethod,
       username: username || undefined,
+      timezone: extras.timezone || undefined,
+      locale: extras.locale || undefined,
+      browser: extras.browser || undefined,
     }),
   });
 

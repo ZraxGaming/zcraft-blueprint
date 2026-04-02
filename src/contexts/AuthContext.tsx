@@ -115,6 +115,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.email as string;
   };
 
+  const getBrowserContext = () => {
+    if (typeof window === 'undefined') {
+      return {
+        timezone: null,
+        locale: null,
+        browser: null,
+      };
+    }
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+    const locale = navigator.language || navigator.languages?.[0] || null;
+    const browser = navigator.userAgent || null;
+
+    return { timezone, locale, browser };
+  };
+
+  const formatLoginMethod = (method: string) => {
+    const normalized = method.toLowerCase().trim();
+
+    if (normalized === 'password' || normalized === 'email') return 'Email / Password';
+    if (normalized === 'magiclink' || normalized === 'otp') return 'Magic Link / OTP';
+    if (normalized === 'discord') return 'Discord OAuth';
+    if (normalized === 'github') return 'GitHub OAuth';
+    if (normalized === 'google') return 'Google OAuth';
+
+    return method
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   // Fetch user profile and role from database
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -255,18 +285,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Send webhook for user login
-    if (data.user) {
-      await sendWebhook(WebhookEvent.USER_LOGIN, {
-        userId: data.user.id,
-        email: data.user.email,
-        lastSignInAt: data.user.last_sign_in_at,
+      if (data.user) {
+        await sendWebhook(WebhookEvent.USER_LOGIN, {
+          userId: data.user.id,
+          email: data.user.email,
+          lastSignInAt: data.user.last_sign_in_at,
       });
 
       if (data.session?.access_token) {
+        const browserContext = getBrowserContext();
         sendLoginAlert(
           data.session.access_token,
-          'password',
+          formatLoginMethod('password'),
           data.user.user_metadata?.username || data.user.email?.split('@')[0] || null
+          ,
+          browserContext
         ).catch((alertError) => {
           console.warn('Login alert email failed:', alertError);
         });

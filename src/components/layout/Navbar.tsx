@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Moon, Sun, Copy, Check, LogOut } from "lucide-react";
+import { Menu, X, Moon, Sun, Copy, Check, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,7 +11,7 @@ export function Navbar() {
   const [isDark, setIsDark] = useState(false);
   const [copied, setCopied] = useState(false);
   const location = useLocation();
-  const { user, userProfile, logout } = useAuth();
+  const { user, userProfile, logout, isAdmin } = useAuth();
   const isAuthPath =
     location.pathname === "/login" ||
     location.pathname === "/register" ||
@@ -120,6 +120,14 @@ export function Navbar() {
 
               {user && userProfile ? (
                 <div className="flex items-center gap-2">
+                  {isAdmin && (
+                    <Button variant="outline" size="sm" className="h-8 gap-2" asChild aria-label="Open admin dashboard">
+                      <Link to="/admin">
+                        <Shield className="h-4 w-4" />
+                        Admin
+                      </Link>
+                    </Button>
+                  )}
                   <Link
                     to="/profile"
                     className="flex items-center gap-2 px-3 py-1 rounded-lg hover:bg-muted transition-colors text-sm"
@@ -193,6 +201,14 @@ export function Navbar() {
               <div className="pt-4 border-t flex flex-col gap-2">
                 {user && userProfile ? (
                   <>
+                    {isAdmin && (
+                      <Button variant="outline" className="flex-1 gap-2" asChild>
+                        <Link to="/admin" onClick={() => setIsOpen(false)}>
+                          <Shield className="h-4 w-4" />
+                          Admin
+                        </Link>
+                      </Button>
+                    )}
                     <Link
                       to="/profile"
                       onClick={() => setIsOpen(false)}

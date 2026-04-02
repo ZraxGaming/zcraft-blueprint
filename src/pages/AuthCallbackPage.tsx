@@ -14,6 +14,26 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
   const [message, setMessage] = useState('Completing authentication...');
 
+  const getBrowserContext = () => ({
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+    locale: navigator.language || navigator.languages?.[0] || null,
+    browser: navigator.userAgent || null,
+  });
+
+  const formatLoginMethod = (method: string) => {
+    const normalized = method.toLowerCase().trim();
+
+    if (normalized === 'password' || normalized === 'email') return 'Email / Password';
+    if (normalized === 'magiclink' || normalized === 'otp') return 'Magic Link / OTP';
+    if (normalized === 'discord') return 'Discord OAuth';
+    if (normalized === 'github') return 'GitHub OAuth';
+    if (normalized === 'google') return 'Google OAuth';
+
+    return method
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
@@ -148,10 +168,12 @@ export default function AuthCallbackPage() {
             description: `Welcome${profile?.username ? `, ${profile.username}` : ''}!` 
           });
           if (session.access_token) {
+            const browserContext = getBrowserContext();
             sendLoginAlert(
               session.access_token,
-              provider || authType || 'email',
-              username
+              formatLoginMethod(provider || authType || 'email'),
+              username,
+              browserContext
             ).catch((alertError) => {
               console.warn('Login alert email failed:', alertError);
             });

@@ -20,7 +20,10 @@ export async function POST(request) {
     const profile = await getUserProfileById(auth.user.id);
     const ip = getClientIp(request);
     const geo = await lookupGeo(ip);
-    const loginMethod = body?.loginMethod || 'password';
+    const loginMethod = body?.loginMethod || 'Email / Password';
+    const browserTimezone = body?.timezone || null;
+    const browserLocale = body?.locale || null;
+    const browserUserAgent = body?.browser || null;
     const loginTime = new Date();
     const formattedUtc = loginTime.toLocaleString('en-US', {
       dateStyle: 'full',
@@ -50,10 +53,13 @@ export async function POST(request) {
       infoRows: [
         { label: 'Time (UTC)', value: formattedUtc },
         { label: 'Login method', value: loginMethod },
+        { label: 'Browser timezone', value: browserTimezone },
+        { label: 'Browser locale', value: browserLocale },
         { label: 'IP address', value: geo.ip || 'Unavailable' },
         { label: 'Approximate location', value: locationBits.join(', ') || 'Unavailable' },
         { label: 'Timezone', value: geo.timezone || 'Unavailable' },
         { label: 'Network / ISP', value: geo.org || 'Unavailable' },
+        { label: 'Browser / device', value: browserUserAgent },
       ],
     });
 

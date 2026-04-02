@@ -669,7 +669,10 @@ app.post('/api/security/login-alert', async (req, res) => {
     const profile = await getUserProfileById(auth.user.id);
     const ip = getClientIp(req);
     const geo = await lookupGeo(ip);
-    const loginMethod = req.body?.loginMethod || 'password';
+    const loginMethod = req.body?.loginMethod || 'Email / Password';
+    const browserTimezone = req.body?.timezone || null;
+    const browserLocale = req.body?.locale || null;
+    const browserUserAgent = req.body?.browser || null;
     const loginTime = new Date();
     const formattedUtc = loginTime.toLocaleString('en-US', {
       dateStyle: 'full',
@@ -692,10 +695,13 @@ app.post('/api/security/login-alert', async (req, res) => {
         <table style="border-collapse:collapse;margin:16px 0">
           <tr><td style="padding:6px 12px 6px 0"><strong>Time (UTC)</strong></td><td>${escapeHtml(formattedUtc)}</td></tr>
           <tr><td style="padding:6px 12px 6px 0"><strong>Login method</strong></td><td>${escapeHtml(loginMethod)}</td></tr>
+          <tr><td style="padding:6px 12px 6px 0"><strong>Browser timezone</strong></td><td>${escapeHtml(browserTimezone || 'Unavailable')}</td></tr>
+          <tr><td style="padding:6px 12px 6px 0"><strong>Browser locale</strong></td><td>${escapeHtml(browserLocale || 'Unavailable')}</td></tr>
           <tr><td style="padding:6px 12px 6px 0"><strong>IP address</strong></td><td>${escapeHtml(geo.ip)}</td></tr>
           <tr><td style="padding:6px 12px 6px 0"><strong>Location</strong></td><td>${escapeHtml(`${geo.city}, ${geo.region}, ${geo.country}`)}</td></tr>
           <tr><td style="padding:6px 12px 6px 0"><strong>Timezone</strong></td><td>${escapeHtml(geo.timezone)}</td></tr>
           <tr><td style="padding:6px 12px 6px 0"><strong>Network</strong></td><td>${escapeHtml(geo.org)}</td></tr>
+          <tr><td style="padding:6px 12px 6px 0"><strong>Browser / device</strong></td><td>${escapeHtml(browserUserAgent || 'Unavailable')}</td></tr>
         </table>
         <p>If this was not you, reset your password immediately and review your account activity.</p>
       </div>
