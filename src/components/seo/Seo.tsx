@@ -313,22 +313,41 @@ export function Seo({
       Object.assign(ld, structuredData);
     }
 
+    // Build schema payload with breadcrumb list at top level for Google Search Console
     const schemaPayload =
-      faq?.length
+      faq?.length || breadcrumbItems.length
         ? [
             ld,
-            {
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: faq.map((item) => ({
-                "@type": "Question",
-                name: item.question,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: item.answer,
-                },
-              })),
-            },
+            ...(faq?.length
+              ? [
+                  {
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    mainEntity: faq.map((item) => ({
+                      "@type": "Question",
+                      name: item.question,
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: item.answer,
+                      },
+                    })),
+                  },
+                ]
+              : []),
+            ...(breadcrumbItems.length
+              ? [
+                  {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    itemListElement: breadcrumbItems.map((crumb, index) => ({
+                      "@type": "ListItem",
+                      position: index + 1,
+                      name: crumb.name,
+                      item: crumb.url.startsWith("http") ? crumb.url : toAbsoluteUrl(crumb.url),
+                    })),
+                  },
+                ]
+              : []),
           ]
         : ld;
 
