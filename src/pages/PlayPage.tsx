@@ -37,6 +37,10 @@ export default function PlayPage() {
 
   return (
     <Layout
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Play", href: "/play" },
+      ]}
       seo={{
         title: "Play ZCraft Network — Minecraft Server IP & How to Join",
         description: "Get ZCraft Network server IP and join our premier Minecraft lifesteal SMP server. Java compatible with custom plugins, economy system, factions, and active community events.",
