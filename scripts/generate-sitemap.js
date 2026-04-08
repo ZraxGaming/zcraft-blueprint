@@ -102,7 +102,10 @@ async function main() {
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
     .map((u) => {
-      const full = new URL(u.loc, SITE_URL).toString();
+      // Ensure SITE_URL has no trailing slash and u.loc has leading slash
+      const baseUrl = SITE_URL.replace(/\/+$/, '');
+      const path = u.loc.startsWith('/') ? u.loc : `/${u.loc}`;
+      const full = `${baseUrl}${path}`;
       const lastmod = u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : '';
       const changefreq = u.changefreq ? `\n    <changefreq>${u.changefreq}</changefreq>` : '';
       const priority = u.priority ? `\n    <priority>${u.priority}</priority>` : '';
