@@ -112,7 +112,7 @@ export function Seo({
     const absoluteUrl = currentPath.startsWith("http") ? currentPath : toAbsoluteUrl(currentPath);
     const absoluteImage = image.startsWith("http") ? image : toAbsoluteUrl(image);
 
-    setMeta("description", description);
+    setMeta("description", description + " - The #1 Minecraft Network for Lifesteal and Skyblock SMP.");
     setMeta("keywords", keywords);
     setMeta("author", author);
     setMeta("robots", noindex ? "noindex, nofollow" : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1");

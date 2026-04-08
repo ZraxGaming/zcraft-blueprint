@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
-const SITE_URL = process.env.SITE_URL || 'https://z-craft.xyz';
+const SITE_URL = process.env.SITE_URL || 'https://www.z-craft.xyz';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const isEnabled = (key, fallback = true) => {
@@ -100,19 +100,13 @@ async function main() {
 
   const urls = [...staticPages, ...dynamicUrls];
 
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
     .map((u) => {
-      const full = `${SITE_URL}${u.loc}`;
+      const full = `${SITE_URL.replace(/\/+$/, "")}${u.loc.startsWith('/') ? '' : '/'}${u.loc.replace(/^\/+/, "")}`;
       const lastmod = u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : '';
       const changefreq = u.changefreq ? `\n    <changefreq>${u.changefreq}</changefreq>` : '';
       const priority = u.priority ? `\n    <priority>${u.priority}</priority>` : '';
-      const alternates = [
-        { hreflang: 'en', href: full },
-        { hreflang: 'x-default', href: full },
-      ]
-        .map((a) => `\n    <xhtml:link rel="alternate" hreflang="${a.hreflang}" href="${a.href}" />`)
-        .join('');
-      return `  <url>\n    <loc>${full}</loc>${alternates}${lastmod}${changefreq}${priority}\n  </url>`;
+      return `  <url>\n    <loc>${full}</loc>${lastmod}${changefreq}${priority}\n  </url>`;
     })
     .join('\n')}\n</urlset>`;
 
