@@ -114,10 +114,10 @@ export default function AdminPage() {
       const canPingPublicSite = !import.meta.env.DEV;
       const website = canPingPublicSite
         ? await pingUrl('https://z-craft.xyz')
-        : { ok: true, latency: null, note: 'Skipped in local dev' };
+        : { ok: true, latency: null as number | null, note: 'Skipped in local dev' };
       const forums = canPingPublicSite
         ? await pingUrl('https://z-craft.xyz/forums')
-        : { ok: true, latency: null, note: 'Skipped in local dev' };
+        : { ok: true, latency: null as number | null, note: 'Skipped in local dev' };
 
       setServiceStatus([
         { name: 'Minecraft Server', status: server.online ? 'online' : 'offline', players: server.players ? `${server.players.online}/${server.players.max}` : '—' },

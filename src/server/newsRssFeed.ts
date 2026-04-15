@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { newsService } from "../src/services/newsService";
+import { newsService } from "../services/newsService";
 
 export async function newsRssFeed(req: Request, res: Response, next: NextFunction) {
   try {

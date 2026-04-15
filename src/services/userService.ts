@@ -112,7 +112,7 @@ export async function assignRole(userId: string, role: string) {
     .from('user_roles')
     .insert({
       user_id: userId,
-      role,
+      role: role as any,
     })
     .select()
     .single();
