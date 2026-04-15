@@ -101,7 +101,7 @@ export default function AuthCallbackPage() {
               discord_id: provider === 'discord' ? discordId : null,
             });
           } else if (!profileError) {
-            const updates: Record<string, string> = {};
+            const updates: Partial<{ avatar_url: string; discord_id: string; github_id: string; google_id: string; updated_at: string }> = {};
 
             if (avatarUrl) {
               updates.avatar_url = avatarUrl;
