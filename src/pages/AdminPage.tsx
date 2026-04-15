@@ -92,7 +92,6 @@ export default function AdminPage() {
   }, []);
 
   // fetch live status for services
-  async function pingUrl(url: string) {
   async function pingUrl(url: string): Promise<{ ok: boolean; latency: number | null; note?: string }> {
     const controller = new AbortController();
     const start = performance.now();
