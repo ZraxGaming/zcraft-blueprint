@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { changelogService } from "../services/changelogService";
+import { changelogService } from "../src/services/changelogService";
 
 export async function changelogRssFeed(req: Request, res: Response, next: NextFunction) {
   try {

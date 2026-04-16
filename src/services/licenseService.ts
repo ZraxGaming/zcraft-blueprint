@@ -48,7 +48,6 @@ export interface LicenseApiResponse {
   valid?: boolean;
   success?: boolean;
   licensed?: boolean;
-  cleared?: boolean;
   error?: string;
   message?: string;
   code?: string;

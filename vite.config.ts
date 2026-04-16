@@ -58,7 +58,10 @@ export default defineConfig(({ mode }) => {
       cssMinify: "esbuild",
       reportCompressedSize: false,
       rollupOptions: {
-        input: path.resolve(__dirname, 'index.html'),
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+          server: path.resolve(__dirname, 'src/entry-server.tsx'),
+        },
       },
     },
     ssr: {

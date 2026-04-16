@@ -14,13 +14,11 @@ import { useAuth } from "@/contexts/AuthContext";
 interface Reply {
   id: string;
   author_id: string;
-  author?: { username: string; avatar_url: string | null; id: string };
+  author?: { username: string; avatar_url: string | null };
   content: string;
   created_at: string;
-  post_id: string;
-  updated_at: string;
-  is_staff?: boolean;
-  likes?: number;
+  is_staff: boolean;
+  likes: number;
 }
 
 interface PostLikes {

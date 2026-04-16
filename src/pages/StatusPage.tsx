@@ -1,25 +1,32 @@
-import { BentoPageLayout } from "@/components/layout/BentoPageLayout";
+import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Activity } from "lucide-react";
+import { useEffect } from "react";
 import { siteConfig } from "@/config/siteEnv";
 
 export default function StatusPage() {
+  useEffect(() => {
+    // Redirect to canonical status domain
+    window.location.replace(siteConfig.statusUrl);
+  }, []);
+
   return (
-    <BentoPageLayout
-      title="Server Status"
-      subtitle="Redirecting to live status page..."
+    <Layout
       seo={{
         title: "ZCraft Network Server Status — Live Uptime & Incident Reports",
-        description: "Check ZCraft Network server status, uptime monitoring, and incident reports.",
-        url: "/status", type: "website",
+        description: "Check ZCraft Network server status, uptime monitoring, incident reports, and maintenance schedules for our Minecraft lifesteal SMP server.",
+        keywords: "zcraft server status, minecraft server status, server uptime, incident reports, server maintenance, lifesteal server status, minecraft downtime",
+        url: "/status",
+        type: "website",
+        tags: ["server status", "uptime", "incidents", "maintenance"]
       }}
     >
-      <div className="text-center py-12">
-        <p className="text-primary-foreground/50 mb-6">If you are not redirected automatically:</p>
-        <a href={siteConfig.statusUrl} target="_blank" rel="noopener noreferrer">
-          <Button className="btn-primary-gradient gap-2">Open Status Page <ExternalLink className="h-4 w-4" /></Button>
-        </a>
+      <div className="py-24 text-center">
+        <p className="text-lg">Redirecting to the live status page…</p>
+        <p className="mt-4">
+          If you are not redirected automatically, <a href={siteConfig.statusUrl} className="underline">click here</a>.
+        </p>
       </div>
-    </BentoPageLayout>
+    </Layout>
   );
 }

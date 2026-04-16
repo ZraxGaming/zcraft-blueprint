@@ -51,12 +51,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        bento: {
-          bg: "hsl(var(--bento-bg))",
-          card: "hsl(var(--bento-card))",
-          "card-hover": "hsl(var(--bento-card-hover))",
-          border: "hsl(var(--bento-border))",
-        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -75,7 +69,6 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        bento: "var(--bento-radius, 1.25rem)",
       },
       keyframes: {
         "accordion-down": {

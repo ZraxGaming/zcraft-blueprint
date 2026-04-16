@@ -35,111 +35,6 @@ export type Database = {
         }
         Relationships: []
       }
-      ban_appeals: {
-        Row: {
-          additional_info: string | null
-          appeal_id: string
-          ban_reason: string | null
-          created_at: string | null
-          discord_tag: string | null
-          email: string | null
-          handled_at: string | null
-          handled_by: string | null
-          id: string
-          ip_address: string | null
-          minecraft_uuid: string | null
-          reason: string
-          response: string | null
-          status: string | null
-          updated_at: string | null
-          user_agent: string | null
-          user_id: string | null
-          username: string
-          webhook_sent: boolean | null
-        }
-        Insert: {
-          additional_info?: string | null
-          appeal_id: string
-          ban_reason?: string | null
-          created_at?: string | null
-          discord_tag?: string | null
-          email?: string | null
-          handled_at?: string | null
-          handled_by?: string | null
-          id?: string
-          ip_address?: string | null
-          minecraft_uuid?: string | null
-          reason: string
-          response?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-          username: string
-          webhook_sent?: boolean | null
-        }
-        Update: {
-          additional_info?: string | null
-          appeal_id?: string
-          ban_reason?: string | null
-          created_at?: string | null
-          discord_tag?: string | null
-          email?: string | null
-          handled_at?: string | null
-          handled_by?: string | null
-          id?: string
-          ip_address?: string | null
-          minecraft_uuid?: string | null
-          reason?: string
-          response?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-          username?: string
-          webhook_sent?: boolean | null
-        }
-        Relationships: []
-      }
-      changelogs: {
-        Row: {
-          changes: string[]
-          created_at: string
-          description: string
-          id: string
-          image_url: string | null
-          released_at: string
-          title: string
-          type: string
-          updated_at: string
-          version: string
-        }
-        Insert: {
-          changes?: string[]
-          created_at?: string
-          description: string
-          id?: string
-          image_url?: string | null
-          released_at: string
-          title: string
-          type?: string
-          updated_at?: string
-          version: string
-        }
-        Update: {
-          changes?: string[]
-          created_at?: string
-          description?: string
-          id?: string
-          image_url?: string | null
-          released_at?: string
-          title?: string
-          type?: string
-          updated_at?: string
-          version?: string
-        }
-        Relationships: []
-      }
       events: {
         Row: {
           created_at: string | null
@@ -179,13 +74,10 @@ export type Database = {
       forum_posts: {
         Row: {
           author_id: string
-          category: string | null
           content: string
           created_at: string | null
-          forum_id: string | null
+          forum_id: string
           id: string
-          locked: boolean | null
-          pinned: boolean | null
           replies: number | null
           title: string
           updated_at: string | null
@@ -193,13 +85,10 @@ export type Database = {
         }
         Insert: {
           author_id: string
-          category?: string | null
           content: string
           created_at?: string | null
-          forum_id?: string | null
+          forum_id: string
           id?: string
-          locked?: boolean | null
-          pinned?: boolean | null
           replies?: number | null
           title: string
           updated_at?: string | null
@@ -207,13 +96,10 @@ export type Database = {
         }
         Update: {
           author_id?: string
-          category?: string | null
           content?: string
           created_at?: string | null
-          forum_id?: string | null
+          forum_id?: string
           id?: string
-          locked?: boolean | null
-          pinned?: boolean | null
           replies?: number | null
           title?: string
           updated_at?: string | null
@@ -232,48 +118,6 @@ export type Database = {
             columns: ["forum_id"]
             isOneToOne: false
             referencedRelation: "forums"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      forum_replies: {
-        Row: {
-          author_id: string | null
-          content: string
-          created_at: string
-          id: string
-          post_id: string
-          updated_at: string
-        }
-        Insert: {
-          author_id?: string | null
-          content: string
-          created_at?: string
-          id?: string
-          post_id: string
-          updated_at?: string
-        }
-        Update: {
-          author_id?: string | null
-          content?: string
-          created_at?: string
-          id?: string
-          post_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "forum_replies_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "forum_replies_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "forum_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -361,60 +205,6 @@ export type Database = {
           },
         ]
       }
-      staff_applications: {
-        Row: {
-          answers: Json
-          created_at: string
-          id: string
-          notes: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: string
-          target_role: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          answers?: Json
-          created_at?: string
-          id?: string
-          notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          target_role: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          answers?: Json
-          created_at?: string
-          id?: string
-          notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          target_role?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_applications_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_applications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       status_services: {
         Row: {
           description: string | null
@@ -448,41 +238,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_email_preferences: {
-        Row: {
-          category: string
-          created_at: string
-          enabled: boolean
-          id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_email_preferences_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
@@ -514,7 +269,6 @@ export type Database = {
           github_id: string | null
           google_id: string | null
           id: string
-          minecraft_name: string | null
           role: string | null
           updated_at: string | null
           username: string
@@ -528,7 +282,6 @@ export type Database = {
           github_id?: string | null
           google_id?: string | null
           id: string
-          minecraft_name?: string | null
           role?: string | null
           updated_at?: string | null
           username: string
@@ -542,7 +295,6 @@ export type Database = {
           github_id?: string | null
           google_id?: string | null
           id?: string
-          minecraft_name?: string | null
           role?: string | null
           updated_at?: string | null
           username?: string
@@ -595,17 +347,7 @@ export type Database = {
       }
     }
     Views: {
-      latest_forum_threads: {
-        Row: {
-          author: string | null
-          category: string | null
-          created_at: string | null
-          id: string | null
-          replies_count: number | null
-          title: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_user_role: { Args: { _user_id: string }; Returns: string }
@@ -618,7 +360,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user" | "helper" | "owner"
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -746,7 +488,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user", "helper", "owner"],
+      app_role: ["admin", "moderator", "user"],
     },
   },
 } as const

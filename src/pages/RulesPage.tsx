@@ -1,11 +1,13 @@
-import { BentoPageLayout } from "@/components/layout/BentoPageLayout";
+import { Layout } from "@/components/layout/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, MessageSquare, Globe, Users, Gavel } from "lucide-react";
-import { motion } from "framer-motion";
 
 const ruleCategories = [
   {
-    id: "server", name: "Server Rules", icon: Shield,
+    id: "server",
+    name: "Server Rules",
+    icon: Shield,
     rules: [
       { title: "No Cheating", description: "Using hacks, mods, or exploits that provide unfair advantages is strictly prohibited." },
       { title: "No Griefing", description: "Destroying or defacing other players' builds without permission is not allowed." },
@@ -15,7 +17,9 @@ const ruleCategories = [
     ],
   },
   {
-    id: "chat", name: "Chat Rules", icon: MessageSquare,
+    id: "chat",
+    name: "Chat Rules",
+    icon: MessageSquare,
     rules: [
       { title: "Be Respectful", description: "Treat all players with respect. No harassment, hate speech, or discrimination." },
       { title: "No Spam", description: "Avoid excessive messages, caps, or repeated content." },
@@ -25,7 +29,9 @@ const ruleCategories = [
     ],
   },
   {
-    id: "forum", name: "Forum Rules", icon: Globe,
+    id: "forum",
+    name: "Forum Rules",
+    icon: Globe,
     rules: [
       { title: "Stay On Topic", description: "Post in the appropriate category and stay on topic." },
       { title: "No Necroposting", description: "Avoid reviving old threads unless you have valuable input." },
@@ -35,7 +41,9 @@ const ruleCategories = [
     ],
   },
   {
-    id: "discord", name: "Discord Rules", icon: Users,
+    id: "discord",
+    name: "Discord Rules",
+    icon: Users,
     rules: [
       { title: "Follow Discord TOS", description: "Adhere to Discord's Terms of Service at all times." },
       { title: "Use Correct Channels", description: "Keep discussions in their appropriate channels." },
@@ -45,7 +53,9 @@ const ruleCategories = [
     ],
   },
   {
-    id: "punishments", name: "Punishments", icon: Gavel,
+    id: "punishments",
+    name: "Punishments",
+    icon: Gavel,
     rules: [
       { title: "Verbal Warning", description: "First minor offense typically results in a warning." },
       { title: "Temporary Mute", description: "Chat violations may result in temporary mutes (1h - 7d)." },
@@ -56,79 +66,95 @@ const ruleCategories = [
   },
 ];
 
-const itemAnim = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.04, duration: 0.35, ease: "easeOut" as const },
-  }),
-};
-
 export default function RulesPage() {
   return (
-    <BentoPageLayout
-      title="Server Rules"
-      subtitle="Please read and follow these rules to ensure a great experience for everyone."
+    <Layout
       seo={{
         title: "ZCraft Network Server Rules — Minecraft Community Guidelines",
-        description: "Complete server rules for ZCraft Network Minecraft server. Learn about gameplay rules, chat guidelines, forum policies, and Discord rules.",
-        keywords: "zcraft rules, minecraft server rules, lifesteal rules, minecraft smp rules, server guidelines",
+        description: "Complete server rules for ZCraft Network Minecraft server. Learn about gameplay rules, chat guidelines, forum policies, and Discord rules for our lifesteal SMP community.",
+        keywords: "zcraft rules, minecraft server rules, lifesteal rules, minecraft smp rules, server guidelines, minecraft community rules, zcraft network rules",
         url: "/rules",
         type: "article",
+        tags: ["minecraft rules", "server rules", "lifesteal rules", "gaming community", "minecraft smp"]
       }}
     >
-      <div className="max-w-4xl mx-auto">
-        <Tabs defaultValue="server" className="w-full">
-          <TabsList className="w-full flex-wrap h-auto gap-2 bg-bento-card p-2 mb-8 rounded-2xl border border-bento-border">
-            {ruleCategories.map((cat) => (
-              <TabsTrigger
-                key={cat.id}
-                value={cat.id}
-                className="flex items-center gap-2 px-4 py-3 rounded-xl text-primary-foreground/60 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-              >
-                <cat.icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{cat.name}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {ruleCategories.map((cat) => (
-            <TabsContent key={cat.id} value={cat.id}>
-              <div className="bento-card p-6 md:p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <cat.icon className="h-6 w-6 text-primary" />
-                  <h2 className="font-display text-2xl font-bold text-primary-foreground">{cat.name}</h2>
-                </div>
-                <div className="space-y-3">
-                  {cat.rules.map((rule, i) => (
-                    <motion.div
-                      key={i}
-                      className="p-4 rounded-xl bg-bento-bg hover:bg-bento-card-hover transition-colors"
-                      custom={i} variants={itemAnim} initial="hidden" animate="visible"
-                    >
-                      <div className="flex items-start gap-4">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-display font-bold text-sm">
-                          {i + 1}
-                        </span>
-                        <div>
-                          <h3 className="font-semibold text-primary-foreground mb-1">{rule.title}</h3>
-                          <p className="text-sm text-primary-foreground/50">{rule.description}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-
-        <div className="mt-8 p-6 rounded-2xl bg-bento-card border border-bento-border text-center">
-          <p className="text-sm text-primary-foreground/50">
-            <strong className="text-primary-foreground/70">Note:</strong> Staff reserve the right to issue punishments at their discretion. Rules may be updated at any time.
-          </p>
+      {/* Hero */}
+      <section className="py-16 lg:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
+        <div className="container mx-auto px-4 relative">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              Server <span className="text-gradient">Rules</span>
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Please read and follow these rules to ensure a great experience for everyone.
+            </p>
+          </div>
         </div>
-      </div>
-    </BentoPageLayout>
+      </section>
+
+      {/* Rules Content */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <Tabs defaultValue="server" className="w-full">
+              <TabsList className="w-full flex-wrap h-auto gap-2 bg-transparent p-0 mb-8">
+                {ruleCategories.map((category) => (
+                  <TabsTrigger
+                    key={category.id}
+                    value={category.id}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    <category.icon className="h-4 w-4" />
+                    <span className="hidden sm:inline">{category.name}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {ruleCategories.map((category) => (
+                <TabsContent key={category.id} value={category.id}>
+                  <Card className="border-0 bg-card">
+                    <CardHeader>
+                      <CardTitle className="font-display text-2xl flex items-center gap-3">
+                        <category.icon className="h-6 w-6 text-primary" />
+                        {category.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {category.rules.map((rule, index) => (
+                          <div
+                            key={index}
+                            className="p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                          >
+                            <div className="flex items-start gap-4">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-display font-bold text-sm">
+                                {index + 1}
+                              </span>
+                              <div>
+                                <h3 className="font-semibold mb-1">{rule.title}</h3>
+                                <p className="text-sm text-muted-foreground">{rule.description}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              ))}
+            </Tabs>
+
+            {/* Disclaimer */}
+            <div className="mt-8 p-6 rounded-xl bg-muted/50 border">
+              <p className="text-sm text-muted-foreground text-center">
+                <strong>Note:</strong> Staff reserve the right to issue punishments at their discretion.
+                Rules may be updated at any time. Ignorance of the rules is not an excuse.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </Layout>
   );
 }

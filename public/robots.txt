@@ -43,7 +43,7 @@ Allow: /
 Disallow: /admin
 
 # Sitemaps
-Sitemap: https://www.z-craft.xyz/sitemap.xml
+Sitemap: https://z-craft.xyz/sitemap.xml
 
 # Crawl delay for other bots
 User-agent: *
