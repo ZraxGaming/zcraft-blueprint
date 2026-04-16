@@ -19,17 +19,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, MessageSquare, Clock, TrendingUp, ChevronRight, Loader, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
-import { forumService, Forum, ForumPost } from "@/services/forumService";
+import { forumService, Forum } from "@/services/forumService";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const FORUM_CATEGORIES = [
-  { value: "general", label: "💬 General Discussion", description: "General discussion about the server and community" },
-  { value: "support", label: "🛠️ Support", description: "Get help and support from the community" },
-  { value: "suggestions", label: "💡 Suggestions", description: "Share your ideas and suggestions" },
-  { value: "bugs", label: "🐛 Bug Reports", description: "Report bugs and issues" },
-  { value: "marketplace", label: "💰 Marketplace", description: "Trading and marketplace discussions" },
+  { value: "general", label: "General Discussion", description: "General discussion about the server and community" },
+  { value: "support", label: "Support", description: "Get help and support from the community" },
+  { value: "suggestions", label: "Suggestions", description: "Share your ideas and suggestions" },
+  { value: "bugs", label: "Bug Reports", description: "Report bugs and issues" },
+  { value: "marketplace", label: "Marketplace", description: "Trading and marketplace discussions" },
 ];
 
 export default function ForumsPage() {
@@ -64,9 +64,10 @@ export default function ForumsPage() {
     }
   };
 
-  const filteredForums = forums.filter(forum => {
+  const filteredForums = forums.filter((forum) => {
     const matchesCategory = !selectedCategory || forum.category === selectedCategory;
-    const matchesSearch = !searchQuery || 
+    const matchesSearch =
+      !searchQuery ||
       forum.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       forum.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -93,7 +94,7 @@ export default function ForumsPage() {
     }
 
     try {
-      const selectedForum = forums.find(f => f.category === newThreadCategory);
+      const selectedForum = forums.find((f) => f.category === newThreadCategory);
       if (!selectedForum) {
         toast({
           title: "Error",
@@ -128,127 +129,124 @@ export default function ForumsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <Layout seo={{
-        title: "ZCraft Network Forums — Minecraft Community Discussions",
-        description: "Join ZCraft Network forums for Minecraft discussions, lifesteal gameplay tips, server announcements, player support, and community conversations.",
-        keywords: "zcraft forums, minecraft forums, lifesteal forums, minecraft community, server discussions, player support, minecraft discussions, gaming forums",
-        url: "/forums",
-        type: "website",
-        tags: ["forums", "community", "discussions", "minecraft", "support"]
-      }}>
-        <div className="flex justify-center py-20">
-          <Loader className="animate-spin h-8 w-8 text-primary" />
-        </div>
-      </Layout>
-    );
-  }
+  const seo = {
+    title: "ZCraft Network Forums - Minecraft Community Discussions",
+    description:
+      "Join ZCraft Network forums for Minecraft discussions, lifesteal gameplay tips, server announcements, player support, and community conversations.",
+    keywords:
+      "zcraft forums, minecraft forums, lifesteal forums, minecraft community, server discussions, player support, minecraft discussions, gaming forums",
+    url: "/forums",
+    type: "website",
+    tags: ["forums", "community", "discussions", "minecraft", "support"],
+  };
 
   return (
-    <Layout seo={{
-      title: "ZCraft Network Forums — Minecraft Community Discussions",
-      description: "Join ZCraft Network forums for Minecraft discussions, lifesteal gameplay tips, server announcements, player support, and community conversations. Connect with thousands of players.",
-      keywords: "zcraft forums, minecraft forums, lifesteal forums, minecraft community, server discussions, player support, minecraft discussions, gaming forums",
-      url: "/forums",
-      type: "website",
-      tags: ["forums", "community", "discussions", "minecraft", "support"]
-    }}>
-      {/* Hero */}
-      <section className="py-16 bg-gradient-to-b from-primary/10 to-transparent">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-4">
-            ZCraft <span className="text-primary">Forums</span>
-          </h1>
-          <p className="text-muted-foreground mb-8">
-            Community discussions, ideas, and support. Join thousands of players.
-          </p>
-          <div className="relative max-w-xl mx-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input 
-              className="pl-12 h-12" 
-              placeholder="Search forums..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+    <Layout seo={seo}>
+      <section className="relative overflow-hidden py-16 lg:py-20">
+        <div className="absolute inset-0 hero-gradient" aria-hidden="true" />
+        <div
+          className="absolute inset-0 opacity-[0.12]"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
+            backgroundSize: "72px 72px",
+          }}
+        />
+        <div className="container mx-auto px-4 relative">
+          <div className="mx-auto max-w-3xl text-center space-y-4">
+            <span className="section-eyebrow mx-auto">Community discussion</span>
+            <h1 className="section-title text-balance text-4xl sm:text-5xl lg:text-6xl">
+              ZCraft <span className="text-gradient">Forums</span>
+            </h1>
+            <p className="section-copy text-lg">
+              Community discussions, ideas, and support. Join players, ask questions, and share feedback.
+            </p>
+            <div className="relative mx-auto max-w-xl">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="h-12 border-border/60 bg-card/60 pl-12"
+                placeholder="Search forums..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Main Content */}
       <section className="py-12">
-        <div className="container mx-auto px-4 grid lg:grid-cols-3 gap-8">
-          {/* Forums List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex justify-between items-center mb-6">
+        <div className="container mx-auto px-4 grid gap-8 lg:grid-cols-3">
+          <div className="space-y-4 lg:col-span-2">
+            <div className="mb-6 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold">Forum Categories</h2>
+                <h2 className="font-display text-2xl font-bold text-foreground">Forum Categories</h2>
                 <p className="text-sm text-muted-foreground">Select a category to browse forums</p>
               </div>
-              <Badge variant="secondary">{filteredForums.length} forums</Badge>
+              <Badge variant="secondary" className="border border-border/60 bg-card/60">
+                {filteredForums.length} forums
+              </Badge>
             </div>
 
             {filteredForums.length === 0 ? (
-              <Card className="border-0 bg-card">
+              <Card className="border-border/60 bg-card/90">
                 <CardContent className="p-12 text-center">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <MessageSquare className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                   <p className="text-muted-foreground">No forums found matching your search.</p>
                 </CardContent>
               </Card>
             ) : (
-              filteredForums.map((forum) => {
-                const categoryLabel = FORUM_CATEGORIES.find(c => c.value === forum.category)?.label || forum.category;
-                return (
-                  <Card
-                    key={forum.id}
-                    className="hover:shadow-lg transition cursor-pointer border-0 bg-card hover:bg-muted/50"
-                    onClick={() => navigate(`/forums/${forum.slug}`)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-lg">{forum.title}</h3>
-                            <Badge variant="outline">{forum.category}</Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">{forum.description}</p>
-                          <div className="flex gap-6 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <MessageSquare className="h-3 w-3" />
-                              {forum.post_count || 0} posts
-                            </span>
-                            {forum.last_post_date && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                Last: {new Date(forum.last_post_date).toLocaleDateString()}
-                              </span>
-                            )}
-                          </div>
+              filteredForums.map((forum) => (
+                <Card
+                  key={forum.id}
+                  className="card-hover cursor-pointer overflow-hidden border-border/60 bg-card/90"
+                  onClick={() => navigate(`/forums/${forum.slug}`)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-2 flex flex-wrap items-center gap-3">
+                          <h3 className="font-semibold text-lg text-foreground">{forum.title}</h3>
+                          <Badge variant="outline" className="border-border/60 bg-card/60">
+                            {forum.category}
+                          </Badge>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                        <p className="mb-3 text-sm leading-6 text-muted-foreground">{forum.description}</p>
+                        <div className="flex flex-wrap gap-6 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <MessageSquare className="h-3 w-3" />
+                            {forum.post_count || 0} posts
+                          </span>
+                          {forum.last_post_date && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Last: {new Date(forum.last_post_date).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })
+                      <ChevronRight className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
             )}
 
-            {/* Category Filter */}
             <div className="mt-8">
-              <h3 className="font-semibold mb-3">Filter by Category</h3>
+              <h3 className="mb-3 font-semibold text-foreground">Filter by Category</h3>
               <div className="space-y-2">
-                <Button 
+                <Button
                   variant={selectedCategory === null ? "default" : "outline"}
-                  className="w-full justify-start"
+                  className="w-full justify-start border-border/60 bg-card/60"
                   onClick={() => setSelectedCategory(null)}
                 >
                   All Categories
                 </Button>
                 {FORUM_CATEGORIES.map((category) => (
-                  <Button 
+                  <Button
                     key={category.value}
                     variant={selectedCategory === category.value ? "default" : "outline"}
-                    className="w-full justify-start"
+                    className="w-full justify-start border-border/60 bg-card/60"
                     onClick={() => setSelectedCategory(category.value)}
                   >
                     {category.label}
@@ -258,12 +256,10 @@ export default function ForumsPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Stats */}
-            <Card>
+            <Card className="border-border/60 bg-card/90">
               <CardHeader>
-                <CardTitle className="flex gap-2 items-center">
+                <CardTitle className="flex items-center gap-2 font-display">
                   <TrendingUp className="h-5 w-5 text-primary" />
                   Forum Stats
                 </CardTitle>
@@ -274,22 +270,19 @@ export default function ForumsPage() {
                   <p className="text-xs text-muted-foreground">Forums</p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-primary">
-                    {forums.reduce((sum, f) => sum + (f.post_count || 0), 0)}
-                  </p>
+                  <p className="text-xl font-bold text-primary">{forums.reduce((sum, f) => sum + (f.post_count || 0), 0)}</p>
                   <p className="text-xs text-muted-foreground">Posts</p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Create Thread */}
-            <Card>
+            <Card className="border-border/60 bg-card/90">
               <CardContent className="p-6">
                 {!showNewThread ? (
                   <>
-                    <PlusCircle className="h-8 w-8 text-primary mb-3" />
+                    <PlusCircle className="mb-3 h-8 w-8 text-primary" />
                     <Button
-                      className="w-full"
+                      className="w-full btn-primary-gradient"
                       onClick={() => {
                         if (!user) {
                           toast({
@@ -312,10 +305,10 @@ export default function ForumsPage() {
                       placeholder="Thread title"
                       value={newThreadTitle}
                       onChange={(e) => setNewThreadTitle(e.target.value)}
+                      className="border-border/60 bg-card/60"
                     />
-
                     <select
-                      className="w-full p-2 rounded-md bg-muted border border-input"
+                      className="w-full rounded-md border border-border/60 bg-card/60 p-2 text-sm text-foreground"
                       value={newThreadCategory}
                       onChange={(e) => setNewThreadCategory(e.target.value)}
                     >
@@ -325,27 +318,17 @@ export default function ForumsPage() {
                         </option>
                       ))}
                     </select>
-
                     <textarea
                       placeholder="Write your thread content..."
-                      className="w-full p-2 rounded-md bg-muted min-h-[120px] border border-input"
+                      className="min-h-[120px] w-full rounded-md border border-border/60 bg-card/60 p-2 text-sm text-foreground"
                       value={newThreadContent}
                       onChange={(e) => setNewThreadContent(e.target.value)}
                     />
-
                     <div className="flex gap-2">
-                      <Button
-                        className="flex-1"
-                        onClick={handleCreateThread}
-                      >
+                      <Button className="flex-1 btn-primary-gradient" onClick={handleCreateThread}>
                         Create Thread
                       </Button>
-
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => setShowNewThread(false)}
-                      >
+                      <Button variant="outline" className="flex-1 border-border/60 bg-card/60" onClick={() => setShowNewThread(false)}>
                         Cancel
                       </Button>
                     </div>
@@ -354,10 +337,9 @@ export default function ForumsPage() {
               </CardContent>
             </Card>
 
-            {/* Recent Activity */}
-            <Card>
+            <Card className="border-border/60 bg-card/90">
               <CardHeader>
-                <CardTitle className="flex gap-2 items-center">
+                <CardTitle className="flex items-center gap-2 font-display">
                   <Clock className="h-5 w-5 text-primary" />
                   Recent Activity
                 </CardTitle>
@@ -367,20 +349,18 @@ export default function ForumsPage() {
                   <p className="text-sm text-muted-foreground">No activity yet.</p>
                 ) : (
                   forums
-                    .filter(f => f.last_post_date)
+                    .filter((f) => f.last_post_date)
                     .sort((a, b) => new Date(b.last_post_date || 0).getTime() - new Date(a.last_post_date || 0).getTime())
                     .slice(0, 5)
                     .map((forum) => (
                       <div
                         key={forum.id}
-                        className="p-3 rounded bg-muted hover:bg-muted/70 transition cursor-pointer"
+                        className="cursor-pointer rounded-2xl border border-border/60 bg-card/60 p-3 transition-colors hover:bg-card/80"
                         onClick={() => navigate(`/forums/${forum.slug}`)}
                       >
-                        <h4 className="text-sm font-medium line-clamp-1">{forum.title}</h4>
+                        <h4 className="line-clamp-1 text-sm font-medium text-foreground">{forum.title}</h4>
                         {forum.last_post_date && (
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(forum.last_post_date).toLocaleDateString()}
-                          </p>
+                          <p className="text-xs text-muted-foreground">{new Date(forum.last_post_date).toLocaleDateString()}</p>
                         )}
                       </div>
                     ))

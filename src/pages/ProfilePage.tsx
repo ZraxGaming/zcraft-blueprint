@@ -99,7 +99,7 @@ export default function ProfilePage() {
     return (
       <Layout
         seo={{
-          title: "ZCraft Network Profile â€” Manage Your Minecraft Account",
+          title: "ZCraft Network Profile - Manage Your Minecraft Account",
           description: "View and manage your ZCraft Network profile, forum posts, account settings, and Minecraft lifesteal SMP server statistics.",
           keywords: "zcraft profile, minecraft profile, player profile, account settings, forum posts, lifesteal profile, server statistics",
           url: "/profile",
@@ -119,7 +119,7 @@ export default function ProfilePage() {
     return (
       <Layout
         seo={{
-          title: "ZCraft Network Profile â€” Manage Your Minecraft Account",
+          title: "ZCraft Network Profile - Manage Your Minecraft Account",
           description: "View and manage your ZCraft Network profile, forum posts, account settings, and Minecraft lifesteal SMP server statistics.",
           keywords: "zcraft profile, minecraft profile, player profile, account settings, forum posts, lifesteal profile, server statistics",
           url: "/profile",
@@ -263,7 +263,7 @@ export default function ProfilePage() {
   return (
     <Layout
       seo={{
-        title: `${userProfile.username}'s Profile â€” ZCraft Network Minecraft Player`,
+        title: `${userProfile.username}'s Profile - ZCraft Network Minecraft Player`,
         description: `View ${userProfile.username}'s profile on ZCraft Network. Check out forum posts, join date, and activity on our premier Minecraft lifesteal SMP server.`,
         keywords: `zcraft profile, ${userProfile.username} profile, minecraft player profile, lifesteal player, server member, forum posts, ${userProfile.username}`,
         url: "/profile",

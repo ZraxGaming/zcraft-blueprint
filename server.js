@@ -485,6 +485,120 @@ app.post('/api/discord/join-server', async (req, res) => {
   }
 });
 
+// Cache exact member counts to avoid hammering Discord + hitting rate limits.
+// 10 minutes is a good balance between freshness and safety.
+let discordExactMemberCountCache = {
+  guildId: null,
+  fetchedAt: 0,
+  count: 0,
+};
+
+app.get('/api/discord/widget', async (_req, res) => {
+  try {
+    const guildId = process.env.DISCORD_GUILD_ID;
+    const botToken = process.env.DISCORD_BOT_TOKEN;
+
+    if (!guildId) {
+      return res.status(400).json({ error: 'Discord guild ID is not configured' });
+    }
+
+    const [guildResponse, widgetResponse] = await Promise.all([
+      botToken
+        ? fetch(`https://discord.com/api/v10/guilds/${guildId}?with_counts=true`, {
+            headers: {
+              Authorization: `Bot ${botToken}`,
+            },
+          }).catch(() => null)
+        : Promise.resolve(null),
+      fetch(`https://discord.com/api/guilds/${guildId}/widget.json`).catch(() => null),
+    ]);
+
+    const guildData = guildResponse && guildResponse.ok ? await guildResponse.json().catch(() => null) : null;
+    const widgetData = widgetResponse && widgetResponse.ok ? await widgetResponse.json().catch(() => null) : null;
+
+    if (!widgetData && !guildData) {
+      return res.status(502).json({ error: 'Discord widget data is unavailable' });
+    }
+
+    let exactMemberCount = null;
+    const cacheIsValid =
+      botToken &&
+      discordExactMemberCountCache.guildId === guildId &&
+      Date.now() - discordExactMemberCountCache.fetchedAt < 10 * 60 * 1000 &&
+      discordExactMemberCountCache.count > 0;
+
+    if (cacheIsValid) {
+      exactMemberCount = discordExactMemberCountCache.count;
+    } else if (botToken) {
+      // Exact counts require fetching members. This may fail if the bot lacks intents/permissions.
+      // When it fails, we fall back to approximate/widget counts.
+      try {
+        let after = undefined;
+        let total = 0;
+        let pages = 0;
+
+        while (pages < 100) {
+          const url = new URL(`https://discord.com/api/v10/guilds/${guildId}/members`);
+          url.searchParams.set('limit', '1000');
+          if (after) url.searchParams.set('after', after);
+
+          const resp = await fetch(url.toString(), {
+            headers: { Authorization: `Bot ${botToken}` },
+          });
+
+          if (!resp.ok) break;
+
+          const members = await resp.json().catch(() => null);
+          if (!Array.isArray(members)) break;
+
+          total += members.length;
+          pages += 1;
+
+          if (members.length < 1000) break;
+          const lastId = members[members.length - 1]?.user?.id;
+          if (!lastId) break;
+          after = lastId;
+
+          // Safety valve for very large guilds.
+          if (total > 200000) break;
+        }
+
+        if (total > 0) {
+          exactMemberCount = total;
+          discordExactMemberCountCache = {
+            guildId,
+            fetchedAt: Date.now(),
+            count: total,
+          };
+        }
+      } catch (_err) {
+        exactMemberCount = null;
+      }
+    }
+
+    const memberCount =
+      exactMemberCount ??
+      guildData?.member_count ??
+      guildData?.approximate_member_count ??
+      widgetData?.member_count ??
+      widgetData?.presence_count ??
+      0;
+
+    return res.json({
+      guildId,
+      name: guildData?.name || widgetData?.name || 'Discord Community',
+      widgetUrl: `https://discord.com/widget?id=${guildId}&theme=dark`,
+      inviteUrl: widgetData?.instant_invite || null,
+      memberCount,
+      memberCountExact: exactMemberCount !== null,
+      onlineCount: widgetData?.presence_count ?? 0,
+    });
+  } catch (error) {
+    console.error('Discord widget error:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+});
+
 app.post('/api/email/send', async (req, res) => {
   try {
     const admin = await requireAdmin(req);

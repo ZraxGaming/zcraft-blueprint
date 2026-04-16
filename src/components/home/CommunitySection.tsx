@@ -9,7 +9,7 @@
  * __BUILTIN_ANTI_PIRACY_CHECK_COMMUNITY_001__
  */
 
-import { MessageSquare, Bell, ArrowRight, ExternalLink } from "lucide-react";
+import { MessageSquare, Bell, ArrowRight, CalendarDays } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,8 +18,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { newsService } from "@/services/newsService";
 import { forumService } from "@/services/forumService";
-import { settingsService } from "@/services/settingsService";
-import { siteConfig } from "@/config/siteEnv";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { DiscordWidgetCard } from "@/components/community/DiscordWidgetCard";
 
 type Announcement = { id: string; title: string; date: string; type?: string; excerpt?: string };
 type ThreadPreview = { id: string; title: string; author: string; replies_count: number; category: string };
@@ -28,17 +28,19 @@ export function CommunitySection() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [forumPosts, setForumPosts] = useState<ThreadPreview[]>([]);
   const [loading, setLoading] = useState(true);
-  const [discordLink, setDiscordLink] = useState(siteConfig.discordUrl);
 
   useEffect(() => {
+    let active = true;
+
     const load = async () => {
       setLoading(true);
       try {
-        const [newsData, threadsData, discord] = await Promise.all([
+        const [newsData, threadsData] = await Promise.all([
           newsService.getNews(3, 0),
           forumService.getLatestThreads(3),
-          settingsService.getDiscordLink(),
         ]);
+
+        if (!active) return;
 
         setAnnouncements(
           (newsData || []).map((n: any) => ({
@@ -51,15 +53,18 @@ export function CommunitySection() {
         );
 
         setForumPosts(threadsData || []);
-        if (discord) setDiscordLink(discord);
       } catch (err) {
         console.error("Error loading community data:", err);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     load();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const containerVariants = {
@@ -76,48 +81,63 @@ export function CommunitySection() {
   };
 
   return (
-    <section className="py-24">
-      <div className="container mx-auto px-4">
-        <motion.div 
-          className="text-center mb-16"
+    <section className="relative overflow-hidden py-20 sm:py-24">
+      <div
+        className="absolute inset-0 opacity-70"
+        aria-hidden="true"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at top right, hsl(214 90% 56% / 0.1), transparent 30%), radial-gradient(circle at bottom left, hsl(38 100% 56% / 0.09), transparent 34%)",
+        }}
+      />
+
+      <div className="container mx-auto px-4 relative">
+        <motion.div
+          className="max-w-3xl mx-auto text-center mb-14 space-y-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
-            Community <span className="text-gradient">Hub</span>
+          <span className="section-eyebrow mx-auto">
+            <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
+            Community pulse
+          </span>
+          <h2 className="section-title text-balance">
+            News, forums, and the spaces where players actually talk
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Stay updated with the latest news and connect with fellow players.
+          <p className="section-copy">
+            The redesign keeps the latest updates easy to find and gives the community a stronger visual home, with
+            cards that feel consistent across desktop and mobile.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Announcements */}
+        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.55 }}
+            className="space-y-8"
           >
-            <Card className="card-hover border-0 bg-card h-full">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2 font-display text-xl">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Bell className="h-5 w-5 text-primary" />
+            <Card className="border-border/60 bg-card/90">
+              <CardHeader className="flex flex-row items-center justify-between gap-3 pb-4">
+                <CardTitle className="flex items-center gap-3 font-display text-xl">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Bell className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  Latest News
+                  Latest news
                 </CardTitle>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-transparent">
                   <Link to="/news" className="gap-1">
-                    View All <ArrowRight className="h-4 w-4" />
+                    View all
+                    <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardHeader>
               <CardContent>
-                <motion.div 
-                  className="space-y-4"
+                <motion.div
+                  className="space-y-3"
                   variants={containerVariants}
                   initial="hidden"
                   whileInView="visible"
@@ -126,63 +146,55 @@ export function CommunitySection() {
                   {loading ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="p-4 rounded-xl bg-muted/50 animate-pulse">
-                          <div className="h-4 w-20 bg-muted rounded mb-2" />
-                          <div className="h-5 w-3/4 bg-muted rounded mb-2" />
-                          <div className="h-4 w-full bg-muted rounded" />
+                        <div key={i} className="rounded-2xl border border-border/60 bg-card/70 p-4">
+                          <div className="h-4 w-20 rounded bg-blue-100 animate-pulse mb-2" />
+                          <div className="h-5 w-3/4 rounded bg-blue-100 animate-pulse mb-2" />
+                          <div className="h-4 w-full rounded bg-blue-100 animate-pulse" />
                         </div>
                       ))}
                     </div>
                   ) : announcements.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-8 text-center">No news available</p>
+                    <p className="py-8 text-center text-sm text-muted-foreground">No news available yet.</p>
                   ) : (
                     announcements.map((post) => (
                       <motion.div
                         key={post.id}
                         variants={itemVariants}
-                        className="p-4 rounded-xl bg-muted/50 hover:bg-muted transition-all duration-300 cursor-pointer group"
-                        whileHover={{ x: 4 }}
+                        className="rounded-2xl border border-border/60 bg-card/60 p-4 transition-colors hover:bg-card/80"
                       >
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="secondary" className="text-xs">
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                          <Badge variant="secondary" className="text-[11px] uppercase tracking-[0.18em]">
                             {post.type}
                           </Badge>
                           <span className="text-xs text-muted-foreground">{post.date}</span>
                         </div>
-                        <h4 className="font-semibold mb-1 group-hover:text-primary transition-colors">{post.title}</h4>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                        <h3 className="font-display text-lg font-bold text-foreground">{post.title}</h3>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground line-clamp-2">{post.excerpt}</p>
                       </motion.div>
                     ))
                   )}
                 </motion.div>
               </CardContent>
             </Card>
-          </motion.div>
 
-          {/* Forum Activity */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card className="card-hover border-0 bg-card h-full">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2 font-display text-xl">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <MessageSquare className="h-5 w-5 text-primary" />
+            <Card className="border-border/60 bg-card/90">
+              <CardHeader className="flex flex-row items-center justify-between gap-3 pb-4">
+                <CardTitle className="flex items-center gap-3 font-display text-xl">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <MessageSquare className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  Forum Activity
+                  Forum activity
                 </CardTitle>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-transparent">
                   <Link to="/forums" className="gap-1">
-                    Browse Forums <ArrowRight className="h-4 w-4" />
+                    Browse forums
+                    <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardHeader>
               <CardContent>
-                <motion.div 
-                  className="space-y-4"
+                <motion.div
+                  className="space-y-3"
                   variants={containerVariants}
                   initial="hidden"
                   whileInView="visible"
@@ -191,31 +203,30 @@ export function CommunitySection() {
                   {loading ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="p-4 rounded-xl bg-muted/50 animate-pulse">
-                          <div className="h-4 w-20 bg-muted rounded mb-2" />
-                          <div className="h-5 w-3/4 bg-muted rounded mb-2" />
-                          <div className="h-4 w-1/2 bg-muted rounded" />
+                        <div key={i} className="rounded-2xl border border-border/60 bg-card/70 p-4">
+                          <div className="h-4 w-20 rounded bg-blue-100 animate-pulse mb-2" />
+                          <div className="h-5 w-3/4 rounded bg-blue-100 animate-pulse mb-2" />
+                          <div className="h-4 w-1/2 rounded bg-blue-100 animate-pulse" />
                         </div>
                       ))}
                     </div>
                   ) : forumPosts.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-8 text-center">No forum posts available</p>
+                    <p className="py-8 text-center text-sm text-muted-foreground">No forum posts available yet.</p>
                   ) : (
                     forumPosts.map((post) => (
                       <motion.div
                         key={post.id}
                         variants={itemVariants}
-                        className="p-4 rounded-xl bg-muted/50 hover:bg-muted transition-all duration-300 cursor-pointer group"
-                        whileHover={{ x: 4 }}
+                        className="rounded-2xl border border-border/60 bg-card/60 p-4 transition-colors hover:bg-card/80"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="text-xs">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <Badge variant="outline" className="text-[11px] uppercase tracking-[0.18em]">
                             {post.category}
                           </Badge>
                           <span className="text-xs text-muted-foreground">{post.replies_count} replies</span>
                         </div>
-                        <h4 className="font-semibold mb-1 group-hover:text-primary transition-colors">{post.title}</h4>
-                        <p className="text-sm text-muted-foreground">by {post.author}</p>
+                        <h3 className="font-display text-lg font-bold text-foreground">{post.title}</h3>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">by {post.author}</p>
                       </motion.div>
                     ))
                   )}
@@ -223,46 +234,49 @@ export function CommunitySection() {
               </CardContent>
             </Card>
           </motion.div>
-        </div>
 
-        {/* Discord CTA */}
-        <motion.div 
-          className="mt-16 text-center"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <Card className="inline-block card-hover border-0 bg-gradient-to-r from-card to-card/80 max-w-3xl overflow-hidden relative">
-            {/* Background decoration */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10" />
-            <CardContent className="p-10 flex flex-col md:flex-row items-center gap-8 relative">
-              <motion.div 
-                className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <svg className="h-10 w-10 text-primary" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                </svg>
-              </motion.div>
-              <div className="text-left flex-1">
-                <h3 className="font-display text-2xl font-bold mb-2">Join our Discord</h3>
-                <p className="text-muted-foreground text-lg">
-                  Chat with players, get support, and stay updated on all server events.
-                </p>
-              </div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
-                <Button className="btn-primary-gradient h-14 px-8 text-lg gap-2" asChild>
-                  <a href={discordLink} target="_blank" rel="noopener noreferrer">
-                    Join Discord
-                    <ExternalLink className="h-5 w-5" />
-                  </a>
-                </Button>
-              </motion.div>
-            </CardContent>
-          </Card>
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55 }}
+            className="space-y-6"
+          >
+            <Card className="overflow-hidden border-border/60 bg-card/90">
+              <CardContent className="p-4 sm:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                      Visual pulse
+                    </div>
+                    <h3 className="mt-1 font-display text-2xl font-bold text-foreground">A place for big moments</h3>
+                  </div>
+                  <span className="mc-chip">Live style</span>
+                </div>
+                <div className="mt-4 image-frame pixel-border">
+                  <OptimizedImage
+                    src="/showcase/stats-card.png"
+                    alt="Minecraft action image highlighting the server's energetic presentation"
+                    priority
+                    className="aspect-[16/11] w-full object-cover"
+                  />
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-border/60 bg-card/70 p-4">
+                    <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Discord</div>
+                    <div className="mt-1 text-sm text-foreground">Support, announcements, and social chat.</div>
+                  </div>
+                  <div className="rounded-2xl border border-border/60 bg-card/70 p-4">
+                    <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Events</div>
+                    <div className="mt-1 text-sm text-foreground">Built to spotlight seasonal drops and server launches.</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <DiscordWidgetCard />
+          </motion.div>
+        </div>
       </div>
     </section>
   );

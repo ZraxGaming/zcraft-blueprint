@@ -25,6 +25,18 @@ export default function AuthCallbackPage() {
     browser: navigator.userAgent || null,
   });
 
+  const shouldSendLoginAlert = (userId: string) => {
+    if (typeof window === 'undefined') return true;
+    const key = `zcraft-login-alert-${userId}`;
+    const lastSent = Number(window.localStorage.getItem(key) || 0);
+    const tenMinutes = 10 * 60 * 1000;
+    if (Date.now() - lastSent > tenMinutes) {
+      window.localStorage.setItem(key, Date.now().toString());
+      return true;
+    }
+    return false;
+  };
+
   const formatLoginMethod = (method: string) => {
     const normalized = method.toLowerCase().trim();
 
@@ -65,7 +77,8 @@ export default function AuthCallbackPage() {
             session.user.user_metadata?.provider_id ||
             session.user.user_metadata?.sub ||
             null;
-          const provider = session.user.app_metadata?.provider;
+          const provider =
+            session.user.identities?.[0]?.provider || session.user.app_metadata?.provider;
           const avatarUrl =
             session.user.user_metadata?.avatar_url ||
             session.user.user_metadata?.picture ||
@@ -178,7 +191,7 @@ export default function AuthCallbackPage() {
             user_id: session.user.id,
             email: session.user.email || undefined,
           });
-          if (session.access_token) {
+          if (session.access_token && shouldSendLoginAlert(session.user.id)) {
             const browserContext = getBrowserContext();
             sendLoginAlert(
               session.access_token,

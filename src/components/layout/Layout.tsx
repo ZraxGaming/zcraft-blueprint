@@ -8,6 +8,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { usePerformanceMonitor } from "@/components/ui/OptimizedImage";
 import { siteConfig } from "@/config/siteEnv";
 import { Link, useLocation } from "react-router-dom";
+import { Megaphone, Sparkles } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -81,12 +82,10 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
       </a>
 
       {isAuthShell ? (
-        <header className="border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <header className="border-b border-border/60 bg-card/85 backdrop-blur supports-[backdrop-filter]:bg-card/75">
           <div className="container mx-auto flex h-16 items-center px-4">
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <span className="font-display text-lg font-bold text-primary-foreground">Z</span>
-              </div>
+              <img src={siteConfig.logo} alt="" aria-hidden="true" className="h-9 w-9 rounded-lg object-cover" />
               <span className="font-display text-lg font-bold text-gradient">{siteConfig.shortName}</span>
             </Link>
           </div>
@@ -97,25 +96,37 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
 
       {!isAuthShell && siteConfig.features.announcementBanner && announcementEnabled && announcementMessage && (
         <div
-          className="border-b border-primary/15 bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.92))] text-white"
+          className="announcement-strip text-foreground"
           role="banner"
           aria-live="polite"
         >
           <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left shadow-[0_18px_60px_rgba(15,23,42,0.25)] backdrop-blur-sm">
+            <div className="metal-surface metal-surface-strong mx-auto flex max-w-5xl flex-col gap-4 rounded-[1.5rem] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative z-10 flex items-start gap-4 text-left">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-card/55 text-primary">
+                  <Megaphone className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="metal-chip">Live announcement</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                      Server update
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-foreground/90 sm:text-[15px]">
+                    {announcementMessage}
+                  </p>
+                </div>
+              </div>
               {announcementImage && (
                 <img
                   src={announcementImage}
                   alt=""
-                  className="hidden sm:block h-12 w-12 rounded-xl object-cover border border-white/10"
+                  className="relative z-10 h-16 w-full max-w-[128px] rounded-2xl border border-border/60 object-cover"
                   aria-hidden="true"
                 />
               )}
-              <span className="inline-flex h-3 w-3 shrink-0 rounded-full bg-emerald-400 animate-pulse self-start mt-1.5" aria-hidden="true" />
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/60 mb-1">Live Announcement</p>
-                <p className="text-sm sm:text-[15px] text-white/95 break-words">{announcementMessage}</p>
-              </div>
             </div>
           </div>
         </div>

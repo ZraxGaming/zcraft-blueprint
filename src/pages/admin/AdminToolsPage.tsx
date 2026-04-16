@@ -205,14 +205,14 @@ export default function AdminToolsPage() {
               <div className="rounded-xl border border-border bg-muted/40 p-4">
                 <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Live Preview</div>
                 {bannerEnabled && bannerMessage.trim() ? (
-                  <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.92))] p-4 text-white">
+                  <div className="rounded-2xl border border-border/60 bg-card/90 p-4 text-foreground">
                     <div className="flex items-center gap-4">
                       {bannerImage && (
-                        <img src={bannerImage} alt="" className="hidden sm:block h-12 w-12 rounded-xl object-cover border border-white/10" aria-hidden="true" />
+                        <img src={bannerImage} alt="" className="hidden sm:block h-12 w-12 rounded-xl object-cover border border-border/60" aria-hidden="true" />
                       )}
                       <div>
-                        <p className="text-[11px] uppercase tracking-[0.24em] text-white/60 mb-1">Live Announcement</p>
-                        <p className="text-sm text-white/95">{bannerMessage}</p>
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground mb-1">Live Announcement</p>
+                        <p className="text-sm text-foreground/90">{bannerMessage}</p>
                       </div>
                     </div>
                   </div>

@@ -146,6 +146,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { timezone, locale, browser };
   };
 
+  const shouldSendLoginAlert = (userId: string) => {
+    if (typeof window === 'undefined') return true;
+    const key = `zcraft-login-alert-${userId}`;
+    const lastSent = Number(window.localStorage.getItem(key) || 0);
+    const tenMinutes = 10 * 60 * 1000;
+    if (Date.now() - lastSent > tenMinutes) {
+      window.localStorage.setItem(key, Date.now().toString());
+      return true;
+    }
+    return false;
+  };
+
   const formatLoginMethod = (method: string) => {
     const normalized = method.toLowerCase().trim();
 
@@ -313,13 +325,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           lastSignInAt: data.user.last_sign_in_at,
       });
 
-      if (data.session?.access_token) {
+      if (data.session?.access_token && shouldSendLoginAlert(data.user.id)) {
         const browserContext = getBrowserContext();
         sendLoginAlert(
           data.session.access_token,
           formatLoginMethod('password'),
-          data.user.user_metadata?.username || data.user.email?.split('@')[0] || null
-          ,
+          data.user.user_metadata?.username || data.user.email?.split('@')[0] || null,
           browserContext
         ).catch((alertError) => {
           console.warn('Login alert email failed:', alertError);

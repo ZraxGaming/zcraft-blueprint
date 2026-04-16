@@ -234,26 +234,71 @@ export default function AdminApplicationsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-3 md:grid-cols-2">
-                {roles.map((role) => (
-                  <button
-                    type="button"
-                    key={role.id}
-                    onClick={() => setSelectedRoleId(role.id)}
-                    className={`rounded-2xl border p-4 text-left transition-colors ${selectedRoleId === role.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40"}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium">{role.label}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{role.description || "No description yet."}</p>
+              <div className="overflow-hidden rounded-3xl border border-border bg-card/70 shadow-sm">
+                <div className="grid grid-cols-[2.5fr_1.5fr_1fr_2fr_1fr] gap-4 border-b border-border/60 bg-muted/50 px-4 py-3 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  <span>Role</span>
+                  <span>Key</span>
+                  <span>Open</span>
+                  <span>Description</span>
+                  <span className="text-right">Actions</span>
+                </div>
+                <div className="divide-y divide-border/60">
+                  {roles.map((role) => (
+                    <div
+                      key={role.id}
+                      className={`grid grid-cols-[2.5fr_1.5fr_1fr_2fr_1fr] gap-4 px-4 py-3 transition-colors ${selectedRoleId === role.id ? "bg-primary/5" : "hover:bg-muted/40"}`}
+                    >
+                      <Input
+                        value={role.label}
+                        onChange={(e) => updateRole(role.id, (item) => ({ ...item, label: e.target.value }))}
+                        className="min-w-0"
+                        placeholder="Role label"
+                      />
+                      <Input
+                        value={role.id}
+                        onChange={(e) => updateRole(role.id, (item) => ({ ...item, id: e.target.value }))}
+                        className="min-w-0"
+                        placeholder="role_key"
+                      />
+                      <div className="flex items-center">
+                        <Switch
+                          checked={role.enabled}
+                          onCheckedChange={(checked) => updateRole(role.id, (item) => ({ ...item, enabled: checked }))}
+                          aria-label={`Toggle ${role.label} application open`}
+                        />
                       </div>
-                      <Badge variant={role.enabled ? "default" : "outline"}>{role.enabled ? "Open" : "Closed"}</Badge>
+                      <Input
+                        value={role.description}
+                        onChange={(e) => updateRole(role.id, (item) => ({ ...item, description: e.target.value }))}
+                        className="min-w-0"
+                        placeholder="Optional description"
+                      />
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant={selectedRoleId === role.id ? "secondary" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedRoleId(role.id)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => {
+                            const next = roles.filter((item) => item.id !== role.id);
+                            setRoles(next);
+                            setSelectedRoleId(next[0]?.id || "");
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </button>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -432,40 +477,49 @@ export default function AdminApplicationsPage() {
             <CardHeader>
               <CardTitle>Submission Queue</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="overflow-x-auto">
               {applications.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No applications submitted yet.</p>
               ) : (
-                applications.map((application) => (
-                  <button
-                    type="button"
-                    key={application.id}
-                    onClick={() => {
-                      setSelected(application);
-                      setReviewNotes(application.notes || "");
-                    }}
-                    className="w-full text-left rounded-xl border border-border p-4 hover:bg-muted/40 transition-colors"
-                  >
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <div>
-                        <p className="font-medium">{application.user?.username || "Unknown User"}</p>
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground mt-1">
-                          {roles.find((role) => role.id === application.target_role)?.label || application.target_role}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge variant="secondary">{application.target_role}</Badge>
-                        <Badge variant={application.status === "accepted" ? "default" : application.status === "rejected" ? "destructive" : "outline"}>
-                          {application.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{application.user?.email}</p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Submitted {new Date(application.created_at).toLocaleString()}
-                    </p>
-                  </button>
-                ))
+                <div className="min-w-full overflow-hidden rounded-3xl border border-border">
+                  <div className="grid grid-cols-[1.2fr_1fr_1fr_0.8fr] gap-4 border-b border-border/60 bg-muted/50 px-4 py-3 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                    <span>Applicant</span>
+                    <span>Role</span>
+                    <span>Status</span>
+                    <span className="text-right">Submitted</span>
+                  </div>
+                  <div className="divide-y divide-border/60">
+                    {applications.map((application) => (
+                      <button
+                        key={application.id}
+                        type="button"
+                        onClick={() => {
+                          setSelected(application);
+                          setReviewNotes(application.notes || "");
+                        }}
+                        className="grid min-w-full grid-cols-[1.2fr_1fr_1fr_0.8fr] gap-4 px-4 py-4 text-left transition-colors hover:bg-muted/40"
+                      >
+                        <div>
+                          <p className="font-medium">{application.user?.username || "Unknown User"}</p>
+                          <p className="text-sm text-muted-foreground">{application.user?.email}</p>
+                        </div>
+                        <div>
+                          <p className="font-medium">{roles.find((role) => role.id === application.target_role)?.label || application.target_role}</p>
+                          <p className="text-xs text-muted-foreground">{application.target_role}</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Badge variant={application.status === "accepted" ? "default" : application.status === "rejected" ? "destructive" : "outline"}>
+                            {application.status}
+                          </Badge>
+                          <p className="text-xs text-muted-foreground">{application.user?.username ? "" : "Unverified"}</p>
+                        </div>
+                        <div className="text-right text-xs text-muted-foreground self-center">
+                          {new Date(application.created_at).toLocaleString()}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>

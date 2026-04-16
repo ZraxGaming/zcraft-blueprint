@@ -36,7 +36,7 @@ export const siteConfig = {
   storeUrl: toString(env.VITE_STORE_URL, "https://store.z-craft.xyz"),
   statusUrl: toString(env.VITE_STATUS_URL, "https://status.z-craft.xyz"),
   wikiUrl: toString(env.VITE_WIKI_URL, "https://wiki.z-craft.xyz"),
-  appealUrl: toString(env.VITE_APPEAL_URL, "/appeal"),
+  appealUrl: toString(env.VITE_APPEAL_URL, "https://appeal.z-craft.xyz"),
   bansUrl: toString(env.VITE_BANS_URL, "https://bans.z-craft.xyz"),
   forumsUrl: toString(env.VITE_FORUMS_URL, "/forums"),
   newsUrl: toString(env.VITE_NEWS_URL, "/news"),
@@ -60,8 +60,8 @@ export const siteConfig = {
     author: toString(env.VITE_SEO_AUTHOR, "ZCraft Network"),
   },
   appeal: {
-    mode: toString(env.VITE_APPEAL_MODE, "form"),
-    redirectUrl: toString(env.VITE_APPEAL_REDIRECT_URL, ""),
+    mode: toString(env.VITE_APPEAL_MODE, "redirect"),
+    redirectUrl: toString(env.VITE_APPEAL_REDIRECT_URL, "https://appeal.z-craft.xyz"),
   },
   pageSeo: {
     support: {
@@ -133,24 +133,18 @@ export type NavLink = {
 };
 
 export const navLinks: NavLink[] = [
-  { name: "Home", path: "/", feature: "homeHero" },
   { name: "Play", path: "/play", feature: "play" },
-  { name: "Forums", path: "/forums", feature: "forums" },
-  { name: "News", path: "/news", feature: "news" },
-  { name: "Changelogs", path: "/events", feature: "changelogs" },
-  { name: "Appeal", path: siteConfig.appealUrl, external: siteConfig.appealUrl.startsWith("http"), feature: "appeal" },
-  { name: "Server Listings", path: "/server-listings", feature: "serverListings" },
   { name: "Rules", path: "/rules", feature: "rules" },
-  { name: "Status", path: siteConfig.statusUrl, external: true, feature: "status" },
+  { name: "Staff", path: "/staff", feature: "staff" },
+  { name: "Store", path: siteConfig.storeUrl, external: true, feature: "store" },
 ];
 
 export const footerSections: Record<string, NavLink[]> = {
   Server: [
-    { name: "Home", path: "/", feature: "homeHero" },
     { name: "Play", path: "/play", feature: "play" },
-    { name: "Status", path: siteConfig.statusUrl, external: true, feature: "status" },
+    { name: "Server Listings", path: "/server-listings", feature: "serverListings" },
     { name: "Rules", path: "/rules", feature: "rules" },
-    { name: "Bans", path: siteConfig.bansUrl, external: true, feature: "bans" },
+    { name: "Status", path: siteConfig.statusUrl, external: true, feature: "status" },
   ],
   Community: [
     { name: "Forums", path: "/forums", feature: "forums" },

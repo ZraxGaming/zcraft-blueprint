@@ -13,7 +13,11 @@ export function MaintenanceGate({ children }: MaintenanceGateProps) {
   const { settings, loading: settingsLoading } = useSettings();
   const location = useLocation();
   const navigate = useNavigate();
-  const isMaintenanceMode = siteConfig.features.maintenanceBanner && settings?.maintenance_mode === 'true';
+  
+  // Override maintenance mode in development/local environment
+  const isDevelopment = import.meta.env.DEV || import.meta.env.MODE === 'development';
+  const isMaintenanceMode = !isDevelopment && siteConfig.features.maintenanceBanner && settings?.maintenance_mode === 'true';
+  
   const maintenanceAllowedPaths = [
     "/maintenance",
     "/login",
