@@ -1,13 +1,12 @@
 import { ReactNode, useEffect } from "react";
-import { Navbar } from "./Navbar";
-import { Footer } from "./Footer";
+import { Link, useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { CookieBanner } from "./CookieBanner";
 import Seo, { SeoProps } from "@/components/seo/Seo";
 import Breadcrumbs, { Crumb } from "@/components/ui/Breadcrumbs";
 import { useSettings } from "@/contexts/SettingsContext";
-import { usePerformanceMonitor } from "@/components/ui/OptimizedImage";
 import { siteConfig } from "@/config/siteEnv";
-import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 
 interface LayoutProps {
   children: ReactNode;
@@ -19,17 +18,6 @@ interface LayoutProps {
 export function Layout({ children, seo, breadcrumbs, skipToContent = "main-content" }: LayoutProps) {
   const { settings } = useSettings();
   const location = useLocation();
-  const announcementEnabled = settings?.announcementEnabled || settings?.announcement_enabled === "true";
-  const announcementMessage = settings?.announcementMessage || settings?.announcement_message || null;
-  const announcementImage = settings?.announcementImage || settings?.announcement_image || null;
-  const isAuthShell =
-    location.pathname === "/login" ||
-    location.pathname === "/register" ||
-    location.pathname === "/forgot-password" ||
-    location.pathname === "/reset-password" ||
-    location.pathname === "/auth/callback" ||
-    location.pathname === "/auth/discord/callback" ||
-    location.pathname === "/verify-identity";
 
   const seoDefaults = {
     title: settings?.seo_title || siteConfig.seo.title,
@@ -39,10 +27,7 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
     type: settings?.seo_type || siteConfig.seo.type,
   };
 
-  const mergedSeo: SeoProps = {
-    ...seoDefaults,
-    ...(seo || {}),
-  };
+  const mergedSeo: SeoProps = { ...seoDefaults, ...(seo || {}) };
 
   if (breadcrumbs?.length) {
     mergedSeo.breadcrumbs = breadcrumbs.map((crumb) => ({
@@ -51,89 +36,48 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
     }));
   }
 
-  usePerformanceMonitor("Layout");
-
-  useEffect(() => {
-    const handleSkipLink = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && e.target instanceof HTMLAnchorElement && e.target.getAttribute("href") === `#${skipToContent}`) {
-        e.preventDefault();
-        const mainContent = document.getElementById(skipToContent);
-        if (mainContent) {
-          mainContent.focus();
-          mainContent.scrollIntoView({ behavior: "smooth" });
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleSkipLink);
-    return () => document.removeEventListener("keydown", handleSkipLink);
-  }, [skipToContent]);
-
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-bento-bg text-primary-foreground">
       <Seo {...mergedSeo} />
 
-      <a
-        href={`#${skipToContent}`}
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      {/* Minimal top bar */}
+      <motion.nav
+        className="sticky top-0 z-50 bg-bento-bg/80 backdrop-blur-xl border-b border-bento-border"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
       >
-        Skip to main content
-      </a>
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Link>
+          <Link to="/" className="font-display text-lg font-bold text-primary">
+            {siteConfig.shortName}
+          </Link>
+        </div>
+      </motion.nav>
 
-      {isAuthShell ? (
-        <header className="border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
-          <div className="container mx-auto flex h-16 items-center px-4">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <span className="font-display text-lg font-bold text-primary-foreground">Z</span>
-              </div>
-              <span className="font-display text-lg font-bold text-gradient">{siteConfig.shortName}</span>
-            </Link>
-          </div>
-        </header>
-      ) : (
-        <Navbar />
-      )}
-
-      {!isAuthShell && siteConfig.features.announcementBanner && announcementEnabled && announcementMessage && (
-        <div
-          className="border-b border-primary/15 bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.92))] text-white"
-          role="banner"
-          aria-live="polite"
-        >
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left shadow-[0_18px_60px_rgba(15,23,42,0.25)] backdrop-blur-sm">
-              {announcementImage && (
-                <img
-                  src={announcementImage}
-                  alt=""
-                  className="hidden sm:block h-12 w-12 rounded-xl object-cover border border-white/10"
-                  aria-hidden="true"
-                />
-              )}
-              <span className="inline-flex h-3 w-3 shrink-0 rounded-full bg-emerald-400 animate-pulse self-start mt-1.5" aria-hidden="true" />
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/60 mb-1">Live Announcement</p>
-                <p className="text-sm sm:text-[15px] text-white/95 break-words">{announcementMessage}</p>
-              </div>
-            </div>
-          </div>
+      {breadcrumbs && (
+        <div className="max-w-5xl mx-auto px-4 pt-4">
+          <Breadcrumbs crumbs={breadcrumbs} />
         </div>
       )}
 
-      {breadcrumbs && <Breadcrumbs crumbs={breadcrumbs} />}
-
-      <main
+      <motion.main
         id={skipToContent}
-        className="flex-1 focus:outline-none motion-safe:animate-fade-in"
+        className="flex-1 focus:outline-none px-4 pb-16 pt-6"
         tabIndex={-1}
         role="main"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
       >
-        {children}
-      </main>
-
-      {!isAuthShell && siteConfig.features.cookieBanner && <CookieBanner />}
-      {!isAuthShell && <Footer />}
+        <div className="max-w-5xl mx-auto">{children}</div>
+      </motion.main>
     </div>
   );
 }
