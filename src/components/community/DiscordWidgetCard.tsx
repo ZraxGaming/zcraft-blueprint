@@ -32,7 +32,7 @@ export function DiscordWidgetCard() {
         if (!guildId) throw new Error("Missing guild ID");
 
         const res = await fetch(
-          `https://discord.com/api/guilds/${guildId}/widget.json`
+          `https://discord.com/api/guilds/1453950844469772485/widget.json`
         );
 
         if (!res.ok) throw new Error("Widget disabled or inaccessible");
