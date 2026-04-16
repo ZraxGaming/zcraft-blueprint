@@ -31,7 +31,7 @@ export function Footer() {
             )}
           </div>
 
-          {Object.entries(enabledFooterSections).map(([category, links]) => (
+          {Object.entries(enabledFooterSections).map(([category, links]: [string, any[]]) => (
             <div key={category}>
               <h4 className="mb-4 font-display text-sm font-semibold text-foreground">
                 {category}

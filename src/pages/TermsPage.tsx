@@ -1,103 +1,39 @@
-import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { BentoPageLayout } from "@/components/layout/BentoPageLayout";
+
+const sections = [
+  { title: "1. Acceptance of Terms", content: "By accessing or using ZCraft services, including our Minecraft server, website, forums, and Discord, you agree to be bound by these Terms of Service." },
+  { title: "2. Account Responsibility", content: "You are responsible for maintaining the security of your account. Any actions taken through your account are your responsibility. Do not share your account credentials." },
+  { title: "3. Server Rules", content: "All players must follow our server rules, available on our Rules page. Violations may result in warnings, mutes, temporary bans, or permanent bans." },
+  { title: "4. Purchases & Refunds", content: "All purchases made through our store are final. Refunds may be issued at our discretion. Chargebacks will result in permanent bans." },
+  { title: "5. Intellectual Property", content: "ZCraft and its original content are owned by ZCraft and protected by international copyright and trademark laws. Minecraft is a trademark of Mojang AB." },
+  { title: "6. Disclaimer", content: "Our services are provided 'as is' without warranties of any kind. We are not liable for any data loss, downtime, or damages." },
+  { title: "7. Changes to Terms", content: "We reserve the right to modify these terms at any time. Continued use constitutes acceptance of the new terms." },
+  { title: "8. Contact", content: "For questions about these Terms, contact us at legal@zcraft.net or through our support system." },
+];
 
 export default function TermsPage() {
   return (
-    <Layout
+    <BentoPageLayout
+      title="Terms of Service"
+      subtitle="Last updated: January 2, 2025"
       seo={{
         title: "ZCraft Network Terms of Service — Server Usage Agreement",
-        description: "ZCraft Network Terms of Service: Complete terms and conditions for using our Minecraft lifesteal SMP server, forums, Discord, and all community services.",
-        keywords: "zcraft terms of service, minecraft server terms, terms and conditions, server agreement, user agreement, service terms, minecraft tos",
-        url: "/terms",
-        type: "website",
-        tags: ["terms of service", "user agreement", "server rules", "legal"]
+        description: "ZCraft Network Terms of Service: Complete terms and conditions for using our services.",
+        keywords: "zcraft terms of service, terms and conditions, server agreement",
+        url: "/terms", type: "website",
       }}
     >
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-              Terms of <span className="text-gradient">Service</span>
-            </h1>
-            <p className="text-muted-foreground mb-8">Last updated: January 2, 2025</p>
-
-            <Card className="border-0 bg-card">
-              <CardContent className="p-8 space-y-8">
-                <section>
-                  <h2 className="font-display text-xl font-semibold mb-4">1. Acceptance of Terms</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    By accessing or using ZCraft services, including our Minecraft server, website, forums, and Discord, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
-                  </p>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h2 className="font-display text-xl font-semibold mb-4">2. Account Responsibility</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    You are responsible for maintaining the security of your account. Any actions taken through your account are your responsibility. Do not share your account credentials with others. We reserve the right to suspend or terminate accounts that violate our rules.
-                  </p>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h2 className="font-display text-xl font-semibold mb-4">3. Server Rules</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    All players must follow our server rules, available on our Rules page. Violations may result in warnings, mutes, temporary bans, or permanent bans at the discretion of our staff team.
-                  </p>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h2 className="font-display text-xl font-semibold mb-4">4. Purchases & Refunds</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    All purchases made through our store are final. Refunds may be issued at our discretion for technical issues or billing errors. Chargebacks will result in permanent bans. Virtual items have no real-world monetary value and cannot be exchanged or transferred.
-                  </p>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h2 className="font-display text-xl font-semibold mb-4">5. Intellectual Property</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    ZCraft and its original content, features, and functionality are owned by ZCraft and are protected by international copyright, trademark, and other intellectual property laws. Minecraft is a trademark of Mojang AB.
-                  </p>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h2 className="font-display text-xl font-semibold mb-4">6. Disclaimer</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Our services are provided "as is" without warranties of any kind. We do not guarantee uninterrupted service and are not liable for any data loss, downtime, or damages resulting from the use of our services.
-                  </p>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h2 className="font-display text-xl font-semibold mb-4">7. Changes to Terms</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    We reserve the right to modify these terms at any time. Continued use of our services after changes constitutes acceptance of the new terms. Major changes will be announced on our Discord and forums.
-                  </p>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h2 className="font-display text-xl font-semibold mb-4">8. Contact</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    For questions about these Terms of Service, contact us at legal@zcraft.net or through our support system.
-                  </p>
-                </section>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="max-w-3xl mx-auto">
+        <div className="bento-card p-8 space-y-8">
+          {sections.map((s, i) => (
+            <section key={i}>
+              <h2 className="font-display text-xl font-semibold text-primary-foreground mb-3">{s.title}</h2>
+              <p className="text-primary-foreground/50 leading-relaxed text-sm">{s.content}</p>
+              {i < sections.length - 1 && <div className="border-b border-bento-border mt-8" />}
+            </section>
+          ))}
         </div>
-      </section>
-    </Layout>
+      </div>
+    </BentoPageLayout>
   );
 }

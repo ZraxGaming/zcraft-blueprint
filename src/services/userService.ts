@@ -112,7 +112,7 @@ export async function assignRole(userId: string, role: string) {
     .from('user_roles')
     .insert({
       user_id: userId,
-      role,
+      role: role as any,
     })
     .select()
     .single();
@@ -137,7 +137,7 @@ export async function removeRole(userId: string, role: string) {
     .from('user_roles')
     .delete()
     .eq('user_id', userId)
-    .eq('role', role);
+    .eq('role', role as any);
 
   if (error) throw error;
 
