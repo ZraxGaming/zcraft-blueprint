@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import zcraftLogo from "@/assets/zcraft-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { siteConfig } from "@/config/siteEnv";
+import { useDiscordMembers } from "@/hooks/useDiscordMembers";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 24, scale: 0.97 },
@@ -12,15 +13,11 @@ const cardVariants = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: {
-      delay: i * 0.08,
-      duration: 0.5,
-      ease: "easeOut" as const,
-    },
+    transition: { delay: i * 0.08, duration: 0.5, ease: "easeOut" as const },
   }),
 };
 
-const hoverTransition = { type: "spring" as const, stiffness: 400, damping: 25 };
+const hover = { type: "spring" as const, stiffness: 400, damping: 25 };
 
 function DiscordIcon({ className }: { className?: string }) {
   return (
@@ -32,22 +29,18 @@ function DiscordIcon({ className }: { className?: string }) {
 
 export function HeroSection() {
   const [copied, setCopied] = useState(false);
-  const [playerCount, setPlayerCount] = useState<number>(0);
+  const [playerCount, setPlayerCount] = useState(0);
+  const { count: discordCount, online: discordOnline } = useDiscordMembers(1200);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await supabase
-          .from("admin_settings")
-          .select("key, value")
-          .eq("key", "total_players")
-          .single();
+    supabase
+      .from("admin_settings")
+      .select("key, value")
+      .eq("key", "total_players")
+      .single()
+      .then(({ data }) => {
         if (data) setPlayerCount(parseInt(data.value) || 0);
-      } catch (error) {
-        console.error("Failed to fetch stats:", error);
-      }
-    };
-    fetchStats();
+      });
   }, []);
 
   const copyIP = () => {
@@ -59,36 +52,22 @@ export function HeroSection() {
   return (
     <section className="bento-container" aria-label="Hero">
       <div className="bento-grid w-full">
-        {/* Row 1: Logo (left) | Media Card (right) */}
+        {/* Logo */}
         <motion.div
-          className="bento-card col-span-5 row-span-1 flex flex-col items-center justify-center p-6 bg-primary"
-          custom={0}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.02 }}
-          transition={hoverTransition}
+          className="bento-card col-span-5 row-span-1 flex items-center justify-center p-6 bg-primary"
+          custom={0} variants={cardVariants} initial="hidden" animate="visible"
+          whileHover={{ scale: 1.02 }} transition={hover}
         >
-          <Link to="/" className="flex items-center justify-center w-full h-full" aria-label={`${siteConfig.name} home`}>
-            <img
-              src={zcraftLogo}
-              alt={siteConfig.name}
-              className="h-24 md:h-32 w-auto object-contain drop-shadow-2xl"
-              loading="eager"
-              width={128}
-              height={128}
-            />
+          <Link to="/" aria-label={`${siteConfig.name} home`} className="flex items-center justify-center w-full h-full">
+            <img src={zcraftLogo} alt={siteConfig.name} className="h-24 md:h-32 w-auto object-contain drop-shadow-2xl" loading="eager" width={128} height={128} />
           </Link>
         </motion.div>
 
+        {/* Media / News */}
         <motion.div
           className="bento-card col-span-7 row-span-1 relative min-h-[200px] overflow-hidden group"
-          custom={1}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.01 }}
-          transition={hoverTransition}
+          custom={1} variants={cardVariants} initial="hidden" animate="visible"
+          whileHover={{ scale: 1.01 }} transition={hover}
         >
           <Link to="/news" className="block w-full h-full" aria-label="Latest news">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bento-card/90 z-10" />
@@ -97,16 +76,12 @@ export function HeroSection() {
               <span className="font-display text-xl font-bold text-primary-foreground drop-shadow-lg">Media</span>
             </div>
             <div className="absolute bottom-4 left-4 z-20">
-              <span className="text-sm text-primary-foreground/80 group-hover:text-primary-foreground transition-colors">
-                Latest Updates →
-              </span>
+              <span className="text-sm text-primary-foreground/80 group-hover:text-primary-foreground transition-colors">Latest Updates →</span>
             </div>
             <div className="absolute inset-0 flex items-center justify-center opacity-20 group-hover:opacity-30 transition-opacity">
               <div className="grid grid-cols-4 gap-2">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="w-8 h-8 rounded bg-primary/40"
+                  <motion.div key={i} className="w-8 h-8 rounded bg-primary/40"
                     animate={{ rotate: [0, 5, -5, 0], y: [0, -4, 0] }}
                     transition={{ duration: 4, delay: i * 0.3, repeat: Infinity, ease: "easeInOut" }}
                   />
@@ -116,30 +91,15 @@ export function HeroSection() {
           </Link>
         </motion.div>
 
-        {/* Row 2: IP Copy Button */}
-        <motion.div
-          className="col-span-5 flex items-center justify-center"
-          custom={2}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.button
-            onClick={copyIP}
+        {/* IP Copy */}
+        <motion.div className="col-span-5 flex items-center justify-center" custom={2} variants={cardVariants} initial="hidden" animate="visible">
+          <motion.button onClick={copyIP}
             className="bento-card flex items-center gap-3 px-5 py-3 w-full justify-center group"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            transition={hoverTransition}
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={hover}
             aria-label={copied ? "IP copied" : `Copy server IP ${siteConfig.playIp}`}
           >
-            {copied ? (
-              <Check className="h-4 w-4 text-emerald-400" />
-            ) : (
-              <Copy className="h-4 w-4 text-primary-foreground/60 group-hover:text-primary transition-colors" />
-            )}
-            <span className="font-mono text-sm font-semibold text-primary-foreground uppercase tracking-wider">
-              {siteConfig.playIp}
-            </span>
+            {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4 text-primary-foreground/60 group-hover:text-primary transition-colors" />}
+            <span className="font-mono text-sm font-semibold text-primary-foreground uppercase tracking-wider">{siteConfig.playIp}</span>
             <span className="flex items-center gap-1.5 ml-2 bg-bento-card-hover rounded-full px-3 py-1">
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs font-medium text-primary-foreground/80">{playerCount}</span>
@@ -147,44 +107,34 @@ export function HeroSection() {
           </motion.button>
         </motion.div>
 
-        {/* Row 2-3: Discord Widget (left) | Stats Card (right) */}
+        {/* Discord Widget */}
         <motion.a
-          href={siteConfig.discordUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={siteConfig.discordUrl} target="_blank" rel="noopener noreferrer"
           className="bento-card col-span-5 row-span-1 flex flex-col items-center justify-center p-8 gap-4 group"
-          custom={3}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.03, y: -4 }}
-          transition={hoverTransition}
-          aria-label={`Join ${siteConfig.name} Discord - 1,200+ members`}
+          custom={3} variants={cardVariants} initial="hidden" animate="visible"
+          whileHover={{ scale: 1.03, y: -4 }} transition={hover}
+          aria-label={`Join ${siteConfig.name} Discord - ${discordCount.toLocaleString()} members`}
         >
-          <motion.div
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          >
+          <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
             <DiscordIcon className="h-14 w-14 text-[#5865F2] drop-shadow-lg" />
           </motion.div>
-          <span className="font-display text-3xl font-bold text-primary-foreground">1,200+</span>
+          <span className="font-display text-3xl font-bold text-primary-foreground">
+            {discordCount.toLocaleString()}+
+          </span>
           <div className="flex items-center gap-2">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-sm text-primary-foreground/60">Discord Members</span>
+            <span className="text-sm text-primary-foreground/60">
+              {discordOnline > 0 ? `${discordOnline.toLocaleString()} Online` : "Discord Members"}
+            </span>
           </div>
-          <span className="text-xs text-primary/80 mt-1 font-medium group-hover:text-primary transition-colors">
-            Join the Discord →
-          </span>
+          <span className="text-xs text-primary/80 mt-1 font-medium group-hover:text-primary transition-colors">Join the Discord →</span>
         </motion.a>
 
+        {/* Stats */}
         <motion.div
           className="bento-card col-span-7 row-span-1 relative min-h-[200px] overflow-hidden group"
-          custom={4}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.01 }}
-          transition={hoverTransition}
+          custom={4} variants={cardVariants} initial="hidden" animate="visible"
+          whileHover={{ scale: 1.01 }} transition={hover}
         >
           <Link to="/status" className="block w-full h-full" aria-label="Server stats">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bento-card/90 z-10" />
@@ -193,16 +143,12 @@ export function HeroSection() {
               <span className="font-display text-xl font-bold text-primary-foreground drop-shadow-lg">Stats</span>
             </div>
             <div className="absolute bottom-4 left-4 z-20">
-              <span className="text-sm text-primary-foreground/80 group-hover:text-primary-foreground transition-colors">
-                View Server Stats →
-              </span>
+              <span className="text-sm text-primary-foreground/80 group-hover:text-primary-foreground transition-colors">View Server Stats →</span>
             </div>
             <div className="absolute inset-0 flex items-center justify-center opacity-15 group-hover:opacity-25 transition-opacity">
               <div className="grid grid-cols-3 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="w-10 h-10 rounded-lg bg-primary/30"
+                  <motion.div key={i} className="w-10 h-10 rounded-lg bg-primary/30"
                     animate={{ scale: [1, 1.1, 1], rotate: [0, 8, -8, 0] }}
                     transition={{ duration: 5, delay: i * 0.4, repeat: Infinity, ease: "easeInOut" }}
                   />
@@ -212,17 +158,13 @@ export function HeroSection() {
           </Link>
         </motion.div>
 
-        {/* Row 3: How To Join (full width) */}
+        {/* How To Join */}
         <motion.div
           className="bento-card col-span-12 relative min-h-[180px] overflow-hidden group"
-          custom={5}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.005 }}
-          transition={hoverTransition}
+          custom={5} variants={cardVariants} initial="hidden" animate="visible"
+          whileHover={{ scale: 1.005 }} transition={hover}
         >
-          <Link to="/play" className="block w-full h-full" aria-label="How to join the server">
+          <Link to="/play" className="block w-full h-full" aria-label="How to join">
             <div className="absolute inset-0 bg-gradient-to-r from-bento-card via-transparent to-bento-card z-10" />
             <div className="absolute inset-0 bg-primary/5" />
             <div className="absolute top-4 left-6 z-20">
@@ -235,9 +177,7 @@ export function HeroSection() {
               <div className="font-mono text-lg text-primary-foreground font-medium">{siteConfig.playIp}</div>
             </div>
             <div className="absolute bottom-6 right-6 z-20">
-              <span className="text-sm text-primary/80 font-medium group-hover:text-primary transition-colors">
-                Start Playing →
-              </span>
+              <span className="text-sm text-primary/80 font-medium group-hover:text-primary transition-colors">Start Playing →</span>
             </div>
           </Link>
         </motion.div>
