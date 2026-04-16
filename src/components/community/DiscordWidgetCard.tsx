@@ -27,7 +27,7 @@ export function DiscordWidgetCard() {
 
     async function load() {
       try {
-        const guildId = siteConfig.discordGuildId;
+        const guildId = 1453950844469772485;
 
         if (!guildId) throw new Error("Missing guild ID");
 
