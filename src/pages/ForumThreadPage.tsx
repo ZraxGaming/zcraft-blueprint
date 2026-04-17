@@ -75,7 +75,7 @@ export default function ForumThreadPage() {
         .eq("post_id", threadId)
         .order("created_at", { ascending: true });
 
-      setReplies((repliesData || []) as Reply[]);
+      setReplies((repliesData || []) as unknown as Reply[]);
 
       // Load likes for each reply
       if (repliesData && repliesData.length > 0) {
