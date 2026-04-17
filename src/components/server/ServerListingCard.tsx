@@ -1,55 +1,117 @@
-import { Button } from "@/components/ui/button";
-import { Moon, Sun, User, Shield, MessageCircle } from "lucide-react";
+/**
+ * ============================================================
+ * Server Listing Card Component - Protected by BuiltByBit Anti-Piracy
+ * © 2024-2026 ZCraft. All rights reserved.
+ * ============================================================
+ */
+
 import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, Copy, Check, ArrowRight } from "lucide-react";
+import { copyToClipboard } from "@/lib/clipboard";
+import { useQuery } from "@tanstack/react-query";
+import { fetchMinecraftServerStatus } from "@/services/serverService";
+import { motion } from "framer-motion";
+import { toast } from "@/components/ui/use-toast";
 
-export function Navbar() {
-  const [dark, setDark] = useState(false);
+export function ServerListingCard({ name, url, host }: { name: string; url: string; host?: string }) {
+  const [copied, setCopied] = useState(false);
 
-  const toggleDark = () => {
-    document.documentElement.classList.toggle("dark");
-    setDark(!dark);
+  const { data, isLoading } = useQuery({
+    queryKey: host ? ["serverStatus", host] : ["serverStatus", url],
+    queryFn: host ? () => fetchMinecraftServerStatus(host) : async () => null,
+    enabled: !!host,
+    refetchInterval: 30000,
+    staleTime: 15000,
+  });
+
+  const onCopy = async () => {
+    const address = host ?? url;
+    const ok = await copyToClipboard(address);
+    if (ok) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+      toast({ title: "Copied", description: `${address} copied to clipboard.` });
+    } else {
+      toast({ title: "Copy failed", description: "Unable to copy address.", variant: "destructive" });
+    }
+  };
+
+  const onJoin = async () => {
+    if (!host) return onCopy();
+    try {
+      await copyToClipboard(host);
+      toast({ title: "Ready to join", description: `Server address ${host} copied. Paste it into Minecraft to join.` });
+    } catch {
+      toast({ title: "Copy failed", description: "Unable to copy address.", variant: "destructive" });
+    }
   };
 
   return (
-    <nav className="w-full border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+      <Card className="border-border/60 bg-card/90">
+        <CardHeader className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-lg font-display">{name}</CardTitle>
+              {host && (
+                <Badge variant="secondary" className="text-[11px] uppercase tracking-[0.18em]">
+                  <span className={`mr-1 ${data?.online ? "text-emerald-400" : isLoading ? "text-muted-foreground" : "text-red-400"}`}>
+                    {data?.online ? "Online" : isLoading ? "Loading" : "Offline"}
+                  </span>
+                </Badge>
+              )}
+            </div>
+            <CardDescription className="mt-1 break-all text-sm text-muted-foreground">{url}</CardDescription>
 
-        {/* LEFT SIDE — Logo */}
-        <div className="flex items-center">
-          <div className="flex items-center justify-center rounded-lg bg-primary px-3 py-2">
-            <img
-              src="/logo.png"
-              alt="ZCraft Logo"
-              className="h-8 w-auto object-contain"
-            />
+            {host && (
+              <div className="mt-3 flex flex-wrap gap-4">
+                {isLoading ? (
+                  <div className="flex items-center gap-3">
+                    <div className="h-3 w-16 rounded bg-muted animate-pulse" />
+                    <div className="h-3 w-12 rounded bg-muted animate-pulse" />
+                  </div>
+                ) : data ? (
+                  <>
+                    <div className="text-sm text-muted-foreground">
+                      Players: {data.players?.online ?? "—"}
+                      {data.players ? ` / ${data.players.max}` : ""}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Latency: {data.latency ?? "—"} ms</div>
+                  </>
+                ) : (
+                  <div className="text-sm text-destructive">Status unavailable</div>
+                )}
+              </div>
+            )}
           </div>
-        </div>
+          <Badge className="shrink-0">External</Badge>
+        </CardHeader>
 
-        {/* CENTER — Main Nav Buttons (max 4) */}
-        <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-          <Button variant="ghost">Play</Button>
-          <Button variant="ghost">Servers</Button>
-          <Button variant="ghost">Store</Button>
-          <Button variant="ghost">Rules</Button>
-        </div>
+        <CardFooter className="justify-between gap-3">
+          <div className="flex items-center gap-2">
+            {host ? (
+              <Button variant="ghost" size="sm" onClick={onJoin}>
+                Join
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button variant="ghost" size="icon" onClick={onCopy} title="Copy URL">
+                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            )}
+          </div>
 
-        {/* RIGHT SIDE — Icon Controls */}
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon">
-            <MessageCircle className="h-5 w-5" />
+          <Button asChild variant="outline" size="sm" className="border-border/60 bg-card/60">
+            <a href={url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${name}`} className="flex items-center">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Visit
+            </a>
           </Button>
-          <Button variant="ghost" size="icon">
-            <Shield className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={toggleDark}>
-            {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
-        </div>
-
-      </div>
-    </nav>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 }
