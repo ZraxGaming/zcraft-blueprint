@@ -146,18 +146,29 @@ export const footerSections: Record<string, NavLink[]> = {
     { name: "Rules", path: "/rules", feature: "rules" },
     { name: "Status", path: siteConfig.statusUrl, external: true, feature: "status" },
   ],
+
   Community: [
     { name: "Forums", path: "/forums", feature: "forums" },
     { name: "News", path: "/news", feature: "news" },
     { name: "Changelogs", path: "/events", feature: "changelogs" },
     { name: "Staff", path: "/staff", feature: "staff" },
   ],
+
   Resources: [
     { name: "Wiki", path: siteConfig.wikiUrl, external: true, feature: "wiki" },
     { name: "Support", path: "/support", feature: "support" },
-    { name: "Appeal", path: siteConfig.appealUrl, external: siteConfig.appealUrl.startsWith("http"), feature: "appeal" },
+
+    // ✅ FIXED — direct external punishments link
+    { 
+      name: "Punishments", 
+      path: "https://bans.z-craft.xyz", 
+      external: true, 
+      feature: "appeal" 
+    },
+
     { name: "Store", path: siteConfig.storeUrl, external: true, feature: "store" },
   ],
+
   Legal: [
     { name: "Privacy Policy", path: "/privacy" },
     { name: "Terms of Service", path: "/terms" },
