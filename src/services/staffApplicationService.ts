@@ -232,7 +232,7 @@ export async function submitStaffApplication(userId: string, targetRole: string,
 export async function listStaffApplications() {
   const { data, error } = await (supabase as any)
     .from("staff_applications")
-    .select("*, user:users(username, email, avatar_url)")
+    .select("*, user:users!staff_applications_user_id_users_fkey(username, email, avatar_url)")
     .order("created_at", { ascending: false });
 
   if (error) {

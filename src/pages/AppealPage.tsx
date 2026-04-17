@@ -1,12 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Send, Shield, Sparkles } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Send, Shield, CheckCircle2, AlertTriangle, MessageSquare, FileSearch } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { getPageSeo, siteConfig } from "@/config/siteEnv";
@@ -36,26 +44,44 @@ const initialState: FormState = {
   additionalInfo: "",
 };
 
+const typeOptions = [
+  { value: "ban", label: "Ban", color: "text-red-400" },
+  { value: "mute", label: "Mute", color: "text-amber-400" },
+  { value: "warn", label: "Warning", color: "text-yellow-400" },
+  { value: "report", label: "Player Report", color: "text-purple-400" },
+  { value: "other", label: "Other", color: "text-blue-400" },
+];
+
+const guidelines = [
+  { icon: Shield, title: "Be Respectful", body: "Honest, calm appeals get reviewed faster than aggressive ones." },
+  { icon: FileSearch, title: "Add Evidence", body: "Screenshots, clip links and chat logs make staff's job easier." },
+  { icon: MessageSquare, title: "One Submission", body: "Don't spam — duplicates push your case to the back of the queue." },
+];
+
 export default function AppealPage() {
   const { user, userProfile } = useAuth();
   const { settings } = useSettings();
-  const isRedirectMode = siteConfig.appeal.mode === "redirect" && Boolean(siteConfig.appeal.redirectUrl);
+  const isRedirectMode =
+    siteConfig.appeal.mode === "redirect" && Boolean(siteConfig.appeal.redirectUrl);
+
   const [form, setForm] = useState<FormState>({
     ...initialState,
     minecraftUsername: userProfile?.username || "",
     email: userProfile?.email || user?.email || "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState<{ ticketId?: string } | null>(null);
 
-  const requiredFilled = useMemo(() => {
-    return (
-      form.minecraftUsername.trim() &&
-      form.discordUsername.trim() &&
-      form.punishmentReason.trim() &&
-      form.appealReason.trim()
-    );
-  }, [form]);
+  const requiredFilled = useMemo(
+    () =>
+      Boolean(
+        form.minecraftUsername.trim() &&
+          form.discordUsername.trim() &&
+          form.punishmentReason.trim() &&
+          form.appealReason.trim(),
+      ),
+    [form],
+  );
 
   useEffect(() => {
     if (isRedirectMode) {
@@ -63,7 +89,7 @@ export default function AppealPage() {
     }
   }, [isRedirectMode]);
 
-  const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+  const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -76,7 +102,6 @@ export default function AppealPage() {
       });
       return;
     }
-
     try {
       setSubmitting(true);
       const response = await fetch("/api/appeals", {
@@ -84,18 +109,21 @@ export default function AppealPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null);
-        throw new Error(payload?.error || "Failed to submit appeal.");
-      }
-
-      setSubmitted(true);
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || "Failed to submit appeal.");
+      setSubmitted({ ticketId: payload?.ticketId });
       toast({
         title: "Appeal submitted",
-        description: "Your appeal has been sent to staff for review.",
+        description: payload?.ticketId
+          ? `Ticket ${payload.ticketId} sent to staff.`
+          : "Your appeal has been sent to staff for review.",
       });
-      setForm({ ...initialState, minecraftUsername: form.minecraftUsername, discordUsername: form.discordUsername, email: form.email });
+      setForm({
+        ...initialState,
+        minecraftUsername: form.minecraftUsername,
+        discordUsername: form.discordUsername,
+        email: form.email,
+      });
     } catch (error: any) {
       toast({
         title: "Submission failed",
@@ -117,216 +145,191 @@ export default function AppealPage() {
         }),
         url: "/appeal",
         type: "website",
-        noindex: false,
         tags: ["appeal", "ban appeal", "support", "moderation"],
       }}
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Appeal" },
+      ]}
     >
       {isRedirectMode ? (
-        <section className="relative overflow-hidden py-20 lg:py-28">
-          <div className="container mx-auto px-4">
-            <Card className="mx-auto max-w-2xl border-0 bg-card/95 shadow-[0_28px_90px_rgba(15,23,42,0.14)]">
-              <CardContent className="p-10 text-center space-y-6">
-                <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
-                  <Shield className="h-8 w-8" />
-                </div>
-                <div className="space-y-3">
-                  <h1 className="font-display text-3xl font-bold">Redirecting to the appeal portal</h1>
-                  <p className="text-muted-foreground">
-                    This appeal page is configured to send you to an external link instead of the built-in form.
-                  </p>
-                </div>
-                <Button asChild className="btn-primary-gradient">
-                  <a href={siteConfig.appeal.redirectUrl} target="_blank" rel="noopener noreferrer">
-                    Continue to Appeal Portal
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+        <section className="container mx-auto px-4 py-24">
+          <Card className="mx-auto max-w-2xl border-border/60 bg-card/80 backdrop-blur">
+            <CardContent className="space-y-5 p-10 text-center">
+              <Shield className="mx-auto h-10 w-10 text-amber-400" />
+              <h1 className="font-display text-3xl font-bold">Redirecting to the Appeal Portal…</h1>
+              <p className="text-muted-foreground">If you aren't redirected, use the button below.</p>
+              <Button asChild className="btn-primary-gradient">
+                <a href={siteConfig.appeal.redirectUrl} target="_blank" rel="noopener noreferrer">
+                  Continue to Appeal Portal
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
         </section>
       ) : (
-      <section className="relative overflow-hidden py-14 lg:py-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.16),transparent_42%),linear-gradient(180deg,rgba(15,23,42,0.04),transparent)]" />
-        <div className="container relative mx-auto px-4">
-          <div className="mx-auto max-w-5xl">
-            <div className="text-center max-w-3xl mx-auto mb-10">
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-sm font-medium text-amber-600 mb-5">
-                <Shield className="h-4 w-4" />
-                Appeals Review
-              </div>
-              <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
+        <section className="relative overflow-hidden py-12 lg:py-16">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.12),transparent_55%)]" aria-hidden="true" />
+          <div className="container relative mx-auto max-w-6xl px-4">
+            <motion.header
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-10 text-center"
+            >
+              <span className="mc-chip mb-4 inline-flex items-center gap-2 border-amber-500/30 bg-amber-500/10 text-amber-400">
+                <Shield className="h-3.5 w-3.5" /> Appeals · Reports
+              </span>
+              <h1 className="font-display text-4xl font-bold md:text-5xl">
                 Submit an <span className="text-gradient">Appeal</span>
               </h1>
-              <p className="text-lg text-muted-foreground">
-                Use this form for ban, mute, or punishment appeals. Be clear, respectful, and specific.
+              <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+                Ban, mute, warning or player report — fill it out clearly and staff will review it.
               </p>
-            </div>
+            </motion.header>
 
             {submitted && (
-              <Card className="mb-6 border-emerald-500/20 bg-emerald-500/5">
-                <CardContent className="flex items-start gap-3 p-5">
-                  <Sparkles className="mt-0.5 h-5 w-5 text-emerald-500" />
-                  <div>
-                    <p className="font-semibold">Appeal received</p>
-                    <p className="text-sm text-muted-foreground">Staff will review your submission as soon as possible.</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mb-6"
+              >
+                <Card className="border-emerald-500/30 bg-emerald-500/10">
+                  <CardContent className="flex items-center gap-3 p-5">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                    <div className="flex-1">
+                      <p className="font-semibold">Appeal received</p>
+                      <p className="text-sm text-muted-foreground">
+                        {submitted.ticketId ? (
+                          <>Ticket <code className="rounded bg-card/80 px-1.5 py-0.5 text-xs">{submitted.ticketId}</code> · staff will reply via Discord.</>
+                        ) : (
+                          "Staff will reply via Discord soon."
+                        )}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             )}
 
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <Card className="border-0 bg-card/95 shadow-[0_28px_90px_rgba(15,23,42,0.14)]">
-                <CardHeader className="border-b border-border/60">
-                  <CardTitle className="font-display text-2xl">Appeal Form</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 lg:p-8 space-y-5">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="minecraftUsername">Minecraft Username *</Label>
-                      <Input
-                        id="minecraftUsername"
-                        value={form.minecraftUsername}
-                        onChange={(e) => updateField("minecraftUsername", e.target.value)}
-                        placeholder="Your in-game name"
-                      />
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+              {/* MAIN FORM */}
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.05 }}
+              >
+                <Card className="overflow-hidden border-border/60 bg-card/80 backdrop-blur">
+                  <div className="border-b border-border/50 bg-gradient-to-r from-primary/10 via-transparent to-transparent px-6 py-4">
+                    <h2 className="font-display text-xl font-semibold">Appeal Details</h2>
+                    <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">All fields marked * are required</p>
+                  </div>
+                  <CardContent className="space-y-5 p-6 lg:p-8">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Minecraft Username *" htmlFor="mc">
+                        <Input id="mc" value={form.minecraftUsername} onChange={(e) => update("minecraftUsername", e.target.value)} placeholder="In-game name" />
+                      </Field>
+                      <Field label="Discord Username *" htmlFor="dc">
+                        <Input id="dc" value={form.discordUsername} onChange={(e) => update("discordUsername", e.target.value)} placeholder="@username" />
+                      </Field>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="discordUsername">Discord Username *</Label>
-                      <Input
-                        id="discordUsername"
-                        value={form.discordUsername}
-                        onChange={(e) => updateField("discordUsername", e.target.value)}
-                        placeholder="name#1234 or @name"
-                      />
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Email" htmlFor="em">
+                        <Input id="em" type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="Optional contact email" />
+                      </Field>
+                      <Field label="Type" htmlFor="type">
+                        <Select value={form.punishmentType} onValueChange={(v) => update("punishmentType", v)}>
+                          <SelectTrigger id="type"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {typeOptions.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                <span className={opt.color}>{opt.label}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
                     </div>
-                  </div>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={form.email}
-                        onChange={(e) => updateField("email", e.target.value)}
-                        placeholder="Optional contact email"
-                      />
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Date" htmlFor="date">
+                        <Input id="date" type="date" value={form.punishmentDate} onChange={(e) => update("punishmentDate", e.target.value)} />
+                      </Field>
+                      <Field label="Punishment Reason *" htmlFor="pr">
+                        <Input id="pr" value={form.punishmentReason} onChange={(e) => update("punishmentReason", e.target.value)} placeholder="What were you punished for?" />
+                      </Field>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="punishmentType">Punishment Type</Label>
-                      <select
-                        id="punishmentType"
-                        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                        value={form.punishmentType}
-                        onChange={(e) => updateField("punishmentType", e.target.value)}
-                      >
-                        <option value="ban">Ban</option>
-                        <option value="mute">Mute</option>
-                        <option value="warn">Warning</option>
-                        <option value="other">Other</option>
-                      </select>
+
+                    <Field label="Why should this be accepted? *" htmlFor="ar">
+                      <Textarea id="ar" rows={6} value={form.appealReason} onChange={(e) => update("appealReason", e.target.value)} placeholder="Explain calmly and in detail." />
+                    </Field>
+
+                    <Field label="Evidence Links" htmlFor="ev">
+                      <Textarea id="ev" rows={3} value={form.evidenceLinks} onChange={(e) => update("evidenceLinks", e.target.value)} placeholder="Paste screenshots, clips, message links…" />
+                    </Field>
+
+                    <Field label="Additional Information" htmlFor="ai">
+                      <Textarea id="ai" rows={3} value={form.additionalInfo} onChange={(e) => update("additionalInfo", e.target.value)} placeholder="Anything else staff should know." />
+                    </Field>
+
+                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                      <Button onClick={handleSubmit} disabled={submitting} className="btn-primary-gradient gap-2">
+                        <Send className="h-4 w-4" />
+                        {submitting ? "Submitting…" : "Submit Appeal"}
+                      </Button>
+                      <Badge variant="outline" className="rounded-full px-4 py-1.5 text-xs">
+                        Sent securely to staff Discord
+                      </Badge>
                     </div>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="punishmentDate">Punishment Date</Label>
-                      <Input
-                        id="punishmentDate"
-                        type="date"
-                        value={form.punishmentDate}
-                        onChange={(e) => updateField("punishmentDate", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="punishmentReason">Punishment Reason *</Label>
-                      <Input
-                        id="punishmentReason"
-                        value={form.punishmentReason}
-                        onChange={(e) => updateField("punishmentReason", e.target.value)}
-                        placeholder="What were you punished for?"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="appealReason">Why should this appeal be accepted? *</Label>
-                    <Textarea
-                      id="appealReason"
-                      rows={6}
-                      value={form.appealReason}
-                      onChange={(e) => updateField("appealReason", e.target.value)}
-                      placeholder="Explain your side calmly and in detail."
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="evidenceLinks">Evidence Links</Label>
-                    <Textarea
-                      id="evidenceLinks"
-                      rows={3}
-                      value={form.evidenceLinks}
-                      onChange={(e) => updateField("evidenceLinks", e.target.value)}
-                      placeholder="Paste any screenshots, clips, or message links here."
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="additionalInfo">Additional Information</Label>
-                    <Textarea
-                      id="additionalInfo"
-                      rows={3}
-                      value={form.additionalInfo}
-                      onChange={(e) => updateField("additionalInfo", e.target.value)}
-                      placeholder="Anything else staff should know."
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Button className="btn-primary-gradient gap-2" onClick={handleSubmit} disabled={submitting}>
-                      <Send className="h-4 w-4" />
-                      {submitting ? "Submitting..." : "Submit Appeal"}
-                    </Button>
-                    <Badge variant="outline" className="px-4 py-2">
-                      Sent to staff Discord webhook
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="space-y-4">
-                <Card className="border-0 bg-card">
-                  <CardContent className="p-5">
-                    <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground mb-3">Guidelines</p>
-                    <ul className="space-y-3 text-sm text-muted-foreground">
-                      <li>Keep your appeal respectful and honest.</li>
-                      <li>Do not spam multiple submissions.</li>
-                      <li>Include context, screenshots, or clips if they help your case.</li>
-                    </ul>
                   </CardContent>
                 </Card>
-                <Card className="border-0 bg-card">
-                  <CardContent className="p-5">
-                    <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground mb-3">What happens next</p>
-                    <p className="text-sm text-muted-foreground leading-6">
-                      Your appeal is delivered to staff through Discord, then reviewed manually. You can check back later for updates.
+              </motion.div>
+
+              {/* SIDEBAR */}
+              <motion.aside
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="space-y-4"
+              >
+                {guidelines.map((g) => (
+                  <Card key={g.title} className="border-border/60 bg-card/70 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-card/90">
+                    <CardContent className="flex gap-3 p-5">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                        <g.icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-display text-sm font-semibold uppercase tracking-[0.2em]">{g.title}</p>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">{g.body}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                <Card className="border-amber-500/20 bg-amber-500/5">
+                  <CardContent className="flex gap-3 p-5">
+                    <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400" />
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      False reports or abusive language may extend your punishment.
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="border-0 bg-card">
-                  <CardContent className="p-5">
-                    <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground mb-3">Site Config</p>
-                    <p className="text-sm text-muted-foreground leading-6">
-                      Appears on {siteConfig.name} and uses the same env-backed branding plus admin SEO overrides as the rest of the site.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+              </motion.aside>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
     </Layout>
+  );
+}
+
+function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={htmlFor} className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </Label>
+      {children}
+    </div>
   );
 }
