@@ -348,6 +348,66 @@
   .section-divider {
     background: linear-gradient(90deg, transparent, hsl(var(--border)), transparent);
   }
+
+  /* Shared "bento" page primitives — used by every inner page so they match the home aesthetic */
+  .page-shell {
+    @apply container mx-auto max-w-7xl px-4 py-12 lg:py-16;
+  }
+
+  .page-eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground backdrop-blur;
+  }
+
+  .page-title {
+    @apply font-display text-4xl font-bold leading-tight md:text-5xl;
+  }
+
+  .page-subtitle {
+    @apply mx-auto mt-3 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg;
+  }
+
+  .bento-card {
+    @apply relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 backdrop-blur transition-all duration-300;
+    box-shadow: var(--shadow-card);
+  }
+
+  .bento-card:hover {
+    @apply -translate-y-1 border-primary/40 bg-card/90;
+    box-shadow: var(--shadow-hover);
+  }
+
+  .bento-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.08), transparent 55%);
+    opacity: 0;
+    transition: opacity 300ms ease;
+    pointer-events: none;
+  }
+
+  .bento-card:hover::before {
+    opacity: 1;
+  }
+
+  .bento-grid {
+    @apply grid gap-5 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  /* Subtle entry animation any page can opt into */
+  .page-enter > * {
+    animation: page-fade-up 0.55s ease-out both;
+  }
+
+  .page-enter > *:nth-child(2) { animation-delay: 80ms; }
+  .page-enter > *:nth-child(3) { animation-delay: 160ms; }
+  .page-enter > *:nth-child(4) { animation-delay: 240ms; }
+  .page-enter > *:nth-child(5) { animation-delay: 320ms; }
+}
+
+@keyframes page-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @layer utilities {
