@@ -270,7 +270,7 @@ export async function deactivateLicenseKey(licenseKey: string, deviceIdentifier 
     device_identifier: deviceIdentifier,
   });
 
-  if (!response.ok || data.cleared !== true) {
+  if (!response.ok || (data as any).cleared !== true) {
     throwLicenseError(data, (data.code as LicenseErrorCode) || "LICENSE_INVALID");
   }
 

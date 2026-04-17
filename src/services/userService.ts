@@ -108,7 +108,7 @@ export async function getUserRoles(userId: string) {
 
 // Assign role to user
 export async function assignRole(userId: string, role: string) {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('user_roles')
     .insert({
       user_id: userId,
@@ -133,7 +133,7 @@ export async function assignRole(userId: string, role: string) {
 
 // Remove role from user
 export async function removeRole(userId: string, role: string) {
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('user_roles')
     .delete()
     .eq('user_id', userId)

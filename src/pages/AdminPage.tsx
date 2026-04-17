@@ -121,8 +121,8 @@ export default function AdminPage() {
 
       setServiceStatus([
         { name: 'Minecraft Server', status: server.online ? 'online' : 'offline', players: server.players ? `${server.players.online}/${server.players.max}` : '—' },
-        { name: 'Website', status: website.ok ? 'online' : 'offline', uptime: website.ok ? 'Available' : 'Unavailable', latency: website.latency, note: website.note },
-        { name: 'Forums', status: forums.ok ? 'online' : 'offline', uptime: forums.ok ? 'Available' : 'Unavailable', latency: forums.latency, note: forums.note },
+        { name: 'Website', status: website.ok ? 'online' : 'offline', uptime: website.ok ? 'Available' : 'Unavailable', latency: website.latency, note: (website as any).note },
+        { name: 'Forums', status: forums.ok ? 'online' : 'offline', uptime: forums.ok ? 'Available' : 'Unavailable', latency: forums.latency, note: (forums as any).note },
       ]);
     } catch (err) {
       setServiceStatus([
@@ -145,10 +145,10 @@ export default function AdminPage() {
         supabase.from("changelogs").select("id", { count: "exact", head: true }),
       ]);
 
-      const totalUsers = usersData.count || 0;
-      const totalPosts = postsData.count || 0;
-      const totalArticles = articlesData.count || 0;
-      const totalChangelogs = changelogsData.count || 0;
+      const totalUsers = (usersData as any).count || 0;
+      const totalPosts = (postsData as any).count || 0;
+      const totalArticles = (articlesData as any).count || 0;
+      const totalChangelogs = (changelogsData as any).count || 0;
 
       setStats([
         { label: "Total Users", value: totalUsers.toLocaleString(), change: "+12%", icon: Users },
