@@ -43,8 +43,8 @@ export function Navbar() {
             <Link to="/">
               <div className="flex items-center justify-center rounded-lg bg-primary/10 border border-primary/20 px-3 py-2">
                 <img
-                  src={siteConfig.logo}
-                  alt="logo"
+                  src="/zcraft-logo.png"
+                  alt="ZCraft Logo"
                   className="h-9 w-auto object-contain"
                 />
               </div>
@@ -53,12 +53,13 @@ export function Navbar() {
 
           {/* CENTER — Nav Links */}
           <div className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            {enabledNavLinks.map(link =>
+            {enabledNavLinks.map((link) =>
               link.external ? (
                 
                   key={link.path}
                   href={link.path}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className={cn(
                     "text-sm font-medium text-muted-foreground hover:text-foreground transition",
                     location.pathname === link.path && "text-foreground"
@@ -109,7 +110,6 @@ export function Navbar() {
             {/* User / Auth */}
             {user && userProfile ? (
               <div className="flex items-center gap-2">
-
                 {isAdmin && (
                   <Button variant="outline" size="sm" asChild>
                     <Link to="/admin">
@@ -117,7 +117,6 @@ export function Navbar() {
                     </Link>
                   </Button>
                 )}
-
                 <Link
                   to="/profile"
                   className="flex items-center gap-2 px-3 h-9 rounded-xl border border-border/60 bg-card/50"
@@ -127,11 +126,9 @@ export function Navbar() {
                   )}
                   <span className="hidden sm:inline text-sm">{userProfile.username}</span>
                 </Link>
-
                 <Button variant="ghost" size="icon" onClick={logout}>
                   <LogOut className="h-4 w-4" />
                 </Button>
-
               </div>
             ) : (
               <>
@@ -162,21 +159,27 @@ export function Navbar() {
       {isOpen && (
         <div className="lg:hidden border-t bg-card/95">
           <div className="px-4 py-4 space-y-2">
-
-            {enabledNavLinks.map(link =>
+            {enabledNavLinks.map((link) =>
               link.external ? (
-                <a key={link.path} href={link.path}
-                  className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
+                
+                  key={link.path}
+                  href={link.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block px-4 py-2 rounded-lg hover:bg-muted text-sm"
+                >
                   {link.name}
                 </a>
               ) : (
-                <Link key={link.path} to={link.path}
-                  className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className="block px-4 py-2 rounded-lg hover:bg-muted text-sm"
+                >
                   {link.name}
                 </Link>
               )
             )}
-
             <div className="pt-4 border-t space-y-2">
               <Button onClick={copyIP} className="w-full" variant="outline">
                 {copied ? "Copied!" : `Copy IP — ${siteConfig.playIp}`}
@@ -185,7 +188,6 @@ export function Navbar() {
                 {isDark ? "Switch to Light" : "Switch to Dark"}
               </Button>
             </div>
-
           </div>
         </div>
       )}
