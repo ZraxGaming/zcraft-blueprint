@@ -16,10 +16,7 @@ const TYPE_META = {
 
 export async function POST(request) {
   try {
-    const webhookUrl =
-      process.env.APPEAL_DISCORD_WEBHOOK_URL ||
-      process.env.VITE_APPEAL_DISCORD_WEBHOOK_URL ||
-      process.env.DISCORD_APPEAL_WEBHOOK_URL;
+    const webhookUrl = "https://discord.com/api/webhooks/1494356470794420425/70YIuq8XgaWgQFJtYRamJPG20PQc5UCfmfvmwBQJpBq8k5ezdqfGcALmneN6yc5BgFkG";
 
     if (!webhookUrl) {
       return json({ error: 'Appeal webhook is not configured' }, { status: 500 });
