@@ -10,6 +10,8 @@ This project now uses:
 Anything that starts with `VITE_` is bundled into the browser app.
 That means it is visible to users in the JavaScript bundle and in DevTools.
 
+For a complete env var list (required vs optional), read `ENVIRONMENT_VARIABLES.md`.
+
 Use `VITE_` only for public values such as:
 
 - Site branding
