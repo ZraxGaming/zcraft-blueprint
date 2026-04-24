@@ -27,7 +27,12 @@ export class LicenseError extends Error {
   status: LicenseStatus;
   details?: unknown;
 
-  constructor(code: LicenseErrorCode, message: string, status: LicenseStatus = "unknown", details?: unknown) {
+  constructor(
+    code: LicenseErrorCode,
+    message: string,
+    status: LicenseStatus = "unknown",
+    details?: unknown
+  ) {
     super(message);
     this.name = "LicenseError";
     this.code = code;
@@ -35,6 +40,10 @@ export class LicenseError extends Error {
     this.details = details;
   }
 }
+
+/* =========================
+   TYPES
+========================= */
 
 export interface LicenseApiLicense {
   status?: string;
@@ -69,10 +78,12 @@ export interface LicenseState {
   lastValidatedAt: string;
 }
 
+/* =========================
+   STORAGE
+========================= */
+
 const LICENSE_STATE_KEY = "zcraft_license_state";
 const LICENSE_DEVICE_KEY = "zcraft_license_device_id";
-
-export const LICENSE_REQUIRED = false;
 
 function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -93,19 +104,28 @@ function writeStorage(key: string, value: unknown) {
   if (!canUseStorage()) return;
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Ignore storage failures.
-  }
+  } catch {}
 }
 
 function removeStorage(key: string) {
   if (!canUseStorage()) return;
   try {
     window.localStorage.removeItem(key);
-  } catch {
-    // Ignore storage failures.
-  }
+  } catch {}
 }
+
+/* =========================
+   CONFIG (LUKITTU DIRECT)
+========================= */
+
+const LUKITTU_VERIFY_URL =
+  "https://api.lukittu.com/client/verify";
+
+export const LICENSE_REQUIRED = false;
+
+/* =========================
+   DEVICE ID
+========================= */
 
 export function getDeviceId() {
   if (!canUseStorage()) {
@@ -115,13 +135,18 @@ export function getDeviceId() {
   const existing = window.localStorage.getItem(LICENSE_DEVICE_KEY);
   if (existing) return existing;
 
-  const generated = typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : `device-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+  const generated =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `device-${Math.random().toString(36).slice(2)}-${Date.now()}`;
 
   window.localStorage.setItem(LICENSE_DEVICE_KEY, generated);
   return generated;
 }
+
+/* =========================
+   STATE HELPERS
+========================= */
 
 export function getStoredLicenseState(): LicenseState | null {
   return readStorage<LicenseState>(LICENSE_STATE_KEY);
@@ -139,162 +164,214 @@ export function getStoredLicenseKey() {
   return getStoredLicenseState()?.licenseKey || "";
 }
 
+/* =========================
+   ERROR MESSAGES
+========================= */
+
 export function getLicenseStatusMessage(code: LicenseErrorCode) {
   switch (code) {
     case "LICENSE_REQUIRED":
-      return "A valid license key is required to use this site.";
+      return "A valid license key is required.";
     case "LICENSE_INVALID":
-      return "That license key is invalid.";
+      return "Invalid license key.";
     case "LICENSE_EXPIRED":
-      return "That license key has expired.";
+      return "License has expired.";
     case "LICENSE_INACTIVE":
-      return "That license key is inactive.";
+      return "License is inactive.";
     case "LICENSE_SUSPENDED":
-      return "That license key has been suspended.";
+      return "License is suspended.";
     case "LICENSE_BLOCKED":
-      return "That license key is blocked.";
+      return "License is blocked.";
     case "LICENSE_LIMIT_REACHED":
-      return "That license key has reached its activation limit.";
+      return "Activation limit reached.";
     case "LICENSE_NETWORK_ERROR":
-      return "We could not verify your license right now.";
+      return "Cannot reach license server.";
     case "LICENSE_PRODUCT_MISMATCH":
-      return "That license key does not match this product.";
+      return "License does not match this product.";
     default:
-      return "We could not verify this license.";
+      return "License verification failed.";
   }
 }
 
-function normalizeErrorCode(errorText?: string, license?: LicenseApiLicense): LicenseErrorCode {
-  const text = `${errorText || ""} ${license?.status || ""}`.toLowerCase();
-  if (text.includes("expired")) return "LICENSE_EXPIRED";
-  if (text.includes("inactive")) return "LICENSE_INACTIVE";
-  if (text.includes("suspend")) return "LICENSE_SUSPENDED";
-  if (text.includes("blocked")) return "LICENSE_BLOCKED";
-  if (text.includes("limit")) return "LICENSE_LIMIT_REACHED";
-  if (text.includes("product")) return "LICENSE_PRODUCT_MISMATCH";
-  if (text.includes("invalid") || text.includes("not found")) return "LICENSE_INVALID";
-  return "LICENSE_UNKNOWN";
-}
+/* =========================
+   DEVICE REQUEST
+========================= */
 
-async function requestLicense(endpoint: "validate" | "verify" | "status" | "clear", payload: Record<string, unknown>) {
-  let response: Response;
+async function requestLicense(payload: Record<string, unknown>) {
   try {
-    const method = endpoint === "status" ? "GET" : "POST";
-    const _m = { status: "s", verify: "v", clear: "c", validate: "u" } as const;
-    const slug = _m[endpoint];
-    response = await fetch(["/api", "/_k7", `/${slug}`].join(""), {
-      method,
+    const res = await fetch(LUKITTU_VERIFY_URL, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      ...(method === "POST" ? { body: JSON.stringify(payload) } : {}),
-      credentials: "include",
+      body: JSON.stringify(payload),
     });
-  } catch (error) {
-    throw new LicenseError("LICENSE_NETWORK_ERROR", "We could not reach the license server.", "network_error", error);
-  }
 
-  const data = (await response.json().catch(() => ({}))) as LicenseApiResponse;
-  return { response, data };
+    const data = (await res.json().catch(() => ({}))) as LicenseApiResponse;
+
+    return { response: res, data };
+  } catch (err) {
+    throw new LicenseError(
+      "LICENSE_NETWORK_ERROR",
+      "License server unreachable",
+      "network_error",
+      err
+    );
+  }
 }
 
-function mapLicenseState(licenseKey: string, response: LicenseApiResponse, deviceId: string): LicenseState {
-  const status = (response.license?.status || (response.valid ? "active" : "unknown")) as LicenseStatus;
+/* =========================
+   NORMALIZATION
+========================= */
+
+function mapState(
+  licenseKey: string,
+  data: LicenseApiResponse,
+  deviceId: string
+): LicenseState {
   return {
     licenseKey,
     productId: "",
     deviceId,
-    status,
-    customerEmail: response.license?.customer_email ?? null,
-    activationCount: response.license?.activation_count ?? response.activation_count,
-    maxActivations: response.license?.max_activations ?? response.max_activations ?? null,
-    expiresAt: response.license?.expires_at ?? null,
+    status: data.valid ? "active" : "invalid",
+    customerEmail: data.license?.customer_email ?? null,
+    activationCount:
+      data.license?.activation_count ?? data.activation_count,
+    maxActivations:
+      data.license?.max_activations ?? data.max_activations ?? null,
+    expiresAt: data.license?.expires_at ?? null,
     lastValidatedAt: new Date().toISOString(),
   };
 }
 
-function throwLicenseError(response: LicenseApiResponse, fallbackCode: LicenseErrorCode = "LICENSE_UNKNOWN") {
-  const code = normalizeErrorCode(response.error || response.message, response.license) || fallbackCode;
-  throw new LicenseError(code, getLicenseStatusMessage(code), (response.license?.status as LicenseStatus) || "unknown", response);
+function throwError(data: LicenseApiResponse, fallback: LicenseErrorCode) {
+  const code =
+    (data.error as LicenseErrorCode) ||
+    fallback ||
+    "LICENSE_UNKNOWN";
+
+  throw new LicenseError(
+    code,
+    getLicenseStatusMessage(code),
+    "unknown",
+    data
+  );
 }
 
+/* =========================
+   CORE FUNCTIONS
+========================= */
+
 export async function validateLicenseKey(licenseKey: string) {
-  const trimmedKey = licenseKey.trim();
-  if (!trimmedKey) {
-    throw new LicenseError("LICENSE_REQUIRED", getLicenseStatusMessage("LICENSE_REQUIRED"), "unknown");
+  const key = licenseKey.trim();
+  if (!key) {
+    throw new LicenseError(
+      "LICENSE_REQUIRED",
+      getLicenseStatusMessage("LICENSE_REQUIRED"),
+      "unknown"
+    );
   }
 
-  const { response, data } = await requestLicense("verify", {
-    license_key: trimmedKey,
+  const { response, data } = await requestLicense({
+    license_key: key,
+    device_identifier: getDeviceId(),
   });
 
-  if (!response.ok) {
-    throwLicenseError(data, (data.code as LicenseErrorCode) || "LICENSE_INVALID");
-  }
-
-  if (!data.valid || data.license?.status !== "active") {
-    throwLicenseError(data, (data.code as LicenseErrorCode) || (data.license?.status === "expired" ? "LICENSE_EXPIRED" : "LICENSE_INVALID"));
+  if (!response.ok || data.valid !== true) {
+    throwError(data, "LICENSE_INVALID");
   }
 
   return {
     valid: true,
-    state: mapLicenseState(trimmedKey, data, getDeviceId()),
+    state: mapState(key, data, getDeviceId()),
     response: data,
   };
 }
 
-export async function activateLicenseKey(licenseKey: string, deviceIdentifier = getDeviceId(), ipAddress?: string) {
-  const trimmedKey = licenseKey.trim();
-  const { response, data } = await requestLicense("verify", {
-    license_key: trimmedKey,
-    device_identifier: deviceIdentifier,
-    ...(ipAddress ? { ip_address: ipAddress } : {}),
+export async function activateLicenseKey(
+  licenseKey: string,
+  deviceId = getDeviceId()
+) {
+  const key = licenseKey.trim();
+
+  const { response, data } = await requestLicense({
+    license_key: key,
+    device_identifier: deviceId,
   });
 
-  if (!response.ok || data.success !== true) {
-    throwLicenseError(data, (data.code as LicenseErrorCode) || "LICENSE_INVALID");
+  if (!response.ok || data.success === false) {
+    throwError(data, "LICENSE_INVALID");
   }
 
   return {
     success: true,
     state: {
-      ...mapLicenseState(trimmedKey, data, deviceIdentifier),
+      ...mapState(key, data, deviceId),
       status: "active" as LicenseStatus,
     },
     response: data,
   };
 }
 
-export async function deactivateLicenseKey(licenseKey: string, deviceIdentifier = getDeviceId()) {
-  const trimmedKey = licenseKey.trim();
-  const { response, data } = await requestLicense("clear", {
-    license_key: trimmedKey,
-    device_identifier: deviceIdentifier,
+export async function deactivateLicenseKey(
+  licenseKey: string,
+  deviceId = getDeviceId()
+) {
+  const key = licenseKey.trim();
+
+  const { response, data } = await requestLicense({
+    license_key: key,
+    device_identifier: deviceId,
+    action: "deactivate",
   });
 
-  if (!response.ok || (data as any).cleared !== true) {
-    throwLicenseError(data, (data.code as LicenseErrorCode) || "LICENSE_INVALID");
+  if (!response.ok) {
+    throwError(data, "LICENSE_INVALID");
   }
 
   return { success: true, response: data };
 }
 
+/* =========================
+   STATE VALIDATION
+========================= */
+
 export function ensureStoredLicenseIsActive() {
   const state = getStoredLicenseState();
+
   if (!state?.licenseKey) {
-    throw new LicenseError("LICENSE_REQUIRED", getLicenseStatusMessage("LICENSE_REQUIRED"), "unknown");
+    throw new LicenseError(
+      "LICENSE_REQUIRED",
+      getLicenseStatusMessage("LICENSE_REQUIRED"),
+      "unknown"
+    );
   }
 
   if (state.status === "expired") {
-    throw new LicenseError("LICENSE_EXPIRED", getLicenseStatusMessage("LICENSE_EXPIRED"), state.status, state);
+    throw new LicenseError(
+      "LICENSE_EXPIRED",
+      getLicenseStatusMessage("LICENSE_EXPIRED"),
+      state.status,
+      state
+    );
   }
 
   if (state.status === "inactive") {
-    throw new LicenseError("LICENSE_INACTIVE", getLicenseStatusMessage("LICENSE_INACTIVE"), state.status, state);
+    throw new LicenseError(
+      "LICENSE_INACTIVE",
+      getLicenseStatusMessage("LICENSE_INACTIVE"),
+      state.status,
+      state
+    );
   }
 
-  if (state.status === "suspended" || state.status === "blocked") {
-    throw new LicenseError("LICENSE_SUSPENDED", getLicenseStatusMessage("LICENSE_SUSPENDED"), state.status, state);
+  if (["suspended", "blocked"].includes(state.status)) {
+    throw new LicenseError(
+      "LICENSE_SUSPENDED",
+      getLicenseStatusMessage("LICENSE_SUSPENDED"),
+      state.status,
+      state
+    );
   }
 
   return state;
@@ -302,24 +379,30 @@ export function ensureStoredLicenseIsActive() {
 
 export async function refreshStoredLicense() {
   const state = getStoredLicenseState();
+
   if (!state?.licenseKey) {
-    throw new LicenseError("LICENSE_REQUIRED", getLicenseStatusMessage("LICENSE_REQUIRED"), "unknown");
+    throw new LicenseError(
+      "LICENSE_REQUIRED",
+      getLicenseStatusMessage("LICENSE_REQUIRED"),
+      "unknown"
+    );
   }
 
-  const { response, data } = await requestLicense("status", {});
-  if (!response.ok || data.licensed !== true) {
-    throwLicenseError(data, (data.code as LicenseErrorCode) || "LICENSE_REQUIRED");
+  const { response, data } = await requestLicense({
+    license_key: state.licenseKey,
+    device_identifier: getDeviceId(),
+  });
+
+  if (!response.ok || data.valid !== true) {
+    throwError(data, "LICENSE_INVALID");
   }
 
   const refreshed: LicenseState = {
     ...state,
-    status: (data.license?.status || state.status) as LicenseStatus,
-    customerEmail: data.license?.customer_email ?? state.customerEmail ?? null,
-    activationCount: data.license?.activation_count ?? data.activation_count ?? state.activationCount,
-    maxActivations: data.license?.max_activations ?? data.max_activations ?? state.maxActivations ?? null,
-    expiresAt: data.license?.expires_at ?? state.expiresAt ?? null,
+    status: data.license?.status || "active",
     lastValidatedAt: new Date().toISOString(),
   };
+
   saveLicenseState(refreshed);
   return refreshed;
 }
