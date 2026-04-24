@@ -24,6 +24,7 @@ import { supabase } from "@/lib/supabase";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { toast } from "@/components/ui/use-toast";
 import { getMyEmailPreferences, setMyEmailPreference, type EmailPreferenceMap } from "@/services/emailPreferenceService";
+import { DiscordConnectCard } from "@/components/chat/DiscordConnectCard";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -507,6 +508,8 @@ export default function ProfilePage() {
                           />
                         </div>
                       </div>
+
+                    <DiscordConnectCard />
                     </div>
                   </CardContent>
                 </Card>
