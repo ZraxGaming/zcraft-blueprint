@@ -86,7 +86,8 @@ Deno.serve(async (req) => {
     const dMsg = await discordRes.json();
     if (!discordRes.ok) {
       console.error("Discord post failed", dMsg);
-      return json({ error: dMsg.message || "Failed to send to Discord" }, 502);
+      const suffix = dMsg?.code ? ` (Discord code ${String(dMsg.code)})` : "";
+      return json({ error: `${dMsg?.message || "Failed to send to Discord"}${suffix}` }, 502);
     }
 
     const { error: insertErr } = await admin.from("chat_messages").insert({
