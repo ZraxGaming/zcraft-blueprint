@@ -92,8 +92,26 @@ export async function exchangeDiscordCode(code: string): Promise<DiscordConnecti
 }
 
 export async function sendChatMessage(content: string): Promise<void> {
-  const { data, error } = await supabase.functions.invoke("chat-send", { body: { content } });
-  if (error) throw new Error(error.message);
+  const { data, error, response } = await supabase.functions.invoke("chat-send", { body: { content } });
+  if (error) {
+    const res = response as Response | undefined;
+    if (res) {
+      try {
+        const contentType = res.headers.get("Content-Type") || "";
+        if (contentType.includes("application/json")) {
+          const json = await res.json().catch(() => null);
+          const msg = json?.error || json?.message;
+          if (msg) throw new Error(String(msg));
+        } else {
+          const text = await res.text().catch(() => "");
+          if (text) throw new Error(text);
+        }
+      } catch (parseErr: any) {
+        if (parseErr?.message) throw parseErr;
+      }
+    }
+    throw new Error((error as any)?.message || "Send failed");
+  }
   if (!data?.ok) throw new Error(data?.error || "Send failed");
 }
 
