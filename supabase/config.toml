@@ -1,1 +1,7 @@
 project_id = "uzpqnhfkjhqqdyulzzeb"
+
+[functions.chat-ingest-webhook]
+verify_jwt = false
+
+[functions.chat-poll-discord]
+verify_jwt = false
