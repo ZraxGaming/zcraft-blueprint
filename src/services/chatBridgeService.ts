@@ -14,8 +14,6 @@ export interface ChatMessage {
   avatar_url: string | null;
   content: string;
   created_at: string;
-  discord_embeds?: unknown[] | null;
-  discord_attachments?: unknown[] | null;
 }
 
 export async function getMyDiscordConnection(): Promise<DiscordConnection | null> {
@@ -120,7 +118,7 @@ export async function sendChatMessage(content: string): Promise<void> {
 export async function fetchChatMessages(limit = 80): Promise<ChatMessage[]> {
   const { data, error } = await supabase
     .from("chat_messages")
-    .select("id, source, username, minecraft_username, avatar_url, content, created_at, discord_embeds, discord_attachments")
+    .select("id, source, username, minecraft_username, avatar_url, content, created_at")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw error;

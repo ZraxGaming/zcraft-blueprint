@@ -99,8 +99,6 @@ Deno.serve(async (req) => {
       minecraft_username: profile?.minecraft_name || null,
       avatar_url: conn.discord_avatar || profile?.avatar_url || null,
       content: text,
-      discord_embeds: dMsg.embeds && dMsg.embeds.length ? dMsg.embeds : null,
-      discord_attachments: dMsg.attachments && dMsg.attachments.length ? dMsg.attachments : null,
     });
     if (insertErr) console.error("DB insert failed", insertErr);
 

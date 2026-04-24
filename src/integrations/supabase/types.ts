@@ -145,8 +145,6 @@ export type Database = {
           avatar_url: string | null
           content: string
           created_at: string
-          discord_attachments: Json | null
-          discord_embeds: Json | null
           discord_id: string | null
           discord_message_id: string | null
           id: string
@@ -159,8 +157,6 @@ export type Database = {
           avatar_url?: string | null
           content: string
           created_at?: string
-          discord_attachments?: Json | null
-          discord_embeds?: Json | null
           discord_id?: string | null
           discord_message_id?: string | null
           id?: string
@@ -173,8 +169,6 @@ export type Database = {
           avatar_url?: string | null
           content?: string
           created_at?: string
-          discord_attachments?: Json | null
-          discord_embeds?: Json | null
           discord_id?: string | null
           discord_message_id?: string | null
           id?: string
