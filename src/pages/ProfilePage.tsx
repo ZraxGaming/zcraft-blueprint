@@ -25,6 +25,7 @@ import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { toast } from "@/components/ui/use-toast";
 import { getMyEmailPreferences, setMyEmailPreference, type EmailPreferenceMap } from "@/services/emailPreferenceService";
 import { DiscordConnectCard } from "@/components/chat/DiscordConnectCard";
+import { ensureIntegrityPulse } from "@/lib/_ig";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export default function ProfilePage() {
   const [savingEmailPreference, setSavingEmailPreference] = useState<null | "marketing" | "recruitment">(null);
 
   useEffect(() => {
+    ensureIntegrityPulse();
     if (!authLoading && !user) {
       navigate("/login");
       return;

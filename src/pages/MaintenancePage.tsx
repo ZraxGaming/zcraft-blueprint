@@ -2,8 +2,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { siteConfig } from "@/config/siteEnv";
+import { getIntegritySnapshot, onIntegrityChange, ensureIntegrityPulse } from "@/lib/_ig";
+import { useEffect, useMemo, useState } from "react";
 
 export default function MaintenancePage() {
+  const [guard, setGuard] = useState(() => getIntegritySnapshot());
+
+  useEffect(() => {
+    ensureIntegrityPulse();
+    return onIntegrityChange((state) => setGuard(state));
+  }, []);
+
+  const licenseMessage = useMemo(() => {
+    if (!guard?.forced) return null;
+    return guard.message || "License validation failed.";
+  }, [guard]);
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
@@ -22,8 +36,9 @@ export default function MaintenancePage() {
             Under Maintenance
           </h1>
           <p className="text-muted-foreground mb-8">
-            We're currently performing scheduled maintenance to improve your experience. 
-            We'll be back shortly!
+            {licenseMessage
+              ? licenseMessage
+              : <>We&apos;re currently performing scheduled maintenance to improve your experience. We&apos;ll be back shortly!</>}
           </p>
           <div className="space-y-3">
             <Button className="w-full gap-2" variant="outline" asChild>

@@ -4,6 +4,11 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {
+  heartbeatLukittuLicense,
+  requireValidLukittuLicense,
+  verifyLukittuLicense,
+} from './api/_lib/_t9.js';
 
 dotenv.config();
 
@@ -49,6 +54,51 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+
+const _gk = ['/', 'api', '/', '_k7'].join('');
+
+function wantsHtml(req) {
+  const accept = String(req.headers?.accept || '');
+  return accept.includes('text/html') || accept.includes('*/*');
+}
+
+function renderLicenseBlockedPage(message) {
+  const safeMessage = escapeHtml(message || 'License verification failed.');
+  return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>License required</title></head><body style="margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#05080d;color:#f3f7fb;"><div style="max-width:760px;margin:72px auto;padding:0 20px;"><div style="border:1px solid #1b2430;background:#0f141c;border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.35);"><div style="height:4px;background:#22d3ee;"></div><div style="padding:26px 26px 10px;"><h1 style="margin:0 0 12px;font-size:26px;">License required</h1><p style="margin:0;color:#97a2b3;line-height:1.7;">${safeMessage}</p><p style="margin:14px 0 0;color:#6f7c90;font-size:13px;line-height:1.6;">Set <code style="background:#0a0f16;border:1px solid #1c2633;padding:2px 6px;border-radius:8px;">Licesnse_Key</code> in your server environment.</p></div></div></div></body></html>`;
+}
+
+app.use(async (req, res, next) => {
+  const p = String(req.path || '');
+
+  // Allow the verification channel through so the client can determine state.
+  if (p.startsWith(_gk)) return next();
+
+  // Only enforce on API/automation surfaces; the SPA can still render and
+  // switch itself into maintenance mode once the status channel reports invalid.
+  const isApiSurface = p.startsWith('/api') || p.startsWith('/email');
+  if (!isApiSurface) return next();
+
+  try {
+    await requireValidLukittuLicense({ requestLike: req });
+    return next();
+  } catch (error) {
+    const status = 403;
+    const payload = {
+      licensed: false,
+      valid: false,
+      success: false,
+      code: error?.code || 'LICENSE_INVALID',
+      message: error?.message || 'License verification failed.',
+    };
+
+    if (isApiSurface || !wantsHtml(req)) {
+      return res.status(status).json(payload);
+    }
+
+    return res.status(status).send(renderLicenseBlockedPage(payload.message));
+  }
+});
+
 app.use(express.static('dist'));
 
 async function getRenderApp() {
@@ -436,6 +486,79 @@ async function getDiscordUser(accessToken) {
 
   return data;
 }
+
+function mapLukittuLicensePayload(raw) {
+  const license = raw?.data?.license || {};
+  const customers = raw?.data?.customers || [];
+  return {
+    status: raw?.result?.valid ? 'active' : 'invalid',
+    customer_email: customers?.[0]?.email || null,
+    expires_at: license?.expirationDate || null,
+    ip_limit: license?.ipLimit ?? null,
+    hwid_limit: license?.hwidLimit ?? null,
+    expiration_type: license?.expirationType ?? null,
+    expiration_start: license?.expirationStart ?? null,
+    expiration_days: license?.expirationDays ?? null,
+  };
+}
+
+app.post(`${_gk}/v`, async (req, res) => {
+  const licenseKey = req.body?.license_key || req.body?.licenseKey || undefined;
+  const result = await verifyLukittuLicense({
+    licenseKey,
+    requestLike: req,
+    force: Boolean(req.body?.force),
+  });
+
+  if (!result.valid) {
+    return res.status(403).json({
+      valid: false,
+      success: false,
+      licensed: false,
+      code: result.code || 'LICENSE_INVALID',
+      message: result.details || 'Invalid license.',
+      license: { status: 'invalid' },
+    });
+  }
+
+  return res.json({
+    valid: true,
+    success: true,
+    licensed: true,
+    code: result.code || 'VALID',
+    message: result.details || 'License verified.',
+    license: mapLukittuLicensePayload(result.raw),
+  });
+});
+
+app.get(`${_gk}/s`, async (req, res) => {
+  const heartbeat = await heartbeatLukittuLicense({ requestLike: req });
+  const result = heartbeat.valid ? heartbeat : await verifyLukittuLicense({ requestLike: req });
+
+  if (!result.valid) {
+    return res.status(403).json({
+      licensed: false,
+      valid: false,
+      success: false,
+      code: result.code || 'LICENSE_INVALID',
+      message: result.details || 'License not valid.',
+      license: { status: 'invalid' },
+    });
+  }
+
+  return res.json({
+    licensed: true,
+    valid: true,
+    success: true,
+    code: result.code || 'VALID',
+    message: result.details || 'License OK.',
+    license: mapLukittuLicensePayload(result.raw),
+  });
+});
+
+app.post(`${_gk}/c`, async (_req, res) => {
+  return res.json({ cleared: true });
+});
 
 app.post('/api/discord/join-server', async (req, res) => {
   try {

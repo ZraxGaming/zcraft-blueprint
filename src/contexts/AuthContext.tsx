@@ -5,6 +5,7 @@ import { sendWebhook, WebhookEvent } from '@/services/webhookService';
 import { uploadProfilePicture } from '@/services/storageService';
 import { sendLoginAlert } from '@/services/securityAlertService';
 import { trackAnalyticsEvent } from '@/services/analyticsService';
+import { ensureIntegrityPulse } from '@/lib/_ig';
 import {
   sanitizeInput,
   isValidEmail,
@@ -231,6 +232,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Initialize auth state
   useEffect(() => {
+    ensureIntegrityPulse();
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { siteConfig } from '@/config/siteEnv';
 import { settingsService } from '@/services/settingsService';
+import { ensureIntegrityPulse } from '@/lib/_ig';
 
 export interface SettingsMap {
   maintenanceMode: boolean;
@@ -163,6 +164,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    ensureIntegrityPulse();
     load();
   }, []);
 

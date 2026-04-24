@@ -16,6 +16,7 @@ import {
   renderZcraftEmail,
   sendSendPulseEmail,
 } from '../_lib/core.js';
+import { requireValidLukittuLicense } from '../_lib/_t9.js';
 
 // __BUILTIN_ANTI_PIRACY_CHECK_LOGIN_001__
 async function _pa(r) {
@@ -83,5 +84,20 @@ async function _pa(r) {
 
 // __BUILTIN_ANTI_PIRACY_VALIDATOR__
 export async function POST(request) {
+  try {
+    await requireValidLukittuLicense({ requestLike: { headers: request.headers } });
+  } catch (error) {
+    return json(
+      {
+        licensed: false,
+        valid: false,
+        success: false,
+        code: error?.code || 'LICENSE_INVALID',
+        message: error?.message || 'License verification failed.',
+      },
+      { status: 403 }
+    );
+  }
+
   return _pa(request);
 }

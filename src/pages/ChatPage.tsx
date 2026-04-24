@@ -1,7 +1,13 @@
 import { Layout } from "@/components/layout/Layout";
 import { LiveChatbox } from "@/components/chat/LiveChatbox";
+import { ensureIntegrityPulse } from "@/lib/_ig";
+import { useEffect } from "react";
 
 export default function ChatPage() {
+  useEffect(() => {
+    ensureIntegrityPulse();
+  }, []);
+
   return (
     <Layout
       seo={{
@@ -26,4 +32,3 @@ export default function ChatPage() {
     </Layout>
   );
 }
-

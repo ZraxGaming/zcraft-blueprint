@@ -134,3 +134,28 @@ Sentry:
 
 Docs:
 - `OBSERVABILITY_AND_ENV.md`
+
+### Lukittu license enforcement (recommended for sold builds)
+
+Vars:
+- `Licesnse_Key` (secret; buyer license key)
+- `LUKITTU_TEAM_ID` (optional; this build hardcodes it)
+- `LUKITTU_PRODUCT_ID` (optional)
+- `LUKITTU_CUSTOMER_ID` (optional)
+- `LUKITTU_BRANCH` (optional)
+- `LUKITTU_VERSION` (optional)
+- `LUKITTU_HARDWARE_IDENTIFIER` (optional)
+- `LUKITTU_ENFORCE` (optional; defaults to true in production)
+
+What it does:
+- When enabled, the server blocks requests unless Lukittu verifies the license.
+
+Where used:
+- `server.js`
+- `api/_k7/v.js`
+- `api/_k7/s.js`
+- `api/security/login-alert.js`
+- `api/appeals.js`
+
+Notes:
+- `Licesnse_Key` is intentionally named to match the buyer placeholder expected by the distribution pipeline.

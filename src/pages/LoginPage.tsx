@@ -14,11 +14,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Loader, Mail } from "lucide-react";
+import { ensureIntegrityPulse } from "@/lib/_ig";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -28,6 +29,10 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    ensureIntegrityPulse();
+  }, []);
 
   const resolveEmail = async (ident: string) => {
     const normalized = ident.trim();

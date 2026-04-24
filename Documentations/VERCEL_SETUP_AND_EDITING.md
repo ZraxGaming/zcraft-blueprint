@@ -157,7 +157,7 @@ The appeal form submits to the Vercel function in `api/appeals.js`.
 
 ### 5. Change license behavior
 
-This project no longer includes built-in license enforcement.
+This project includes optional Lukittu license enforcement (recommended for sold builds). Configure `Licesnse_Key` and set `LUKITTU_ENFORCE=true` in production.
 
 ## Editing In Practice
 

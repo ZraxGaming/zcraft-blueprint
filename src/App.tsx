@@ -52,6 +52,7 @@ import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
 import { AnalyticsSync } from "@/components/analytics/AnalyticsSync";
 import { useState, useEffect } from "react";
 import { siteConfig } from "@/config/siteEnv";
+import { ensureIntegrityPulse } from "@/lib/_ig";
 
 // ClientOnly component to prevent SSR issues with localStorage-dependent contexts
 function ClientOnly({ children }: { children: React.ReactNode }) {
@@ -59,6 +60,7 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setHasMounted(true);
+    ensureIntegrityPulse();
   }, []);
 
   if (!hasMounted) {

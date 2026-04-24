@@ -4,9 +4,15 @@ import { FeaturesSection } from "@/components/home/FeaturesSection";
 import { CommunitySection } from "@/components/home/CommunitySection";
 import { getPageSeo, siteConfig } from "@/config/siteEnv";
 import { useSettings } from "@/contexts/SettingsContext";
+import { ensureIntegrityPulse } from "@/lib/_ig";
+import { useEffect } from "react";
 
 const Index = () => {
   const { settings } = useSettings();
+
+  useEffect(() => {
+    ensureIntegrityPulse();
+  }, []);
 
   return (
     <Layout

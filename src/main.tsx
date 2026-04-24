@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { PostHogProvider, PostHogErrorBoundary, PostHogErrorBoundaryFallbackProps } from "@posthog/react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initializeSentry } from "@/lib/sentry";
+import { ensureIntegrityPulse } from "@/lib/_ig";
 import { trackAnalyticsException } from "@/services/analyticsService";
 import App from "./App.tsx";
 import "./index.css";
@@ -19,6 +20,7 @@ const posthogOptions = {
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN?.trim() || "";
 
 initializeSentry();
+ensureIntegrityPulse();
 
 function AppErrorFallback({ error, componentStack }: PostHogErrorBoundaryFallbackProps) {
   useEffect(() => {

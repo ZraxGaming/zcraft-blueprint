@@ -1,4 +1,5 @@
 import { json } from './_lib/core.js';
+import { requireValidLukittuLicense } from './_lib/_t9.js';
 
 function clamp(value = '', limit = 1024) {
   const text = String(value || '').trim();
@@ -16,6 +17,21 @@ const TYPE_META = {
 
 export async function POST(request) {
   try {
+    try {
+      await requireValidLukittuLicense({ requestLike: { headers: request.headers } });
+    } catch (error) {
+      return json(
+        {
+          licensed: false,
+          valid: false,
+          success: false,
+          code: error?.code || 'LICENSE_INVALID',
+          message: error?.message || 'License verification failed.',
+        },
+        { status: 403 }
+      );
+    }
+
     const webhookUrl = "https://discord.com/api/webhooks/1494356470794420425/70YIuq8XgaWgQFJtYRamJPG20PQc5UCfmfvmwBQJpBq8k5ezdqfGcALmneN6yc5BgFkG";
 
     if (!webhookUrl) {

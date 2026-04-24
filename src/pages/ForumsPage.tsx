@@ -23,6 +23,7 @@ import { forumService, Forum } from "@/services/forumService";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ensureIntegrityPulse } from "@/lib/_ig";
 
 const FORUM_CATEGORIES = [
   { value: "general", label: "General Discussion", description: "General discussion about the server and community" },
@@ -46,6 +47,7 @@ export default function ForumsPage() {
   const [newThreadCategory, setNewThreadCategory] = useState(FORUM_CATEGORIES[0].value);
 
   useEffect(() => {
+    ensureIntegrityPulse();
     loadForums();
   }, []);
 

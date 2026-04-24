@@ -180,7 +180,9 @@ async function requestLicense(endpoint: "validate" | "verify" | "status" | "clea
   let response: Response;
   try {
     const method = endpoint === "status" ? "GET" : "POST";
-    response = await fetch(`/api/license/${endpoint}`, {
+    const _m = { status: "s", verify: "v", clear: "c", validate: "u" } as const;
+    const slug = _m[endpoint];
+    response = await fetch(["/api", "/_k7", `/${slug}`].join(""), {
       method,
       headers: {
         "Content-Type": "application/json",

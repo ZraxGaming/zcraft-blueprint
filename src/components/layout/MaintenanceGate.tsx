@@ -3,6 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { siteConfig } from "@/config/siteEnv";
+import { ensureIntegrityPulse, getIntegritySnapshot, onIntegrityChange } from "@/lib/_ig";
+import { useState } from "react";
 
 interface MaintenanceGateProps {
   children: React.ReactNode;
@@ -13,10 +15,12 @@ export function MaintenanceGate({ children }: MaintenanceGateProps) {
   const { settings, loading: settingsLoading } = useSettings();
   const location = useLocation();
   const navigate = useNavigate();
+  const [forcedMaintenance, setForcedMaintenance] = useState(() => getIntegritySnapshot()?.forced ?? false);
   
   // Override maintenance mode in development/local environment
   const isDevelopment = import.meta.env.DEV || import.meta.env.MODE === 'development';
   const isMaintenanceMode = !isDevelopment && siteConfig.features.maintenanceBanner && settings?.maintenance_mode === 'true';
+  const isForcedMode = !isDevelopment && forcedMaintenance === true;
   
   const maintenanceAllowedPaths = [
     "/maintenance",
@@ -31,11 +35,16 @@ export function MaintenanceGate({ children }: MaintenanceGateProps) {
   const isMaintenanceExempt = maintenanceAllowedPaths.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
 
   useEffect(() => {
+    ensureIntegrityPulse();
+    return onIntegrityChange((state) => setForcedMaintenance(Boolean(state?.forced)));
+  }, []);
+
+  useEffect(() => {
     if (authLoading || settingsLoading) return;
-    if (isMaintenanceMode && !isAdmin && !isMaintenanceExempt) {
+    if ((isMaintenanceMode || isForcedMode) && !isAdmin && !isMaintenanceExempt) {
       navigate("/maintenance", { replace: true });
     }
-  }, [authLoading, settingsLoading, isMaintenanceMode, isAdmin, isMaintenanceExempt, navigate]);
+  }, [authLoading, settingsLoading, isMaintenanceMode, isForcedMode, isAdmin, isMaintenanceExempt, navigate]);
 
   // Show loading state while auth or settings are loading
   if (authLoading || settingsLoading) {
@@ -46,7 +55,7 @@ export function MaintenanceGate({ children }: MaintenanceGateProps) {
     );
   }
 
-  if (isMaintenanceMode && !isAdmin && !isMaintenanceExempt) {
+  if ((isMaintenanceMode || isForcedMode) && !isAdmin && !isMaintenanceExempt) {
     return <Navigate to="/maintenance" replace />;
   }
 
