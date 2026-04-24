@@ -118,11 +118,10 @@ function removeStorage(key: string) {
 }
 
 /* =========================
-   LUKITTU CONFIG
+   CONFIG
 ========================= */
 
-const LUKITTU_VERIFY_URL =
-  "https://api.lukittu.com/client/verify";
+export const LICENSE_REQUIRED = false;
 
 /* =========================
    DEVICE ID
@@ -161,8 +160,12 @@ export function clearStoredLicenseState() {
   removeStorage(LICENSE_STATE_KEY);
 }
 
+export function getStoredLicenseKey() {
+  return getStoredLicenseState()?.licenseKey || "";
+}
+
 /* =========================
-   ERROR MESSAGES
+   MESSAGES
 ========================= */
 
 export function getLicenseStatusMessage(code: LicenseErrorCode) {
@@ -191,12 +194,12 @@ export function getLicenseStatusMessage(code: LicenseErrorCode) {
 }
 
 /* =========================
-   LUKITTU REQUEST (CLEAN)
+   API CALL (VERCEL ONLY)
 ========================= */
 
 async function requestLicense(payload: Record<string, unknown>) {
   try {
-    const res = await fetch(LUKITTU_VERIFY_URL, {
+    const res = await fetch("/api/license/verify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -218,7 +221,7 @@ async function requestLicense(payload: Record<string, unknown>) {
 }
 
 /* =========================
-   NORMALIZATION
+   MAPPING
 ========================= */
 
 function mapState(
@@ -252,7 +255,7 @@ function throwError(data: LicenseApiResponse, fallback: LicenseErrorCode) {
 }
 
 /* =========================
-   MAIN FUNCTIONS
+   CORE FUNCTIONS
 ========================= */
 
 export async function validateLicenseKey(licenseKey: string) {
