@@ -35,6 +35,8 @@ Deno.serve(async (req) => {
       minecraft_username: username,
       avatar_url: body.avatar_url || `https://mc-heads.net/avatar/${encodeURIComponent(username)}/64`,
       content,
+      discord_embeds: body.discord_embeds || body.embeds || null,
+      discord_attachments: body.discord_attachments || body.attachments || null,
     });
     if (error) {
       console.error(error);

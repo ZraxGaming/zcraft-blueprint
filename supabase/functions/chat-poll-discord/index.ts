@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
@@ -13,10 +14,15 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const CHANNEL_ID = Deno.env.get("DISCORD_CHAT_CHANNEL_ID");
     const BOT_TOKEN = Deno.env.get("DISCORD_BOT_TOKEN");
+
+    if (!SUPABASE_URL || !SERVICE_ROLE) {
+      return json({ error: "Supabase environment is not configured on the server" }, 500);
+    }
+
     if (!CHANNEL_ID || !BOT_TOKEN) {
       return json({ error: "Discord chat channel or bot token not configured" }, 500);
     }
@@ -46,6 +52,8 @@ Deno.serve(async (req) => {
       author: { id: string; username: string; global_name?: string; avatar?: string; bot?: boolean };
       webhook_id?: string;
       timestamp: string;
+      embeds?: unknown[];
+      attachments?: unknown[];
     }>;
 
     let inserted = 0;
@@ -70,6 +78,8 @@ Deno.serve(async (req) => {
         minecraft_username: isMinecraft ? username : null,
         avatar_url: avatar,
         content: m.content,
+        discord_embeds: m.embeds && m.embeds.length ? m.embeds : null,
+        discord_attachments: m.attachments && m.attachments.length ? m.attachments : null,
         created_at: m.timestamp,
       });
       if (!error) inserted++;
