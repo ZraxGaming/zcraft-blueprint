@@ -55,12 +55,40 @@ export function buildDiscordOAuthUrl(): string {
 
 export async function exchangeDiscordCode(code: string): Promise<DiscordConnection> {
   const redirectUri = `${window.location.origin}/auth/discord/callback`;
-  const { data, error } = await supabase.functions.invoke("discord-oauth-exchange", {
+  const { data, error, response } = await supabase.functions.invoke("discord-oauth-exchange", {
     body: { code, redirectUri },
   });
-  if (error) throw new Error(error.message);
+  if (error) {
+    const res = response as Response | undefined;
+    if (res) {
+      try {
+        const contentType = res.headers.get("Content-Type") || "";
+        if (contentType.includes("application/json")) {
+          const json = await res.json().catch(() => null);
+          const msg = json?.error || json?.message;
+          if (msg) throw new Error(String(msg));
+        } else {
+          const text = await res.text().catch(() => "");
+          if (text) throw new Error(text);
+        }
+      } catch (parseErr: any) {
+        if (parseErr?.message) throw parseErr;
+      }
+    }
+    throw new Error((error as any)?.message || "Discord connection failed");
+  }
   if (!data?.ok) throw new Error(data?.error || "Discord exchange failed");
-  return data.discord;
+
+  const d = data.discord as any;
+  if (d?.discord_id) return d as DiscordConnection;
+  if (d?.id) {
+    return {
+      discord_id: String(d.id),
+      discord_username: String(d.username ?? ""),
+      discord_avatar: (d.avatar ?? null) as string | null,
+    };
+  }
+  throw new Error("Discord exchange returned an unexpected response");
 }
 
 export async function sendChatMessage(content: string): Promise<void> {
