@@ -20,7 +20,6 @@ import { newsService } from "@/services/newsService";
 import { forumService } from "@/services/forumService";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { DiscordWidgetCard } from "@/components/community/DiscordWidgetCard";
-import { LiveChatbox } from "@/components/chat/LiveChatbox";
 
 type Announcement = { id: string; title: string; date: string; type?: string; excerpt?: string };
 type ThreadPreview = { id: string; title: string; author: string; replies_count: number; category: string };
@@ -276,7 +275,6 @@ export function CommunitySection() {
             </Card>
 
             <DiscordWidgetCard />
-            <LiveChatbox />
           </motion.div>
         </div>
       </div>

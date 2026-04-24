@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Send, Globe, Pickaxe, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   fetchChatMessages,
   getMyDiscordConnection,
@@ -36,6 +37,7 @@ export function LiveChatbox({ className }: { className?: string }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Load Discord connection
@@ -51,22 +53,75 @@ export function LiveChatbox({ className }: { className?: string }) {
     })();
   }, [user]);
 
-  // Poll for messages
-  const refresh = useCallback(async () => {
-    try {
-      pollDiscordForNewMessages();
-      const msgs = await fetchChatMessages(80);
-      setMessages(msgs);
-    } catch (e) {
-      console.error("chat fetch failed", e);
-    }
+  // On load: sync from Discord once, then pull latest from DB
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoadingMessages(true);
+      try {
+        await pollDiscordForNewMessages();
+      } catch (e) {
+        console.warn("chat poll failed", e);
+      }
+      try {
+        const msgs = await fetchChatMessages(50);
+        if (mounted) setMessages(msgs);
+      } catch (e) {
+        console.error("chat fetch failed", e);
+      } finally {
+        if (mounted) setLoadingMessages(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
+  // Live updates via Realtime (DB changes)
   useEffect(() => {
-    refresh();
-    const t = setInterval(refresh, 3000);
+    const channel = supabase
+      .channel("live-chat-messages")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages" },
+        (payload) => {
+          const row = payload.new as ChatMessage;
+          setMessages((prev) => mergeChatMessage(prev, row));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "chat_messages" },
+        (payload) => {
+          const row = payload.new as ChatMessage;
+          setMessages((prev) => mergeChatMessage(prev, row));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "chat_messages" },
+        (payload) => {
+          const oldRow = payload.old as { id?: string } | null;
+          const id = oldRow?.id;
+          if (!id) return;
+          setMessages((prev) => prev.filter((m) => m.id !== id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Keep pulling Discord -> DB in the background (Realtime delivers new rows)
+  useEffect(() => {
+    const t = setInterval(() => {
+      pollDiscordForNewMessages().catch(() => {});
+    }, 5000);
     return () => clearInterval(t);
-  }, [refresh]);
+  }, []);
 
   // Auto-scroll
   useEffect(() => {
@@ -83,7 +138,6 @@ export function LiveChatbox({ className }: { className?: string }) {
     try {
       await sendChatMessage(content);
       setDraft("");
-      await refresh();
     } catch (err: any) {
       toast({ title: "Couldn't send", description: err.message, variant: "destructive" });
     } finally {
@@ -122,7 +176,12 @@ export function LiveChatbox({ className }: { className?: string }) {
         ) : (
           <>
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-              {messages.length === 0 ? (
+              {loadingMessages && (
+                <div className="flex items-center justify-center py-10 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+              )}
+              {!loadingMessages && messages.length === 0 ? (
                 <p className="text-center text-sm text-muted-foreground py-10">
                   No messages yet — be the first to say hi!
                 </p>
@@ -201,4 +260,12 @@ function ChatRow({ m }: { m: ChatMessage }) {
       </div>
     </div>
   );
+}
+
+function mergeChatMessage(prev: ChatMessage[], next: ChatMessage) {
+  const existingIndex = prev.findIndex((m) => m.id === next.id);
+  const merged =
+    existingIndex >= 0 ? prev.map((m, i) => (i === existingIndex ? next : m)) : [...prev, next];
+  merged.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  return merged.slice(-50);
 }

@@ -115,7 +115,7 @@ export async function sendChatMessage(content: string): Promise<void> {
   if (!data?.ok) throw new Error(data?.error || "Send failed");
 }
 
-export async function fetchChatMessages(limit = 80): Promise<ChatMessage[]> {
+export async function fetchChatMessages(limit = 50): Promise<ChatMessage[]> {
   const { data, error } = await supabase
     .from("chat_messages")
     .select("id, source, username, minecraft_username, avatar_url, content, created_at")
@@ -126,6 +126,5 @@ export async function fetchChatMessages(limit = 80): Promise<ChatMessage[]> {
 }
 
 export async function pollDiscordForNewMessages(): Promise<void> {
-  // Fire-and-forget; the function fetches new Discord messages and inserts them.
-  await supabase.functions.invoke("chat-poll-discord", { body: {} }).catch(() => {});
+  await supabase.functions.invoke("chat-poll-discord", { body: {} });
 }

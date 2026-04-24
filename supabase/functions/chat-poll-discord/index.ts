@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
@@ -13,10 +14,15 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const CHANNEL_ID = Deno.env.get("DISCORD_CHAT_CHANNEL_ID");
     const BOT_TOKEN = Deno.env.get("DISCORD_BOT_TOKEN");
+
+    if (!SUPABASE_URL || !SERVICE_ROLE) {
+      return json({ error: "Supabase environment is not configured on the server" }, 500);
+    }
+
     if (!CHANNEL_ID || !BOT_TOKEN) {
       return json({ error: "Discord chat channel or bot token not configured" }, 500);
     }
@@ -62,17 +68,37 @@ Deno.serve(async (req) => {
         ? `https://cdn.discordapp.com/avatars/${m.author.id}/${m.author.avatar}.png`
         : null;
 
-      const { error } = await admin.from("chat_messages").insert({
-        source: isMinecraft ? "minecraft" : "website",
-        discord_message_id: m.id,
-        discord_id: m.author?.id || null,
-        username,
-        minecraft_username: isMinecraft ? username : null,
-        avatar_url: avatar,
-        content: m.content,
-        created_at: m.timestamp,
-      });
+      const { error } = await admin.from("chat_messages").upsert(
+        {
+          source: isMinecraft ? "minecraft" : "website",
+          discord_message_id: m.id,
+          discord_id: m.author?.id || null,
+          username,
+          minecraft_username: isMinecraft ? username : null,
+          avatar_url: avatar,
+          content: m.content,
+          created_at: m.timestamp,
+        },
+        { onConflict: "discord_message_id" }
+      );
       if (!error) inserted++;
+    }
+
+    const cutoff = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+    const { error: cutoffErr } = await admin.from("chat_messages").delete().lt("created_at", cutoff);
+    if (cutoffErr) console.error("cleanup cutoff failed", cutoffErr);
+
+    const { data: boundary, error: boundaryErr } = await admin
+      .from("chat_messages")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .range(50, 50)
+      .maybeSingle();
+    if (boundaryErr) {
+      console.error("cleanup boundary failed", boundaryErr);
+    } else if (boundary?.created_at) {
+      const { error: sizeErr } = await admin.from("chat_messages").delete().lt("created_at", boundary.created_at);
+      if (sizeErr) console.error("cleanup size failed", sizeErr);
     }
 
     return json({ ok: true, inserted, scanned: messages.length });
