@@ -396,7 +396,7 @@ export async function refreshStoredLicense() {
 
   const refreshed: LicenseState = {
     ...state,
-    status: data.license?.status || "active",
+    status: ((data.license?.status as LicenseStatus) || "active"),
     lastValidatedAt: new Date().toISOString(),
   };
 
