@@ -83,10 +83,16 @@ async function checkOnce(): Promise<GuardState> {
   }
 
   try {
-    const res = await fetch(["/api", "/_k7", "/s"].join(""), { cache: "no-store", credentials: "include" });
+    const res = await fetch(["/api", "/license", "/verify"].join(""), {
+      method: "POST",
+      cache: "no-store",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({}),
+    });
     const payload = await res.json().catch(() => ({}));
 
-    if (!res.ok || payload?.licensed !== true) {
+    if (!res.ok || (payload?.licensed !== true && payload?.valid !== true)) {
       return normalizeFailure(payload, res.status);
     }
 
