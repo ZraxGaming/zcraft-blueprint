@@ -233,6 +233,9 @@ function EmptyState({
 
 function ChatRow({ m }: { m: ChatMessage }) {
   const isMC = m.source === "minecraft";
+  const isWebsite = m.source === "website";
+  const SourceIcon = isMC ? Pickaxe : isWebsite ? Globe : MessageCircle;
+  const label = isMC ? "Minecraft" : isWebsite ? "Website" : "Discord";
   return (
     <div className="flex items-start gap-3">
       <Avatar className="h-8 w-8 flex-shrink-0">
@@ -247,11 +250,13 @@ function ChatRow({ m }: { m: ChatMessage }) {
               "h-5 px-1.5 text-[10px] gap-1 font-semibold",
               isMC
                 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                : isWebsite
+                  ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                  : "bg-indigo-500/10 text-indigo-400 border-indigo-500/30"
             )}
           >
-            {isMC ? <Pickaxe className="h-3 w-3" /> : <Globe className="h-3 w-3" />}
-            {isMC ? "Minecraft" : "Website"}
+            <SourceIcon className="h-3 w-3" />
+            {label}
           </Badge>
           <span className="text-sm font-medium truncate">{m.minecraft_username || m.username}</span>
           <span className="text-[10px] text-muted-foreground ml-auto">{relativeTime(m.created_at)}</span>

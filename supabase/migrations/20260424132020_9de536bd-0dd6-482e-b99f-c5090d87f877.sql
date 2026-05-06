@@ -41,7 +41,7 @@ CREATE TRIGGER trg_discord_connections_updated_at
 -- Chat messages bridged between website and Minecraft via Discord
 CREATE TABLE public.chat_messages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  source text NOT NULL CHECK (source IN ('website', 'minecraft')),
+  source text NOT NULL CHECK (source IN ('website', 'minecraft', 'discord')),
   discord_message_id text UNIQUE,
   discord_id text,
   user_id uuid,
@@ -49,6 +49,7 @@ CREATE TABLE public.chat_messages (
   minecraft_username text,
   avatar_url text,
   content text NOT NULL,
+  dedup_hash text UNIQUE,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 

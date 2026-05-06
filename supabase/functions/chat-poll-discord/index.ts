@@ -64,6 +64,7 @@ Deno.serve(async (req) => {
         {
           discord_message_id: m.id,
           source: isMinecraft ? "minecraft" : "discord",
+          discord_id: isMinecraft ? null : m.author?.id ?? null,
           username,
           minecraft_username: isMinecraft ? username : null,
           avatar_url: avatar,

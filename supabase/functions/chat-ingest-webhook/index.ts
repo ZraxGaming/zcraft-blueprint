@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import crypto from "node:crypto";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null);
@@ -23,10 +22,7 @@ Deno.serve(async (req) => {
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-    const hash = crypto
-      .createHash("sha256")
-      .update(username + content)
-      .digest("hex");
+    const hash = await sha256Hex(`${username}:${content}`);
 
     const { error } = await admin.from("chat_messages").insert({
       source: "minecraft",
@@ -53,4 +49,12 @@ function json(data: unknown, status = 200) {
     status,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+async function sha256Hex(input: string) {
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }

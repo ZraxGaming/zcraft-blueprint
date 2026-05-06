@@ -8,7 +8,7 @@ export interface DiscordConnection {
 
 export interface ChatMessage {
   id: string;
-  source: "website" | "minecraft";
+  source: "website" | "minecraft" | "discord";
   username: string;
   minecraft_username: string | null;
   avatar_url: string | null;
