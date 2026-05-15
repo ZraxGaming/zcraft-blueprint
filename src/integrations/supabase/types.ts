@@ -699,6 +699,29 @@ export type Database = {
       }
     }
     Functions: {
+      get_my_user_record: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          discord_id: string | null
+          email: string
+          github_id: string | null
+          google_id: string | null
+          id: string
+          minecraft_name: string | null
+          role: string | null
+          updated_at: string | null
+          username: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
