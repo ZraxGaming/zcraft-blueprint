@@ -75,7 +75,7 @@ export const siteConfig = {
       keywords: toString(env.VITE_PAGE_APPEAL_KEYWORDS, "appeal, ban appeal, punishment appeal, minecraft appeal"),
     },
     home: {
-      title: toString(env.VITE_PAGE_HOME_TITLE, "ZCraft Network - Premium Minecraft Lifesteal & Skyblock SMP Server"),
+      title: toString(env.VITE_PAGE_HOME_TITLE, "ZCraft Network — Premium Minecraft SMP"),
       description: toString(env.VITE_PAGE_HOME_DESCRIPTION, "Join ZCraft Network, the ultimate Minecraft network with Lifesteal and Skyblock SMP, survival gameplay, custom economy, factions, and active community events."),
       keywords: toString(env.VITE_PAGE_HOME_KEYWORDS, "zcraft, zcraft network, minecraft server, minecraft lifesteal, skyblock, lifesteal skyblock, minecraft survival, minecraft factions, minecraft economy, minecraft pvp, minecraft smp, best minecraft server"),
     },
