@@ -38,6 +38,7 @@ export default function FaqPage() {
         url: "/faq",
         type: "website",
         tags: ["faq", "support", "help", "troubleshooting"],
+        faq: supportFaqs.map((f) => ({ question: f.question, answer: f.answer })),
       }}
     >
       <section className="py-16 lg:py-24 relative overflow-hidden">

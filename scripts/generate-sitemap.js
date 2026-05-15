@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
-const SITE_URL = process.env.SITE_URL || 'https://z-craft.xyz';
+const SITE_URL = process.env.SITE_URL || 'https://guilded-design.lovable.app';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const isEnabled = (key, fallback = true) => {

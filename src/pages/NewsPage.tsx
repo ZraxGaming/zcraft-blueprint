@@ -51,7 +51,7 @@ export default function NewsPage() {
   return (
     <Layout
       seo={{
-        title: "ZCraft Network News - Latest Updates, Events & Announcements",
+        title: "ZCraft News — Updates, Events & Announcements",
         description:
           "Stay updated with ZCraft Network's latest news, server announcements, event schedules, and important updates.",
         keywords:

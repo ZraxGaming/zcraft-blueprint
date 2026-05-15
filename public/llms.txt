@@ -1,0 +1,25 @@
+# ZCraft Network
+
+> ZCraft Network is a premium Minecraft Lifesteal & Skyblock SMP with custom game modes, active staff, and a friendly community.
+
+ZCraft is a Minecraft server network. Players can join via Java or Bedrock edition, browse news and changelogs, read the wiki, participate in forums, apply for staff, file ban appeals, and check live server status.
+
+## Pages
+
+- [Home](/): Overview of ZCraft Network and how to join.
+- [Play](/play): Server IP, port, and connection details for Java and Bedrock.
+- [News](/news): Server announcements, updates, and events.
+- [Forums](/forums): Community discussions across categories.
+- [Changelogs](/changelogs): Version history and release notes.
+- [Status](/status): Live status of network services.
+- [Staff](/staff): Meet the staff team and apply.
+- [Rules](/rules): Server rules and conduct guidelines.
+- [FAQ](/faq): Common questions about joining, gameplay, and support.
+- [Support](/support): Open a ticket or get help.
+- [Appeal](/appeal): Submit a ban appeal.
+- [Store](/store): In-game ranks and cosmetics (redirects to Tebex).
+
+## Optional
+
+- [Search](/search): Site-wide search.
+- [Server Listings](/server-listings): Curated server list.
