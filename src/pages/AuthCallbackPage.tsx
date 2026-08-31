@@ -98,7 +98,7 @@ export default function AuthCallbackPage() {
           // Check if user profile exists
           const { data: profile, error: profileError } = await supabase
             .from('users')
-            .select('username, discord_id')
+            .select('username')
             .eq('id', session.user.id)
             .single();
 
@@ -120,7 +120,7 @@ export default function AuthCallbackPage() {
               updates.avatar_url = avatarUrl;
             }
 
-            if (provider === 'discord' && discordId && !profile.discord_id) {
+            if (provider === 'discord' && discordId) {
               updates.discord_id = discordId;
             }
 

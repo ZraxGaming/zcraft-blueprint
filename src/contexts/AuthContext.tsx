@@ -129,15 +129,13 @@ async function _rei(i: string): Promise<string> {
     }
     return si;
   }
-  const { data: d, error: e } = await supabase
-    .from('users')
-    .select('email')
-    .eq('username', si)
-    .single();
-  if (e || !d?.email) {
+  const { data: d, error: e } = await supabase.rpc('get_email_by_username', {
+    lookup_username: si,
+  });
+  if (e || !d) {
     throw new Error('User not found.');
   }
-  return d.email as string;
+  return d as string;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -197,7 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('users')
-        .select('*')
+        .select('id, username, avatar_url, bio, minecraft_name, role, created_at, updated_at')
         .eq('id', userId)
         .maybeSingle();
 
@@ -227,6 +225,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: fallbackRole,
         created_at: currentUser?.created_at || new Date().toISOString(),
       };
+
+      profile.email = currentUser?.email || '';
 
       let avatarUrl = profile.avatar_url;
       if (!avatarUrl && currentUser) {

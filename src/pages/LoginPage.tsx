@@ -44,17 +44,15 @@ export default function LoginPage() {
       return normalized.toLowerCase();
     }
 
-    const { data, error } = await supabase
-      .from('users')
-      .select('email')
-      .ilike('username', normalized)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc('get_email_by_username', {
+      lookup_username: normalized,
+    });
 
-    if (error || !data?.email) {
+    if (error || !data) {
       throw new Error('User not found. Try signing in with your email address.');
     }
 
-    return data.email as string;
+    return data as string;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

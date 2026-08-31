@@ -77,10 +77,7 @@ export default function AdminUsersPage() {
     try {
       setLoading(true);
       
-      const { data: usersData, error: usersError } = await supabase
-        .from("users")
-        .select("id, username, email, avatar_url, created_at")
-        .order("created_at", { ascending: false });
+      const { data: usersData, error: usersError } = await supabase.rpc("get_admin_users");
 
       if (usersError) throw usersError;
 

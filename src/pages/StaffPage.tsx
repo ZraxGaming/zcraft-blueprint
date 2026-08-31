@@ -14,7 +14,6 @@ import type { StaffApplicationRoleConfig } from "@/services/staffApplicationServ
 interface StaffMember {
   id: string;
   username: string;
-  email: string;
   role: string;
   created_at: string;
   avatar_url?: string;
@@ -176,7 +175,7 @@ export default function StaffPage() {
 
       const { data, error: queryError } = await supabase
         .from("users")
-        .select("id, username, email, role, created_at, avatar_url, minecraft_name")
+        .select("id, username, role, created_at, avatar_url, minecraft_name")
         .in("role", staffRoles);
 
       if (queryError) throw queryError;
@@ -188,7 +187,7 @@ export default function StaffPage() {
       if (extraStaffIds.length > 0) {
         const { data: extraData, error: extraError } = await supabase
           .from("users")
-          .select("id, username, email, role, created_at, avatar_url, minecraft_name")
+          .select("id, username, role, created_at, avatar_url, minecraft_name")
           .in("id", extraStaffIds);
 
         if (extraError) throw extraError;
