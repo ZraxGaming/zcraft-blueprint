@@ -15,22 +15,11 @@ Windows (if PowerShell blocks npm):
 
 - `/login`, `/register`
 - `/auth/callback` (Supabase OAuth callback)
-- `/profile` (Discord connect UI lives here)
-- `/auth/discord/callback` (Connect Discord callback)
-- `/chat` (dedicated live chat page)
+- `/profile`
 
 ## Key tables
 
 - `public.users`
-- `public.discord_connections`
-- `public.chat_messages`
-
-## Key Edge Functions
-
-- `discord-oauth-exchange`
-- `chat-send`
-- `chat-poll-discord`
-- `chat-ingest-webhook` (optional push ingest)
 
 ## Must-have env vars (minimum)
 
@@ -42,7 +31,6 @@ Server/scripts (recommended):
 - `SITE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
-Discord live chat (optional):
 - `DISCORD_BOT_TOKEN`
 - `DISCORD_CHAT_CHANNEL_ID`
 - `VITE_DISCORD_CLIENT_ID` + `DISCORD_CLIENT_ID` + `DISCORD_CLIENT_SECRET`

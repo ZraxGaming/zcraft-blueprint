@@ -35,15 +35,6 @@ patchFile("api/email/send.js", {
     "export async function POST(h){try{await requireValidLukittuLicense({requestLike:{headers:h.headers}});}catch(e){return json({licensed:!1,valid:!1,success:!1,code:e?.code||'LICENSE_INVALID',message:e?.message||'License verification failed.'},{status:403});}return vma_b458cc(",
 });
 
-patchFile("api/discord/join-server.js", {
-  importFrom: "import{getDiscordUser,json}from'../_lib/core.js';",
-  importTo:
-    "import{getDiscordUser,json}from'../_lib/core.js';import{requireValidLukittuLicense}from'../_lib/_t9.js';",
-  exportFrom: "export async function POST(s){return vmg_fe282(",
-  exportTo:
-    "export async function POST(s){try{await requireValidLukittuLicense({requestLike:{headers:s.headers}});}catch(e){return json({licensed:!1,valid:!1,success:!1,code:e?.code||'LICENSE_INVALID',message:e?.message||'License verification failed.'},{status:403});}return vmg_fe282(",
-});
-
 patchFile("api/email/unsubscribe.js", {
   importFrom:
     "import{createSignature,escapeHtml,getSupabaseConfig,htmlPage,isOptionalEmailCategory}from'../_lib/core.js';",

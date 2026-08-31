@@ -20,10 +20,6 @@ If PowerShell blocks `npm` on Windows, use `cmd /c npm run dev`.
 - `VERCEL_SETUP_AND_EDITING.md` — deploying on Vercel, maintenance mode, appeals + webhook config
 - `OBSERVABILITY_AND_ENV.md` — what must stay private vs safe to expose (`VITE_` rule)
 
-## Discord + live chat
-
-- `CHAT_BRIDGE_SETUP.md` (repo root) — DiscordSRV ↔ website live chat setup (Discord app + bot + Supabase secrets)
-
 ## Other references
 
 - `SQL_SCHEMA_DOCUMENTATION.md` — tables, RLS policies, schema notes

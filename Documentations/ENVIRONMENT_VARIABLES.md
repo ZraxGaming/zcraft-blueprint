@@ -91,25 +91,6 @@ Where to get them (Discord Developer Portal):
   - Client ID / Client Secret
   - Add redirect: `https://YOUR_DOMAIN/auth/discord/callback` (and dev localhost if needed)
 
-### Discord bot + channel (live chat bridge)
-
-Vars:
-- `DISCORD_BOT_TOKEN` (secret)
-- `DISCORD_CHAT_CHANNEL_ID`
-- `DISCORD_CHAT_INGEST_SECRET` (optional)
-- `DISCORD_GUILD_ID` (optional, only for auto-join endpoint)
-
-What it does:
-- Reads/writes the Discord channel used by DiscordSRV to bridge chat.
-
-Where used:
-- `supabase/functions/chat-send/index.ts`
-- `supabase/functions/chat-poll-discord/index.ts`
-- `server.js` (`/api/discord/join-server`)
-
-Setup guide:
-- `CHAT_BRIDGE_SETUP.md`
-
 ### Appeals webhook (optional)
 
 Var:

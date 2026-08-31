@@ -42,11 +42,3 @@ This repo includes `server.js` (Express) for API routes and SSR support.
   - `SITE_URL` and `CORS_ALLOW_ORIGIN` (optional CORS tuning)
   - `SUPABASE_SERVICE_ROLE_KEY` (recommended for admin/secure routes)
 
-## Live chat (DiscordSRV bridge)
-
-Follow `CHAT_BRIDGE_SETUP.md` to configure:
-
-- Discord app (OAuth) for “Connect Discord”
-- Discord bot token + channel permissions
-- Supabase Edge Function secrets
-

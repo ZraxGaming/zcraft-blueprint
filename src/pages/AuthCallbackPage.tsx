@@ -4,8 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OAUTH_PROVIDER_TOKEN_KEY, supabase } from '@/integrations/supabase/client';
-import { buildApiUrl } from '@/lib/api';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Loader } from 'lucide-react';
 import { sendLoginAlert } from '@/services/securityAlertService';
@@ -83,9 +82,6 @@ export default function AuthCallbackPage() {
             session.user.user_metadata?.avatar_url ||
             session.user.user_metadata?.picture ||
             null;
-          const providerToken =
-            (session as any).provider_token ||
-            (typeof window !== 'undefined' ? window.sessionStorage.getItem(OAUTH_PROVIDER_TOKEN_KEY) : null);
           const username =
             session.user.user_metadata?.preferred_username ||
             session.user.user_metadata?.user_name ||
@@ -132,53 +128,6 @@ export default function AuthCallbackPage() {
             }
           } else if (profileError) {
             throw profileError;
-          }
-
-          if (provider === 'discord' && providerToken) {
-            setMessage('Joining Discord server...');
-            try {
-              const joinResponse = await fetch(buildApiUrl('/api/discord/join-server'), {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  accessToken: providerToken,
-                  discordUserId: discordId,
-                }),
-              });
-
-              const joinResult = await joinResponse.json().catch(() => null);
-
-              if (!joinResponse.ok) {
-                console.warn('Discord server auto-join failed:', joinResult);
-                toast({
-                  title: 'Discord sign-in worked',
-                  description:
-                    joinResult?.details ||
-                    joinResult?.error ||
-                    'Server auto-join failed. Check Discord bot token, guild id, and guilds.join scope.',
-                });
-              } else if (joinResult?.skipped) {
-                toast({
-                  title: 'Discord sign-in worked',
-                  description: joinResult.reason || 'Server auto-join is not configured.',
-                });
-              } else if (typeof window !== 'undefined') {
-                window.sessionStorage.removeItem(OAUTH_PROVIDER_TOKEN_KEY);
-              }
-            } catch (joinError) {
-              console.warn('Discord server auto-join failed:', joinError);
-              toast({
-                title: 'Discord sign-in worked',
-                description: 'Server auto-join failed before Discord could respond.',
-              });
-            }
-          } else if (provider === 'discord') {
-            toast({
-              title: 'Discord sign-in worked',
-              description: 'Discord server auto-join could not start because no provider token was available from OAuth.',
-            });
           }
 
           toast({ 

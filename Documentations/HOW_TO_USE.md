@@ -14,11 +14,7 @@
 
 - Read: `VERCEL_SETUP_AND_EDITING.md`
 
-## 4) Enable Discord live chat (DiscordSRV bridge)
-
-- Read: `CHAT_BRIDGE_SETUP.md` (repo root)
-
-## 5) Reference / deep dives
+## 4) Reference / deep dives
 
 - Database schema: `SQL_SCHEMA_DOCUMENTATION.md`
 - Webhooks: `WEBHOOK_INTEGRATION.md` and `WEBHOOK_QUICK_REFERENCE.md`

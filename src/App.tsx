@@ -45,8 +45,6 @@ import MaintenancePage from "./pages/MaintenancePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import VerifyIdentityPage from "./pages/VerifyIdentityPage";
 import DiscordRedirectPage from "./pages/DiscordRedirectPage";
-import DiscordCallbackPage from "./pages/DiscordCallbackPage";
-import ChatPage from "./pages/ChatPage";
 import NotFound from "./pages/NotFound";
 import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
 import { AnalyticsSync } from "@/components/analytics/AnalyticsSync";
@@ -141,8 +139,6 @@ const App = () => (
                     <Route path="/apply" element={<ApplyPage />} />
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/discord" element={<DiscordRedirectPage />} />
-                    <Route path="/chat" element={<ChatPage />} />
-                    <Route path="/auth/discord/callback" element={<DiscordCallbackPage />} />
                     <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
                     <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
                     <Route path="/admin/news" element={<AdminRoute><AdminNewsPage /></AdminRoute>} />

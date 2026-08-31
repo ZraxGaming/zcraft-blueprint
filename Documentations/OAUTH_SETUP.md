@@ -23,20 +23,5 @@ Steps:
 3. App callback route:
    - This app uses `/auth/callback` as the post-auth landing page.
 
-## 2) Connect Discord (optional)
-
-This is used by the live chat bridge and stores a per-user Discord identity in `discord_connections`.
-
-Steps:
-
-1. Create a Discord application
-2. Add redirect URL(s) for the app:
-   - `https://YOUR_DOMAIN/auth/discord/callback`
-   - `http://localhost:5173/auth/discord/callback`
-3. Set secrets in Supabase for the Edge Function:
-   - `DISCORD_CLIENT_ID`
-   - `DISCORD_CLIENT_SECRET`
-
-Full guide:
 - `CHAT_BRIDGE_SETUP.md` (repo root)
 

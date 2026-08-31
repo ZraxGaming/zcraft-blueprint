@@ -1,6 +1,6 @@
 # Authentication & OAuth — Overview
 
-This project uses Supabase Auth for primary login, plus an optional “Connect Discord” flow used by the live chat bridge.
+This project uses Supabase Auth for primary login.
 
 ## Primary login (Supabase Auth)
 
@@ -23,20 +23,6 @@ Setup steps:
 2. In your provider dashboard(s), allow the Supabase callback URL:
    - `https://YOUR_PROJECT.supabase.co/auth/v1/callback`
 
-## “Connect Discord” (optional)
 
-Purpose:
 
-- Links a logged-in website user to a Discord identity (`discord_connections` table).
-- Used by the live chat bridge and any future Discord-linked features.
-
-How it works:
-
-- Frontend redirects user to Discord with `redirect_uri = https://YOUR_DOMAIN/auth/discord/callback`
-- `src/pages/DiscordCallbackPage.tsx` calls the Edge Function `discord-oauth-exchange`
-- The function exchanges the code and upserts into `discord_connections`
-
-Setup:
-
-- See `CHAT_BRIDGE_SETUP.md` (repo root).
 

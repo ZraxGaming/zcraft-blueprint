@@ -22,7 +22,6 @@ If PowerShell blocks `npm` on Windows, use `cmd /c npm run dev`.
 
 ## Discord + live chat
 
-- `CHAT_BRIDGE_SETUP.md` (repo root) — DiscordSRV ↔ website live chat setup (Discord app + bot + Supabase secrets)
 
 ## Other references
 

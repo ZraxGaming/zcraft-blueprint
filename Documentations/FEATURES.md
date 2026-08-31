@@ -9,16 +9,6 @@ This project is a Vite + React frontend backed by Supabase (auth + database + Ed
 - Admin pages (role-gated)
 - SEO helpers, sitemap + RSS generation at build time
 
-## Live chat (optional)
-
-- DiscordSRV bridge: website ↔ Discord channel ↔ Minecraft
-- UI:
-  - floating chat widget (bottom-right)
-  - dedicated `/chat` page
-
-Setup:
-- `CHAT_BRIDGE_SETUP.md`
-
 ## Feature flags
 
 Feature flags are frontend env vars in `.env.example`:

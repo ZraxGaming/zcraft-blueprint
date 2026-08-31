@@ -9,7 +9,6 @@ import { usePerformanceMonitor } from "@/components/ui/OptimizedImage";
 import { siteConfig } from "@/config/siteEnv";
 import { Link, useLocation } from "react-router-dom";
 import { Megaphone, Sparkles } from "lucide-react";
-import { FloatingChatWidget } from "@/components/chat/FloatingChatWidget";
 
 interface LayoutProps {
   children: ReactNode;
@@ -30,9 +29,7 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
     location.pathname === "/forgot-password" ||
     location.pathname === "/reset-password" ||
     location.pathname === "/auth/callback" ||
-    location.pathname === "/auth/discord/callback" ||
     location.pathname === "/verify-identity";
-  const hideChatWidget = isAuthShell || location.pathname === "/chat";
 
   const seoDefaults = {
     title: settings?.seo_title || siteConfig.seo.title,
@@ -144,8 +141,6 @@ export function Layout({ children, seo, breadcrumbs, skipToContent = "main-conte
       >
         {children}
       </main>
-
-      {!hideChatWidget && <FloatingChatWidget />}
 
       {!isAuthShell && siteConfig.features.cookieBanner && <CookieBanner />}
       {!isAuthShell && <Footer />}
