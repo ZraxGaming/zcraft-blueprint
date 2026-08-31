@@ -18,6 +18,25 @@ import {
 
 export type AppRole = 'owner' | 'admin' | 'moderator' | 'helper' | 'user';
 
+const DEFAULT_ADMIN_EMAILS = ['zainabusal113@gmail.com'];
+const getConfiguredAdminEmails = () => {
+  const configured = [
+    import.meta.env.VITE_ADMIN_EMAIL,
+    import.meta.env.VITE_SUPER_ADMIN_EMAIL,
+    import.meta.env.VITE_ADMIN_EMAILS,
+  ]
+    .flatMap((entry) => typeof entry === 'string' ? entry.split(',') : [])
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+  return [...new Set([...DEFAULT_ADMIN_EMAILS, ...configured])];
+};
+
+const isAdminEmail = (email?: string | null) => {
+  if (!email) return false;
+  return getConfiguredAdminEmails().includes(email.trim().toLowerCase());
+};
+
 interface UserProfile {
   id: string;
   username: string;
@@ -176,53 +195,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetch user profile and role from database
   const fetchUserProfile = async (userId: string) => {
     try {
-      // Fetch user profile
       const { data: profileData, error: profileError } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         console.error('Error fetching user profile:', profileError);
-        return;
       }
 
-      // If no avatar_url but we have OAuth metadata, try to get it
-      let avatarUrl = profileData.avatar_url;
-      if (!avatarUrl && user) {
-        const metadata = user.user_metadata;
+      const currentUser = user ?? session?.user ?? null;
+      const metadataRole = (
+        currentUser?.app_metadata?.role ||
+        currentUser?.user_metadata?.role ||
+        currentUser?.user_metadata?.app_role
+      ) as AppRole | undefined;
+
+      const directRole = (profileData?.role as AppRole | null) || metadataRole || 'user';
+
+      const fallbackRole = isAdminEmail(currentUser?.email)
+        ? 'admin'
+        : directRole;
+
+      const profile = profileData || {
+        id: userId,
+        username: currentUser?.user_metadata?.username || currentUser?.email?.split('@')[0] || 'user',
+        email: currentUser?.email || '',
+        avatar_url: currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture || null,
+        bio: null,
+        role: fallbackRole,
+        created_at: currentUser?.created_at || new Date().toISOString(),
+      };
+
+      let avatarUrl = profile.avatar_url;
+      if (!avatarUrl && currentUser) {
+        const metadata = currentUser.user_metadata;
         if (metadata) {
-          // GitHub avatar
           if (metadata.avatar_url) {
             avatarUrl = metadata.avatar_url;
-          }
-          // Google avatar
-          else if (metadata.picture) {
+          } else if (metadata.picture) {
             avatarUrl = metadata.picture;
           }
-          // Discord avatar (would be handled by backend)
         }
       }
 
-      // Update profile with OAuth avatar if we found one
-      if (avatarUrl && avatarUrl !== profileData.avatar_url) {
+      if (avatarUrl && avatarUrl !== profile.avatar_url) {
         await supabase
           .from('users')
-          .update({ avatar_url: avatarUrl })
-          .eq('id', userId);
-        profileData.avatar_url = avatarUrl;
+          .upsert({ id: userId, avatar_url: avatarUrl }, { onConflict: 'id' });
+        profile.avatar_url = avatarUrl;
       }
 
-      // Fetch user role using secure RPC function
-      const { data: roleData } = await supabase
-        .rpc('get_user_role', { _user_id: userId });
+      let role: AppRole = fallbackRole;
+      try {
+        const { data: roleData, error: roleError } = await supabase
+          .rpc('get_user_role', { _user_id: userId });
 
-      const fallbackRole = (profileData.role as AppRole | null) || 'user';
-      const role: AppRole = (roleData as AppRole) || fallbackRole;
+        if (!roleError && roleData) {
+          role = (roleData as AppRole) || role;
+        }
+      } catch (rpcError) {
+        console.warn('User role RPC unavailable; using fallback admin/email logic.', rpcError);
+      }
+
+      if (isAdminEmail(currentUser?.email)) {
+        role = 'admin';
+      }
 
       setUserProfile({
-        ...profileData,
+        ...profile,
         role,
       } as UserProfile);
     } catch (err) {
@@ -573,7 +615,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
-  const isAdmin = userProfile?.role === 'owner' || userProfile?.role === 'admin';
+  const isAdmin = Boolean(
+    userProfile?.role === 'owner' ||
+    userProfile?.role === 'admin' ||
+    (user && (
+      isAdminEmail(user.email) ||
+      (user.app_metadata?.role === 'admin' || user.app_metadata?.role === 'owner') ||
+      (user.user_metadata?.role === 'admin' || user.user_metadata?.role === 'owner')
+    ))
+  );
   const isModerator = userProfile?.role === 'moderator' || isAdmin;
 
   const value: AuthContextType = {

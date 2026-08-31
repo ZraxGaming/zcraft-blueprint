@@ -40,51 +40,54 @@ async function main() {
     try {
       const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      // Fetch news slugs
-      const { data: news } = await supabase.from('news').select('slug, updated_at').limit(1000);
+      const queries = [
+        supabase.from('news').select('slug, updated_at').limit(1000),
+        supabase.from('wiki').select('slug, updated_at').limit(1000),
+        supabase.from('changelogs').select('version, released_at').limit(1000),
+        supabase.from('events').select('id, date').limit(1000),
+        supabase.from('forums').select('slug, updated_at').limit(1000),
+        supabase.from('forum_posts').select('id, forum:forums(slug), updated_at, created_at').order('created_at', { ascending: false }).limit(1000),
+      ];
+
+      const results = await Promise.allSettled(queries);
+
+      const news = results[0].status === 'fulfilled' ? results[0].value.data : null;
       if (news) {
         for (const n of news) {
           dynamicUrls.push({ loc: `/news/${n.slug}`, lastmod: n.updated_at?.slice(0, 10) || null, changefreq: 'weekly' });
         }
       }
 
-      // Fetch wiki slugs
-      const { data: wiki } = await supabase.from('wiki').select('slug, updated_at').limit(1000);
+      const wiki = results[1].status === 'fulfilled' ? results[1].value.data : null;
       if (wiki) {
         for (const w of wiki) {
           dynamicUrls.push({ loc: `/wiki/${w.slug}`, lastmod: w.updated_at?.slice(0, 10) || null, changefreq: 'monthly' });
         }
       }
 
-      // Fetch changelogs versions
-      const { data: changelogs } = await supabase.from('changelogs').select('version, released_at').limit(1000);
+      const changelogs = results[2].status === 'fulfilled' ? results[2].value.data : null;
       if (changelogs) {
         for (const c of changelogs) {
-          // Use version as path (e.g., /changelogs/v1.2.3)
           const v = encodeURIComponent(c.version);
           dynamicUrls.push({ loc: `/changelogs/${v}`, lastmod: c.released_at?.slice(0,10) || null, changefreq: 'monthly' });
         }
       }
 
-      // Fetch events
-      const { data: events } = await supabase.from('events').select('id, date').limit(1000);
+      const events = results[3].status === 'fulfilled' ? results[3].value.data : null;
       if (events) {
         for (const e of events) {
           dynamicUrls.push({ loc: `/events/${e.id}`, lastmod: e.date?.slice(0,10) || null, changefreq: 'weekly' });
         }
       }
 
-      // Fetch forum slugs and threads
-      const { data: forums } = await supabase.from('forums').select('slug, updated_at').limit(1000);
+      const forums = results[4].status === 'fulfilled' ? results[4].value.data : null;
       if (forums) {
         for (const f of forums) {
-          // Add forum category page
           dynamicUrls.push({ loc: `/forums/${f.slug}`, lastmod: f.updated_at?.slice(0,10) || null, changefreq: 'weekly', priority: '0.7' });
         }
       }
 
-      // Fetch forum threads/posts with their forum slug
-      const { data: threads } = await supabase.from('forum_posts').select('id, forum:forums(slug), updated_at, created_at').order('created_at', { ascending: false }).limit(1000);
+      const threads = results[5].status === 'fulfilled' ? results[5].value.data : null;
       if (threads) {
         for (const t of threads) {
           const forumSlug = t.forum?.slug || 'general';

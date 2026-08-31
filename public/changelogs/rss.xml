@@ -2,79 +2,9 @@
 <rss version="2.0">
   <channel>
     <title>ZCraft Changelog Feed</title>
-    <link>https://www.z-craft.xyz/events</link>
+    <link>http://www.z-craft.xyz/events</link>
     <description>Latest changelogs from ZCraft Network</description>
     <language>en-us</language>
-    <item>
-      <title>✨ ZCraft Official Release — Server Now Open! ✨ (v2.0)</title>
-      <link>https://www.z-craft.xyz/events#changelog-2-0</link>
-      <description>We’re officially live.
 
-After intensive development, testing, and optimization, ZCraft is now open to the public. The server is fully built, core systems are stable, and everything is ready for players to jump in.
-
-Minor bugs may still exist — that’s expected at launch. Report anything you find so it gets fixed fast
-
-🎮┃Gameplay — Fully implemented and tested
-🌍┃World — Generation complete, spawn finalized
-🔐┃Permissions — Balanced roles and fair access
-💰┃Economy — Active, stable, and integrated
-🧩┃Features — Optimized for performance and experience
-⸻
-🛠️┃Support &amp; Bugs
-💬┃Discord support system is fully active
-🎫┃Create tickets for bugs, issues, or help
-🐛┃Any reported bugs will be reviewed and fixed quickly
-⸻
-⚠️┃Important
-❗┃Minor bugs may still appear
-📢┃Player feedback is critical at this stage
-🚧┃Continuous updates and improvements are planned
-⸻
-📣┃Join Now
-🔥┃Jump in and start playing
-🤝┃Help shape the server with your feedback
-💬┃Use Discord for support, reports, and suggestions
-⸻
-💎┃ZCraft
-Play smart. Build fast. Dominate.</description>
-      <pubDate>Sun, 29 Mar 2026 00:00:00 GMT</pubDate>
-      <guid>https://www.z-craft.xyz/events#changelog-2-0</guid>
-    </item>
-    <item>
-      <title>Website Fixes and Improvements  (v1.0.1)</title>
-      <link>https://www.z-craft.xyz/events#changelog-1-0-1</link>
-      <description>We’ve launched a dedicated Status Page so you can check ZCraft’s operational status anytime without asking staff. You’ll know exactly when the server is online, how many players are connected, and whether any maintenance is planned or ongoing. This keeps everyone informed and eliminates confusion during downtime or updates.
-Access it at: status.z-craft.xyz
-
-
-🔍 Public Bans Page
-Transparency matters. Our new Bans Page lets anyone view all punishments issued on the server—past and present. You can search for any player and see exactly what they were punished for, when it happened, how long it lasts, and which staff member issued it. This ensures our moderation stays fair, consistent, and accountable to the community.
-Access it at: bans.z-craft.xyz
-
-🎯 Why This Matters
-These pages aren’t just extra features—they’re core infrastructure. Status visibility reduces support requests and confusion. Public punishment records keep moderation honest and give players the transparency they deserve. Both integrate directly with our existing systems and reflect ZCraft’s commitment to being more than just another Minecraft server.
-
--THE ZCRAFT TEAM
-</description>
-      <pubDate>Thu, 29 Jan 2026 00:00:00 GMT</pubDate>
-      <guid>https://www.z-craft.xyz/events#changelog-1-0-1</guid>
-    </item>
-    <item>
-      <title>Opening Soon - ZCraft Network (v1.0.0)</title>
-      <link>https://www.z-craft.xyz/events#changelog-1-0-0</link>
-      <description>🚀 Opening Soon
-
-We’re actively building a centralized platform designed to connect our 🌐 website, 💬 Discord, and ⚙️ community systems into one seamless experience.
-
-Everything is being carefully configured, tested, and secured to ensure performance, stability, and automation from day one—no rushed features, no half-finished systems.
-
-This launch is about doing it right, not doing it fast.
-Once all systems meet our standards, access will open.
-
-📢 Stay tuned — updates will be announced soon.
-</description>
-      <pubDate>Tue, 27 Jan 2026 00:00:00 GMT</pubDate>
-      <guid>https://www.z-craft.xyz/events#changelog-1-0-0</guid>
-    </item>
   </channel>
 </rss>

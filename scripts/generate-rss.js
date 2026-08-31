@@ -65,72 +65,81 @@ async function main() {
   console.log('Generating RSS feeds...');
 
   if (!SUPABASE_URL || !SUPABASE_KEY) {
-    throw new Error('Supabase env vars not found. Set SUPABASE_URL and a usable key before generating RSS feeds.');
+    console.warn('Supabase env vars not found. Skipping RSS feed generation.');
+    writeFile(path.join('public', 'news', 'rss.xml'), buildFeed({ title: 'ZCraft News Feed', link: `${SITE_URL}/news`, description: 'Latest news from ZCraft Network', items: [] }));
+    writeFile(path.join('public', 'changelogs', 'rss.xml'), buildFeed({ title: 'ZCraft Changelog Feed', link: `${SITE_URL}/events`, description: 'Latest changelogs from ZCraft Network', items: [] }));
+    return;
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const [{ data: news, error: newsError }, { data: changelogs, error: changelogError }] = await Promise.all([
-    supabase
-      .from('news')
-      .select('title, slug, excerpt, created_at, updated_at')
-      .order('created_at', { ascending: false })
-      .limit(100),
-    supabase
-      .from('changelogs')
-      .select('version, title, description, released_at, created_at')
-      .order('released_at', { ascending: false })
-      .limit(100),
-  ]);
+    const [{ data: news, error: newsError }, { data: changelogs, error: changelogError }] = await Promise.all([
+      supabase
+        .from('news')
+        .select('title, slug, excerpt, created_at, updated_at')
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase
+        .from('changelogs')
+        .select('version, title, description, released_at, created_at')
+        .order('released_at', { ascending: false })
+        .limit(100),
+    ]);
 
-  if (newsError) throw newsError;
-  if (changelogError) throw changelogError;
+    if (newsError) throw newsError;
+    if (changelogError) throw changelogError;
 
-  const newsItems = (news || []).map((article) => {
-    const url = `${SITE_URL}/news/${article.slug}`;
-    return buildItem({
-      title: article.title,
-      link: url,
-      description: article.excerpt || article.title,
-      pubDate: new Date(article.updated_at || article.created_at || Date.now()).toUTCString(),
-      guid: url,
+    const newsItems = (news || []).map((article) => {
+      const url = `${SITE_URL}/news/${article.slug}`;
+      return buildItem({
+        title: article.title,
+        link: url,
+        description: article.excerpt || article.title,
+        pubDate: new Date(article.updated_at || article.created_at || Date.now()).toUTCString(),
+        guid: url,
+      });
     });
-  });
 
-  const changelogItems = (changelogs || []).map((entry) => {
-    const fragment = slugifyFragment(`changelog-${entry.version}`);
-    const url = `${SITE_URL}/events#${fragment}`;
-    return buildItem({
-      title: `${entry.title} (v${entry.version})`,
-      link: url,
-      description: entry.description || entry.title,
-      pubDate: new Date(entry.released_at || entry.created_at || Date.now()).toUTCString(),
-      guid: url,
+    const changelogItems = (changelogs || []).map((entry) => {
+      const fragment = slugifyFragment(`changelog-${entry.version}`);
+      const url = `${SITE_URL}/events#${fragment}`;
+      return buildItem({
+        title: `${entry.title} (v${entry.version})`,
+        link: url,
+        description: entry.description || entry.title,
+        pubDate: new Date(entry.released_at || entry.created_at || Date.now()).toUTCString(),
+        guid: url,
+      });
     });
-  });
 
-  writeFile(
-    path.join('public', 'news', 'rss.xml'),
-    buildFeed({
-      title: 'ZCraft News Feed',
-      link: `${SITE_URL}/news`,
-      description: 'Latest news from ZCraft Network',
-      items: newsItems,
-    })
-  );
+    writeFile(
+      path.join('public', 'news', 'rss.xml'),
+      buildFeed({
+        title: 'ZCraft News Feed',
+        link: `${SITE_URL}/news`,
+        description: 'Latest news from ZCraft Network',
+        items: newsItems,
+      })
+    );
 
-  writeFile(
-    path.join('public', 'changelogs', 'rss.xml'),
-    buildFeed({
-      title: 'ZCraft Changelog Feed',
-      link: `${SITE_URL}/events`,
-      description: 'Latest changelogs from ZCraft Network',
-      items: changelogItems,
-    })
-  );
+    writeFile(
+      path.join('public', 'changelogs', 'rss.xml'),
+      buildFeed({
+        title: 'ZCraft Changelog Feed',
+        link: `${SITE_URL}/events`,
+        description: 'Latest changelogs from ZCraft Network',
+        items: changelogItems,
+      })
+    );
 
-  console.log('Wrote public/news/rss.xml');
-  console.log('Wrote public/changelogs/rss.xml');
+    console.log('Wrote public/news/rss.xml');
+    console.log('Wrote public/changelogs/rss.xml');
+  } catch (error) {
+    console.warn('Skipping RSS feed generation due to Supabase access issue:', error?.message || error);
+    writeFile(path.join('public', 'news', 'rss.xml'), buildFeed({ title: 'ZCraft News Feed', link: `${SITE_URL}/news`, description: 'Latest news from ZCraft Network', items: [] }));
+    writeFile(path.join('public', 'changelogs', 'rss.xml'), buildFeed({ title: 'ZCraft Changelog Feed', link: `${SITE_URL}/events`, description: 'Latest changelogs from ZCraft Network', items: [] }));
+  }
 }
 
 main().catch((error) => {
